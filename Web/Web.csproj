@@ -10,13 +10,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Src\Library\FastEndpoints.csproj"/>
-        <ProjectReference Include="..\Src\Messaging\Messaging.Remote\FastEndpoints.Messaging.Remote.csproj"/>
-        <ProjectReference Include="..\Src\Security\FastEndpoints.Security.csproj"/>
-        <ProjectReference Include="..\Src\Swagger\FastEndpoints.Swagger.csproj"/>
+        <ProjectReference Include="..\Src\Library\FastEndpoints.csproj" />
+        <ProjectReference Include="..\Src\Messaging\Messaging.Remote\FastEndpoints.Messaging.Remote.csproj" />
+        <ProjectReference Include="..\Src\Security\FastEndpoints.Security.csproj" />
+        <ProjectReference Include="..\Src\Swagger\FastEndpoints.Swagger.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="FastEndpoints" />
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
 
         <PackageReference Include="MySqlConnector" />
@@ -28,12 +29,12 @@
     </PropertyGroup>-->
 
     <ItemGroup>
-        <ProjectReference Include="..\Src\Generator\FastEndpoints.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\Src\Generator\FastEndpoints.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <!--<Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs"/>-->
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="Web.csproj.DotSettings"/>
+        <None Remove="Web.csproj.DotSettings" />
         <None Update="Json\**\*.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
