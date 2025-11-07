@@ -120,9 +120,18 @@ public class RoleConfigService : IRoleConfigService
     {
         return deviceType switch
         {
-            1 => _sportConfigs.FirstOrDefault(c => c.Distance == distance && c.BicycleLowerLimb > 0),
-            2 => _sportConfigs.FirstOrDefault(c => c.Distance == distance && c.RunHeartLungs > 0),
-            3 => _sportConfigs.FirstOrDefault(c => c.Distance == distance && c.RowingUpperLimb > 0),
+            1 => _sportConfigs
+                .Where(c => c.Distance <= distance && c.BicycleLowerLimb > 0)
+                .OrderByDescending(c => c.Distance)
+                .FirstOrDefault(),
+            2 => _sportConfigs
+                .Where(c => c.Distance <= distance && c.RunHeartLungs > 0)
+                .OrderByDescending(c => c.Distance)
+                .FirstOrDefault(),
+            3 => _sportConfigs
+                .Where(c => c.Distance <= distance && c.RowingUpperLimb > 0)
+                .OrderByDescending(c => c.Distance)
+                .FirstOrDefault(),
             _ => null
         };
     }
