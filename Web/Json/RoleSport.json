@@ -1,0 +1,142 @@
+[
+  {
+    "ID": 1,
+    "Distance": 0.5,
+    "BicycleLowerLimb": 1,
+    "RunHeartLungs": 1,
+    "RowingUpperLimb": 0
+  },
+  {
+    "ID": 2,
+    "Distance": 1.0,
+    "BicycleLowerLimb": 0,
+    "RunHeartLungs": 0,
+    "RowingUpperLimb": 1
+  },
+  {
+    "ID": 3,
+    "Distance": 1.5,
+    "BicycleLowerLimb": 1,
+    "RunHeartLungs": 1,
+    "RowingUpperLimb": 0
+  },
+  {
+    "ID": 4,
+    "Distance": 2.0,
+    "BicycleLowerLimb": 0,
+    "RunHeartLungs": 0,
+    "RowingUpperLimb": 1
+  },
+  {
+    "ID": 5,
+    "Distance": 2.5,
+    "BicycleLowerLimb": 1,
+    "RunHeartLungs": 1,
+    "RowingUpperLimb": 0
+  },
+  {
+    "ID": 6,
+    "Distance": 3.0,
+    "BicycleLowerLimb": 0,
+    "RunHeartLungs": 0,
+    "RowingUpperLimb": 1
+  },
+  {
+    "ID": 7,
+    "Distance": 3.5,
+    "BicycleLowerLimb": 1,
+    "RunHeartLungs": 1,
+    "RowingUpperLimb": 0
+  },
+  {
+    "ID": 8,
+    "Distance": 4.0,
+    "BicycleLowerLimb": 0,
+    "RunHeartLungs": 0,
+    "RowingUpperLimb": 1
+  },
+  {
+    "ID": 9,
+    "Distance": 4.5,
+    "BicycleLowerLimb": 1,
+    "RunHeartLungs": 1,
+    "RowingUpperLimb": 0
+  },
+  {
+    "ID": 10,
+    "Distance": 5.0,
+    "BicycleLowerLimb": 0,
+    "RunHeartLungs": 0,
+    "RowingUpperLimb": 1
+  },
+  {
+    "ID": 11,
+    "Distance": 5.5,
+    "BicycleLowerLimb": 1,
+    "RunHeartLungs": 1,
+    "RowingUpperLimb": 0
+  },
+  {
+    "ID": 12,
+    "Distance": 6.0,
+    "BicycleLowerLimb": 0,
+    "RunHeartLungs": 0,
+    "RowingUpperLimb": 1
+  },
+  {
+    "ID": 13,
+    "Distance": 6.5,
+    "BicycleLowerLimb": 1,
+    "RunHeartLungs": 1,
+    "RowingUpperLimb": 0
+  },
+  {
+    "ID": 14,
+    "Distance": 7.0,
+    "BicycleLowerLimb": 0,
+    "RunHeartLungs": 0,
+    "RowingUpperLimb": 1
+  },
+  {
+    "ID": 15,
+    "Distance": 7.5,
+    "BicycleLowerLimb": 1,
+    "RunHeartLungs": 1,
+    "RowingUpperLimb": 0
+  },
+  {
+    "ID": 16,
+    "Distance": 8.0,
+    "BicycleLowerLimb": 0,
+    "RunHeartLungs": 0,
+    "RowingUpperLimb": 1
+  },
+  {
+    "ID": 17,
+    "Distance": 8.5,
+    "BicycleLowerLimb": 1,
+    "RunHeartLungs": 1,
+    "RowingUpperLimb": 0
+  },
+  {
+    "ID": 18,
+    "Distance": 9.0,
+    "BicycleLowerLimb": 0,
+    "RunHeartLungs": 0,
+    "RowingUpperLimb": 1
+  },
+  {
+    "ID": 19,
+    "Distance": 9.5,
+    "BicycleLowerLimb": 1,
+    "RunHeartLungs": 1,
+    "RowingUpperLimb": 0
+  },
+  {
+    "ID": 20,
+    "Distance": 10.0,
+    "BicycleLowerLimb": 0,
+    "RunHeartLungs": 0,
+    "RowingUpperLimb": 1
+  }
+]

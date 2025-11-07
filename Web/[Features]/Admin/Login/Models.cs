@@ -51,7 +51,7 @@ public class Validator : Validator<Request>
             .MinimumLength(3).WithMessage("Password too short!");
 
         var logger = Resolve<ILogger<Validator>>();
-        logger.LogError("resolving from validator works!");
+        //logger.LogError("resolving from validator works!");
     }
 }
 

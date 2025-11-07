@@ -16,6 +16,12 @@
         <ProjectReference Include="..\Src\Swagger\FastEndpoints.Swagger.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
+
+        <PackageReference Include="MySqlConnector" />
+    </ItemGroup>
+
     <!--<PropertyGroup>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
@@ -28,5 +34,11 @@
 
     <ItemGroup>
         <None Remove="Web.csproj.DotSettings"/>
+        <None Update="Json\**\*.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="sql\**\*.sql">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 </Project>

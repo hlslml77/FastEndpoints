@@ -1,4 +1,7 @@
 using System.Globalization;
+using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Web.Data;
 using FastEndpoints.Swagger;
 using NJsonSchema;
 using NSwag;
@@ -19,6 +22,20 @@ using Web.Services;
 
 var bld = WebApplication.CreateBuilder(args);
 bld.AddHandlerServer();
+
+// 初始化数据库
+using var loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder.AddConfiguration(bld.Configuration.GetSection("Logging"));
+    builder.AddConsole();
+});
+var dbLogger = loggerFactory.CreateLogger<DatabaseInitializationService>();
+var dbInitializer = new DatabaseInitializationService(bld.Configuration, dbLogger);
+await dbInitializer.InitializeAsync();
+
+bld.Services.AddDbContext<Web.Data.AppDbContext>(o =>
+    o.UseMySql(bld.Configuration.GetConnectionString("DefaultConnection"),
+               ServerVersion.AutoDetect(bld.Configuration.GetConnectionString("DefaultConnection"))));
 bld.Services
    .AddCors()
    .AddOutputCache()
@@ -30,6 +47,8 @@ bld.Services
    .AddKeyedTransient<IKeyedService>("AAA", (_, _) => new MyKeyedService("AAA"))
    .AddKeyedTransient<IKeyedService>("BBB", (_, _) => new MyKeyedService("BBB"))
    .AddScoped<IEmailService, EmailService>()
+   .AddSingleton<IRoleConfigService, RoleConfigService>()
+   .AddScoped<IPlayerRoleGrowthService, PlayerRoleGrowthService>()
    .AddSingleton(new SingltonSVC(0))
    .AddJobQueues<Job, JobStorage>()
    .RegisterServicesFromWeb()
