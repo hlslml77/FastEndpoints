@@ -1,0 +1,121 @@
+[
+  {
+    "ID": 1,
+    "AchievementType": "runspeedall",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 0
+  },
+  {
+    "ID": 2,
+    "AchievementType": "runspeed1",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 3
+  },
+  {
+    "ID": 3,
+    "AchievementType": "runspeed2",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 5
+  },
+  {
+    "ID": 4,
+    "AchievementType": "runspeed3",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 7
+  },
+  {
+    "ID": 5,
+    "AchievementType": "rundistance",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 0
+  },
+  {
+    "ID": 6,
+    "AchievementType": "runtime",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 0
+  },
+  {
+    "ID": 7,
+    "AchievementType": "bicyclespeedall",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 0
+  },
+  {
+    "ID": 8,
+    "AchievementType": "bicyclespeed1",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 3
+  },
+  {
+    "ID": 9,
+    "AchievementType": "bicyclespeed2",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 5
+  },
+  {
+    "ID": 10,
+    "AchievementType": "bicyclespeed3",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 7
+  },
+  {
+    "ID": 11,
+    "AchievementType": "bicycledistance",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 0
+  },
+  {
+    "ID": 12,
+    "AchievementType": "bicycletime",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 0
+  },
+  {
+    "ID": 13,
+    "AchievementType": "bicyclepower",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 0
+  },
+  {
+    "ID": 14,
+    "AchievementType": "shipspeed",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 0
+  },
+  {
+    "ID": 15,
+    "AchievementType": "shipdistance",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 0
+  },
+  {
+    "ID": 16,
+    "AchievementType": "shiptime",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 0
+  },
+  {
+    "ID": 17,
+    "AchievementType": "shippower",
+    "MinimumValue": 6,
+    "Amplification": 1,
+    "Range": 0
+  }
+]

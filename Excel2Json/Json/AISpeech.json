@@ -1,0 +1,226 @@
+[
+  {
+    "ID": 1,
+    "StepID": 1,
+    "SubID": 1,
+    "LanguageID": -1,
+    "Des": "<prosody pitch=\"+2st\" rate=\"fast\">Welcome to the {0}!</prosody><break time=\"0.5s\"/>",
+    "SubDes": "Welcome to the {0}!"
+  },
+  {
+    "ID": 2,
+    "StepID": 2,
+    "SubID": 1,
+    "LanguageID": -1,
+    "Des": " <prosody volume=\"loud\" rate=\"medium\">The starting line is packed with top-tier athletes!</prosody> Among them, <prosody pitch=\"+1st\">{0} set a new platform record in the last race,</prosody> completing {1} in just <emphasis level=\"strong\">{2} minutes.</emphasis><break time=\"0.4s\"/>",
+    "SubDes": "The starting line is packed with top-tier athletes! Among them,\n {0} set a new platform record in the last race, completing {1} in just {2} minutes."
+  },
+  {
+    "ID": 3,
+    "StepID": 2,
+    "SubID": 2,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"medium\">{0} is also in today's lineup,</prosody> currently ranked <prosody pitch=\"+1st\">{1}</prosody> in the annual leaderboard.<break time=\"0.3s\"/>",
+    "SubDes": "{0} is also in today's lineup, currently ranked {1} in the annual leaderboard."
+  },
+  {
+    "ID": 4,
+    "StepID": 2,
+    "SubID": 3,
+    "LanguageID": -1,
+    "Des": "<prosody pitch=\"+1st\">{0} holds the record for the {1} challenge</prosody> in the <prosody volume=\"loud\">{2} tier of the Honor Wall,</prosody> with an impressive time of <emphasis level=\"strong\">{3}.</emphasis><break time=\"0.5s\"/>",
+    "SubDes": "{0} holds the record for the {1} challenge in the {2} tier of the Honor Wall, \nwith an impressive time of {3}."
+  },
+  {
+    "ID": 5,
+    "StepID": 2,
+    "SubID": 4,
+    "LanguageID": -1,
+    "Des": " <prosody volume=\"loud\" rate=\"fast\">Let's give them a round of applause and cheer them on!</prosody><break time=\"0.6s\"/>",
+    "SubDes": "Let's give them a round of applause and cheer them on!"
+  },
+  {
+    "ID": 6,
+    "StepID": 2,
+    "SubID": 4,
+    "LanguageID": -1,
+    "Des": "<prosody volume=\"loud\" rate=\"fast\">Let's show our appreciation with some applause</prosody> and <prosody pitch=\"+2st\">encouragement!</prosody><break time=\"0.5s\"/>",
+    "SubDes": "Let's show our appreciation with some applause and encouragement!"
+  },
+  {
+    "ID": 7,
+    "StepID": 2,
+    "SubID": 4,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"medium\">Let's applaud them</prosody> and <prosody pitch=\"+1st\" volume=\"loud\">encourage their efforts!</prosody><break time=\"0.4s\"/>",
+    "SubDes": "Let's applaud them and encourage their efforts!"
+  },
+  {
+    "ID": 8,
+    "StepID": 2,
+    "SubID": 4,
+    "LanguageID": -1,
+    "Des": "<prosody volume=\"loud\" rate=\"fast\">Let's applaud them</prosody> and show our support with <emphasis level=\"strong\">cheers!</emphasis><break time=\"0.5s\"/>",
+    "SubDes": "Let's applaud them and show our support with cheers!"
+  },
+  {
+    "ID": 9,
+    "StepID": 2,
+    "SubID": 4,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"medium\" volume=\"loud\">Let's show our appreciation with a round of applause</prosody> and <prosody pitch=\"+2st\">encourage them!</prosody><break time=\"0.6s\"/>",
+    "SubDes": "Let's show our appreciation with a round of applause and encourage them!"
+  },
+  {
+    "ID": 10,
+    "StepID": 3,
+    "SubID": 1,
+    "LanguageID": -1,
+    "Des": "<prosody pitch=\"+1st\">{0}, the Honor Wall record holder,</prosody> is opting for a <prosody rate=\"fast\">high-speed start</prosody>—likely aiming to gain an early lead.<break time=\"0.4s\"/>",
+    "SubDes": "{0}, the Honor Wall record holder, is opting for a high-speed start—likely aiming to gain an early lead."
+  },
+  {
+    "ID": 11,
+    "StepID": 3,
+    "SubID": 2,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"medium\">{0}, the top-ranked athlete in the annual competition leaderboard,</prosody> is choosing a <prosody pitch=\"-1st\">steady start,</prosody> possibly conserving energy for the later stages.<break time=\"0.3s\"/>",
+    "SubDes": "{0}, the top-ranked athlete in the annual competition leaderboard, \nis choosing a steady start, possibly conserving energy for the later stages."
+  },
+  {
+    "ID": 12,
+    "StepID": 4,
+    "SubID": 1,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"fast\">{0} is accelerating</prosody> and has overtaken {1}, moving up to <emphasis level=\"strong\">third place!</emphasis> <prosody pitch=\"+2st\">Can he maintain this momentum?</prosody><break time=\"0.5s\"/>",
+    "SubDes": "{0} is accelerating and has overtaken {1}, moving up to third place! \nCan he maintain this momentum?"
+  },
+  {
+    "ID": 13,
+    "StepID": 4,
+    "SubID": 2,
+    "LanguageID": -1,
+    "Des": "The leading runner, <prosody pitch=\"+1st\">{0},</prosody> is maintaining a strong cadence, but <prosody rate=\"fast\">{1} is picking up speed</prosody>—the gap is now <emphasis level=\"strong\">minimal!</emphasis><break time=\"0.4s\"/>",
+    "SubDes": "The leading runner, {0}, is maintaining a strong cadence, \nbut {1} is picking up speed—the gap is now minimal!"
+  },
+  {
+    "ID": 14,
+    "StepID": 4,
+    "SubID": 3,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"medium\">We've reached the halfway mark!</prosody> The current Speed is {0}. <prosody pitch=\"+1st\">{1} is adjusting his stride</prosody>—clearly conserving energy for the final stretch.<break time=\"0.3s\"/>",
+    "SubDes": "We've reached the halfway mark! The current Speed is {0}.\n {1} is adjusting his stride—clearly conserving energy for the final stretch."
+  },
+  {
+    "ID": 15,
+    "StepID": 4,
+    "SubID": 4,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"medium\">One-third of the race is completed!</prosody> Currently, {0} is in first place, {1} in second, and {2} in third.<break time=\"0.4s\"/>",
+    "SubDes": "One-third of the race is completed! Currently, {0} is in first place, {1} in second, and {2} in third."
+  },
+  {
+    "ID": 16,
+    "StepID": 5,
+    "SubID": 1,
+    "LanguageID": -1,
+    "Des": "<prosody volume=\"loud\" rate=\"fast\">Race is almost over!</prosody> <prosody pitch=\"+2st\">{0} and {1} are locked in a fierce battle,</prosody> pushing their Speed below {2}! <prosody pitch=\"+3st\">Who will cross the finish line first?</prosody><break time=\"0.5s\"/>",
+    "SubDes": "Race is almost over! {0} and {1} are locked in a fierce battle, \npushing their Speed below {2}! Who will cross the finish line first?"
+  },
+  {
+    "ID": 17,
+    "StepID": 6,
+    "SubID": 1,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"fast\" volume=\"loud\">{0} is about to cross the finish line!</prosody> If he keeps up this pace, he'll set a <emphasis level=\"strong\">new personal best!</emphasis><break time=\"0.4s\"/>",
+    "SubDes": "{0} is about to cross the finish line! If he keeps up this pace, \nhe'll set a new personal best!"
+  },
+  {
+    "ID": 18,
+    "StepID": 6,
+    "SubID": 2,
+    "LanguageID": -1,
+    "Des": " <prosody pitch=\"+2st\" volume=\"loud\">{0} finishes with an incredible time</prosody>—another milestone in his career!<break time=\"0.6s\"/>",
+    "SubDes": "{0} finishes with an incredible time—another milestone in his career!"
+  },
+  {
+    "ID": 19,
+    "StepID": 6,
+    "SubID": 3,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"medium\" volume=\"loud\">Congratulations to {0} for taking first place</prosody> with a time of <emphasis level=\"strong\">{1},</emphasis> setting a new personal record!<break time=\"0.5s\"/>",
+    "SubDes": "Congratulations to {0} for taking first place with a time of {1}, \nsetting a new personal record!"
+  },
+  {
+    "ID": 20,
+    "StepID": 7,
+    "SubID": 1,
+    "LanguageID": -1,
+    "Des": " <prosody rate=\"medium\">Looking at today's race data,</prosody> {0} demonstrated exceptional pace control, while <prosody pitch=\"+1st\">{1} unleashed an explosive sprint</prosody> in the final stretch.<break time=\"0.4s\"/>",
+    "SubDes": "Looking at today's race data,  {0} demonstrated exceptional pace control, \nwhile  {1} unleashed an explosive sprint in the final stretch."
+  },
+  {
+    "ID": 21,
+    "StepID": 8,
+    "SubID": 1,
+    "LanguageID": -1,
+    "Des": " <prosody rate=\"slow\">Did you know that the marathon distance was not always 42.195 kilometers?</prosody> Originally, it was about 40 kilometers.<break time=\"0.3s\"/> However, during the 1908 London Olympics, the starting line was placed in Windsor Castle's gardens so the royal family could witness the start, while the finish line was set in front of the royal box in the Olympic stadium.<break time=\"0.4s\"/> This extension led to the official marathon distance of <prosody pitch=\"+1st\">42.195 kilometers,</prosody> which was formally established by World Athletics in 1921.<break time=\"0.5s\"/>\n",
+    "SubDes": "Did you know that the marathon distance was not always 42.195 kilometers? Originally, it was about 40 kilometers. \nHowever, during the 1908 London Olympics, \nthe starting line was placed in Windsor Castle's gardens so the royal family could witness the start, \nwhile the finish line was set in front of the royal box in the Olympic stadium. \nThis extension led to the official marathon distance of 42.195 kilometers, \nwhich was formally established by World Athletics in 1921."
+  },
+  {
+    "ID": 22,
+    "StepID": 8,
+    "SubID": 2,
+    "LanguageID": -1,
+    "Des": " <prosody rate=\"medium\">Now, let's talk about a legendary runner:</prosody> <prosody pitch=\"+1st\">Abebe Bikila</prosody> from Ethiopia.<break time=\"0.3s\"/> In the 1960 Rome Olympics, he won the marathon gold medal <prosody pitch=\"+2st\">running barefoot,</prosody> becoming the first African Olympic champion in history.<break time=\"0.4s\"/> Four years later, in Tokyo 1964, he defended his title—this time, wearing shoes—becoming the <emphasis level=\"strong\">first-ever back-to-back Olympic marathon winner.</emphasis><break time=\"0.5s\"/>",
+    "SubDes": "Now, let's talk about a legendary runner: Abebe Bikila from Ethiopia. \nIn the 1960 Rome Olympics, \nhe won the marathon gold medal running barefoot, \nbecoming the first African Olympic champion in history. \nFour years later, in Tokyo 1964, \nhe defended his title—this time, wearing shoes—becoming the first-ever back-to-back Olympic marathon winner."
+  },
+  {
+    "ID": 23,
+    "StepID": 9,
+    "SubID": 1,
+    "LanguageID": -1,
+    "Des": "<prosody volume=\"loud\" rate=\"medium\">And that's a wrap!</prosody> <prosody pitch=\"+1st\">Who impressed you the most in today's race?</prosody> Join the community and share your thoughts!<break time=\"0.5s\"/>",
+    "SubDes": "And that's a wrap! Who impressed you the most in today's race? \nJoin the community and share your thoughts!"
+  },
+  {
+    "ID": 24,
+    "StepID": 10,
+    "SubID": 1,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"fast\" volume=\"loud\" pitch=\"+2st\"> <say-as interpret-as=\"cardinal\">{0}</say-as> <break time=\"200ms\"/> <emphasis level=\"strong\">has just passed</emphasis> <break time=\"100ms\"/> <say-as interpret-as=\"cardinal\">three</say-as> <break time=\"50ms\"/> competitors in a row! </prosody>",
+    "SubDes": "{0} has just passed three competitors in a row!"
+  },
+  {
+    "ID": 25,
+    "StepID": 10,
+    "SubID": 2,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"fast\" volume=\"loud\"> <emphasis level=\"strong\">Hitting a top speed of</emphasis> <break time=\"100ms\"/> <prosody pitch=\"+1st\"> <say-as interpret-as=\"cardinal\">{0}</say-as> </prosody> <break time=\"50ms\"/> <say-as interpret-as=\"unit\">kph!</say-as> </prosody>",
+    "SubDes": "Hitting a top speed of {0} kph!"
+  },
+  {
+    "ID": 26,
+    "StepID": 10,
+    "SubID": 3,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"medium\" volume=\"loud\" pitch=\"+1st\"> <emphasis level=\"strong\">CONGRATULATIONS!</emphasis> <break time=\"200ms\"/> You have successfully completed <break time=\"100ms\"/> <prosody pitch=\"+2st\"> <say-as interpret-as=\"cardinal\">ONE</say-as> <break time=\"50ms\"/> kilometer! </prosody> </prosody>",
+    "SubDes": "You have successfully completed ONE kilometer! "
+  },
+  {
+    "ID": 27,
+    "StepID": 10,
+    "SubID": 4,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"medium\" volume=\"loud\" pitch=\"+1st\"> <emphasis level=\"strong\">CONGRATULATIONS!</emphasis> <break time=\"200ms\"/> You have successfully completed <break time=\"100ms\"/> <prosody pitch=\"+2st\"> <say-as interpret-as=\"cardinal\">THREE</say-as> <break time=\"50ms\"/> kilometer! </prosody> </prosody>",
+    "SubDes": "You have successfully completed Three kilometer! "
+  },
+  {
+    "ID": 28,
+    "StepID": 10,
+    "SubID": 5,
+    "LanguageID": -1,
+    "Des": "<prosody rate=\"medium\" volume=\"loud\" pitch=\"+1st\"> <emphasis level=\"strong\">Incredible effort!</emphasis> <break time=\"200ms\"/> You have just reached the <emphasis level=\"moderate\">five-kilometer</emphasis> mark! <break time=\"150ms\"/> <prosody pitch=\"+3st\" volume=\"x-loud\"> <say-as interpret-as=\"cardinal\">FIVE</say-as> <break time=\"100ms\"/> KILOMETERS! </prosody> </prosody>",
+    "SubDes": "You have successfully completed Five kilometer! "
+  }
+]

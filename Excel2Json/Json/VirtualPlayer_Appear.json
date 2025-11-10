@@ -1,0 +1,17 @@
+[
+  {
+    "ID": 1,
+    "MachineType": 0,
+    "Distance": 10
+  },
+  {
+    "ID": 2,
+    "MachineType": 2,
+    "Distance": 20
+  },
+  {
+    "ID": 3,
+    "MachineType": 1,
+    "Distance": 5
+  }
+]
