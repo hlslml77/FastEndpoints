@@ -1,0 +1,146 @@
+[
+  {
+    "ID": 1,
+    "GroupId": 1,
+    "Transcend": 1,
+    "ChasingTime": 1,
+    "LeadTime": 5,
+    "LeadingDis": 2,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 2,
+    "GroupId": 1,
+    "Transcend": 0,
+    "ChasingTime": 0,
+    "LeadTime": 0,
+    "LeadingDis": 0,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 3,
+    "GroupId": 1,
+    "Transcend": 2,
+    "ChasingTime": 2,
+    "LeadTime": 6,
+    "LeadingDis": 2,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 4,
+    "GroupId": 2,
+    "Transcend": 0,
+    "ChasingTime": 0,
+    "LeadTime": 0,
+    "LeadingDis": 0,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 5,
+    "GroupId": 2,
+    "Transcend": 1,
+    "ChasingTime": 1,
+    "LeadTime": 6,
+    "LeadingDis": 2,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 6,
+    "GroupId": 2,
+    "Transcend": 2,
+    "ChasingTime": 2,
+    "LeadTime": 5,
+    "LeadingDis": 3,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 7,
+    "GroupId": 2,
+    "Transcend": 2,
+    "ChasingTime": 3,
+    "LeadTime": 6,
+    "LeadingDis": 2,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 8,
+    "GroupId": 3,
+    "Transcend": 1,
+    "ChasingTime": 1,
+    "LeadTime": 7,
+    "LeadingDis": 3,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 9,
+    "GroupId": 3,
+    "Transcend": 1,
+    "ChasingTime": 1,
+    "LeadTime": 5,
+    "LeadingDis": 2,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 10,
+    "GroupId": 3,
+    "Transcend": 1,
+    "ChasingTime": 1,
+    "LeadTime": 6,
+    "LeadingDis": 3,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 11,
+    "GroupId": 3,
+    "Transcend": 1,
+    "ChasingTime": 1,
+    "LeadTime": 6,
+    "LeadingDis": 2,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 12,
+    "GroupId": 3,
+    "Transcend": 2,
+    "ChasingTime": 2,
+    "LeadTime": 7,
+    "LeadingDis": 3,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 13,
+    "GroupId": 3,
+    "Transcend": 2,
+    "ChasingTime": 2,
+    "LeadTime": 5,
+    "LeadingDis": 2,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 14,
+    "GroupId": 3,
+    "Transcend": 2,
+    "ChasingTime": 3,
+    "LeadTime": 6,
+    "LeadingDis": 3,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 15,
+    "GroupId": 3,
+    "Transcend": 3,
+    "ChasingTime": 2,
+    "LeadTime": 5,
+    "LeadingDis": 2,
+    "DestoryDis": 50
+  },
+  {
+    "ID": 16,
+    "GroupId": 3,
+    "Transcend": 3,
+    "ChasingTime": 2,
+    "LeadTime": 7,
+    "LeadingDis": 3,
+    "DestoryDis": 50
+  }
+]
