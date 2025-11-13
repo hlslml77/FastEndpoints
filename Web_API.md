@@ -1,8 +1,8 @@
 RoleGrowth API
 
 获取玩家角色信息
-GET /api/role-growth/player/{UserId}
-路径参数: UserId (long)
+POST /api/role-growth/get-player
+请求 Body: GetPlayerRoleRequest
 返回: PlayerRoleResponse
 
 完成运动
@@ -11,6 +11,11 @@ POST /api/role-growth/complete-sport
 返回: PlayerRoleResponse
 
 数据模型
+
+GetPlayerRoleRequest
+{
+  "userId": 0
+}
 
 PlayerRoleResponse
 {

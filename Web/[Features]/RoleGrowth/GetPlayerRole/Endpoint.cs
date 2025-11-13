@@ -6,7 +6,7 @@ namespace RoleGrowth.GetPlayerRole;
 /// <summary>
 /// 获取玩家角色信息请求
 /// </summary>
-public class Request
+public class GetPlayerRoleRequest
 {
     /// <summary>
     /// 用户ID
@@ -17,7 +17,7 @@ public class Request
 /// <summary>
 /// 获取玩家角色信息端点
 /// </summary>
-public class Endpoint : Endpoint<Request, PlayerRoleResponse>
+public class Endpoint : Endpoint<GetPlayerRoleRequest, PlayerRoleResponse>
 {
     private readonly IPlayerRoleGrowthService _roleGrowthService;
     private readonly IRoleConfigService _configService;
@@ -30,7 +30,7 @@ public class Endpoint : Endpoint<Request, PlayerRoleResponse>
 
     public override void Configure()
     {
-        Get("/role-growth/player/{UserId}");
+        Post("/role-growth/get-player");
         AllowAnonymous();
         Description(x => x
             .WithTags("RoleGrowth")
@@ -38,7 +38,7 @@ public class Endpoint : Endpoint<Request, PlayerRoleResponse>
             .WithDescription("获取指定用户的角色成长信息，包括等级、经验、属性等"));
     }
 
-    public override async Task HandleAsync(Request req, CancellationToken ct)
+    public override async Task HandleAsync(GetPlayerRoleRequest req, CancellationToken ct)
     {
         var player = await _roleGrowthService.GetOrCreatePlayerAsync(req.UserId);
         var config = _configService.GetRoleConfig();
