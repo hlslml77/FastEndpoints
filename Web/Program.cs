@@ -20,7 +20,13 @@ using Web;
 using Web.PipelineBehaviors.PreProcessors;
 using Web.Services;
 
-var bld = WebApplication.CreateBuilder(args);
+// 禁用 wwwroot 目录（纯 API 项目不需要静态文件）
+var bld = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    WebRootPath = string.Empty
+});
+
 bld.AddHandlerServer();
 
 // 初始化数据库
@@ -49,6 +55,8 @@ bld.Services
    .AddScoped<IEmailService, EmailService>()
    .AddSingleton<IRoleConfigService, RoleConfigService>()
    .AddScoped<IPlayerRoleGrowthService, PlayerRoleGrowthService>()
+   .AddSingleton<IMapConfigService, MapConfigService>()
+   .AddScoped<IMapService, MapService>()
    .AddSingleton(new SingltonSVC(0))
    .AddJobQueues<Job, JobStorage>()
    .RegisterServicesFromWeb()

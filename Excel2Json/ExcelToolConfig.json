@@ -1,6 +1,0 @@
-{
-  "StartHead": "5",
-  "InputExcelDir": "./Excel",
-  "OutputJsonDir": "./Json",
-  "OutputCSDir": "./CS"
-}
