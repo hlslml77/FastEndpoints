@@ -357,3 +357,7 @@ Src/Documentation/api/
 .vscode/
 
 .idea/
+
+
+# Ignore Excel2Json directory
+Excel2Json/

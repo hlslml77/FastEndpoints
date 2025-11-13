@@ -1,9 +1,0 @@
-[
-  {
-    "ID": 1,
-    "Trigger": 1,
-    "Type": "SingleRun",
-    "Opening": 10,
-    "GuardTime": 5
-  }
-]
