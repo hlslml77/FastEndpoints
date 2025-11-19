@@ -41,7 +41,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
             var webToken = JwtBearer.CreateToken(o =>
             {
                 o.SigningKey = _config["TokenKey"]!;
-                o.ExpireAt = DateTime.UtcNow.AddHours(2); // Web token有效期2小时
+                o.ExpireAt = DateTime.UtcNow.AddHours(6); // Web token有效期6小时
 
                 // 最大化权限配置 - 所有读写权限
                 // 基础访问权限
