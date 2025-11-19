@@ -43,9 +43,11 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
                 o.SigningKey = _config["TokenKey"]!;
                 o.ExpireAt = DateTime.UtcNow.AddHours(2); // Web token有效期2小时
 
-                // 暂时跳过验证，使用基础权限
+                // 最大化权限配置 - 所有读写权限
+                // 基础访问权限
                 o.User.Permissions.Add("web_access");
                 o.User.Permissions.Add("api_read");
+                o.User.Permissions.Add("api_write");
                 o.User.Permissions.Add("profile_update");
             });
 
@@ -53,7 +55,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
             Response = new TokenExchangeResponse
             {
                 WebToken = webToken,
-                ExpiresIn = 7200, // 2小时
+                ExpiresIn = 43200, // 6小时
                 TokenType = "Bearer",
                 UserId = "anonymous" // 暂时使用匿名用户
             };

@@ -18,11 +18,12 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
     public override void Configure()
     {
         Post("/map/save-progress");
-        AllowAnonymous();
+        // 需要JWT token验证，要求web_access权限
+        Permissions("web_access");
         Description(x => x
             .WithTags("MapSystem")
             .WithSummary("保存地图进度")
-            .WithDescription("保存玩家从起点到终点的跑步进度，记录跑步距离"));
+            .WithDescription("保存玩家从起点到终点的跑步进度，记录跑步距离。需要JWT token验证。"));
     }
 
     public override async Task HandleAsync(SaveMapProgressRequest req, CancellationToken ct)

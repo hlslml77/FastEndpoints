@@ -4,11 +4,13 @@ RoleGrowth API
 POST /api/role-growth/get-player
 请求 Body: GetPlayerRoleRequest
 返回: PlayerRoleResponse
+认证: 需要JWT token，权限: web_access
 
 完成运动
 POST /api/role-growth/complete-sport
 请求 Body: CompleteSportRequest
 返回: PlayerRoleResponse
+认证: 需要JWT token，权限: web_access
 
 数据模型
 
@@ -49,11 +51,13 @@ MapSystem API
 POST /api/map/save-progress
 请求 Body: SaveMapProgressRequest
 返回: SaveMapProgressResponse
+认证: 需要JWT token，权限: web_access
 
 访问地图点位
 POST /api/map/visit-location
 请求 Body: VisitMapLocationRequest
 返回: VisitMapLocationResponse
+认证: 需要JWT token，权限: web_access
 
 数据模型
 

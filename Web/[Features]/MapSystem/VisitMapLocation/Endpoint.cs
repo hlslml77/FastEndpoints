@@ -18,11 +18,12 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
     public override void Configure()
     {
         Post("/map/visit-location");
-        AllowAnonymous();
+        // 需要JWT token验证，要求web_access权限
+        Permissions("web_access");
         Description(x => x
             .WithTags("MapSystem")
             .WithSummary("访问地图点位")
-            .WithDescription("记录玩家访问地图点位，首次访问发放首次奖励，非首次访问发放固定奖励"));
+            .WithDescription("记录玩家访问地图点位，首次访问发放首次奖励，非首次访问发放固定奖励。需要JWT token验证。"));
     }
 
     public override async Task HandleAsync(VisitMapLocationRequest req, CancellationToken ct)

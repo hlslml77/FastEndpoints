@@ -20,11 +20,12 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
     public override void Configure()
     {
         Post("/role-growth/complete-sport");
-        AllowAnonymous();
+        // 需要JWT token验证，要求web_access权限
+        Permissions("web_access");
         Description(x => x
             .WithTags("RoleGrowth")
             .WithSummary("完成运动")
-            .WithDescription("记录玩家完成的运动，根据运动类型和距离增加对应属性。运动类型: Bicycle, Run, Rowing"));
+            .WithDescription("记录玩家完成的运动，根据运动类型和距离增加对应属性。运动类型: Bicycle, Run, Rowing。需要JWT token验证。"));
     }
 
     public override async Task HandleAsync(CompleteSportRequest req, CancellationToken ct)

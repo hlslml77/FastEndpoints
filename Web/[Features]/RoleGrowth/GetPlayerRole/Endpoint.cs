@@ -31,11 +31,12 @@ public class Endpoint : Endpoint<GetPlayerRoleRequest, PlayerRoleResponse>
     public override void Configure()
     {
         Post("/role-growth/get-player");
-        AllowAnonymous();
+        // 需要JWT token验证，要求web_access权限
+        Permissions("web_access");
         Description(x => x
             .WithTags("RoleGrowth")
             .WithSummary("获取玩家角色信息")
-            .WithDescription("获取指定用户的角色成长信息，包括等级、经验、属性等"));
+            .WithDescription("获取指定用户的角色成长信息，包括等级、经验、属性等。需要JWT token验证。"));
     }
 
     public override async Task HandleAsync(GetPlayerRoleRequest req, CancellationToken ct)
