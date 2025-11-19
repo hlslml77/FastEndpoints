@@ -22,7 +22,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
         _httpClientFactory = httpClientFactory;
     }
 
-    public override async Task HandleAsync(TokenExchangeRequest req, CancellationToken ct)
+    public override Task HandleAsync(TokenExchangeRequest req, CancellationToken ct)
     {
         try
         {
@@ -59,11 +59,14 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
                 TokenType = "Bearer",
                 UserId = "anonymous" // 暂时使用匿名用户
             };
+
+            return Task.CompletedTask;
         }
         catch (Exception ex)
         {
             AddError("Token exchange failed: " + ex.Message);
             ThrowError("Token exchange failed: " + ex.Message);
+            return Task.CompletedTask;
         }
     }
 
@@ -90,9 +93,9 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
             return new TokenValidationResult
             {
                 IsValid = true,
-                UserId = validationData.UserId,
-                Username = validationData.Username,
-                Roles = validationData.Roles
+                UserId = validationData?.UserId,
+                Username = validationData?.Username,
+                Roles = validationData?.Roles ?? new List<string>()
             };
         }
         catch (Exception ex)
@@ -101,11 +104,11 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
         }
     }
 
-    private async Task<TokenValidationResult> ValidateTokenWithKeyAsync(string appToken, CancellationToken ct)
+    private Task<TokenValidationResult> ValidateTokenWithKeyAsync(string appToken, CancellationToken ct)
     {
         // 使用APP的公钥直接验证token
         // 这里简化处理，实际需要使用JWT库验证
-        var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+        var tokenHandler = new JwtSecurityTokenHandler();
         var validationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -119,13 +122,13 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
 
         var principal = tokenHandler.ValidateToken(appToken, validationParameters, out var validatedToken);
         
-        return new TokenValidationResult
+        return Task.FromResult(new TokenValidationResult
         {
             IsValid = true,
             UserId = principal.FindFirst("sub")?.Value,
             Username = principal.FindFirst("name")?.Value,
             Roles = principal.FindAll("role").Select(c => c.Value).ToList()
-        };
+        });
     }
 
     private static RsaSecurityKey CreateRsaSecurityKey(string publicKeyBase64)
