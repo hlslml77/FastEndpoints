@@ -52,7 +52,16 @@ bld.Services
    .AddAuthorization(o => o.AddPolicy("AdminOnly", b => b.RequireRole(Role.Admin)))
    .AddKeyedTransient<IKeyedService>("AAA", (_, _) => new MyKeyedService("AAA"))
    .AddKeyedTransient<IKeyedService>("BBB", (_, _) => new MyKeyedService("BBB"))
-   .AddScoped<IEmailService, EmailService>()
+   .AddScoped<IEmailService, EmailService>();
+
+// 添加HttpClient用于调用APP服务进行token验证
+bld.Services.AddHttpClient("AppService", client =>
+{
+    client.BaseAddress = new Uri(bld.Configuration["AppService:BaseUrl"]!);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
+bld.Services
    .AddSingleton<IRoleConfigService, RoleConfigService>()
    .AddScoped<IPlayerRoleGrowthService, PlayerRoleGrowthService>()
    .AddSingleton<IMapConfigService, MapConfigService>()

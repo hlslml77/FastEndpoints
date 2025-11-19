@@ -100,3 +100,51 @@ VisitMapLocationResponse
     "hierarchy": 1
   }
 }
+
+---
+
+Token Exchange API
+
+Token交换端点
+POST `/api/auth/exchange`
+
+用APP Token换取Web服务专用Token
+
+请求模型
+json
+{
+  "appToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+
+响应模型
+json
+{
+  "webToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+}
+
+使用流程
+1. 客户端使用APP Token调用交换接口
+//2. Web服务验证APP Token有效性
+3. 生成Web服务专用Token并返回
+4. 客户端使用Web Token访问其他API
+
+示例代码
+// 1. Token交换
+const response = await fetch('/api/auth/exchange', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ appToken: 'your-app-token' })
+});
+
+const { webToken } = await response.json();
+
+// 2. 使用Web Token访问API
+const apiResponse = await fetch('/api/role-growth/get-player', {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${webToken}`,
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ userId: 123 })
+});
+```
