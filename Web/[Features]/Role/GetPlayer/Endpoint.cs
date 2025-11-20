@@ -8,16 +8,9 @@ using RoleApi;
 namespace RoleApi.GetPlayer;
 
 /// <summary>
-/// 获取玩家角色信息请求（从JWT解析用户ID，请求体可为空）
-/// </summary>
-public class GetPlayerRoleRequest
-{
-}
-
-/// <summary>
 /// 获取玩家角色信息端点
 /// </summary>
-public class Endpoint : Endpoint<GetPlayerRoleRequest, PlayerRoleResponse>
+public class Endpoint : Endpoint<EmptyRequest, PlayerRoleResponse>
 {
     private readonly IPlayerRoleService _roleGrowthService;
     private readonly IRoleConfigService _configService;
@@ -39,7 +32,7 @@ public class Endpoint : Endpoint<GetPlayerRoleRequest, PlayerRoleResponse>
             .WithDescription("获取指定用户的角色信息，包括等级、经验、属性等。需要JWT token验证。"));
     }
 
-    public override async Task HandleAsync(GetPlayerRoleRequest req, CancellationToken ct)
+    public override async Task HandleAsync(EmptyRequest req, CancellationToken ct)
     {
         // 从JWT解析用户ID（优先 sub，其次 userId/NameIdentifier）
         var userIdStr = User?.Claims?.FirstOrDefault(c =>

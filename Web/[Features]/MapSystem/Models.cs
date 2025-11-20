@@ -150,13 +150,6 @@ public class MapLocationInfo
 
 
 /// <summary>
-/// 获取玩家地图状态请求（从JWT中解析用户ID，请求体可为空）
-/// </summary>
-public class GetPlayerMapStateRequest
-{
-}
-
-/// <summary>
 /// 进度记录DTO
 /// </summary>
 public class PlayerProgressDto

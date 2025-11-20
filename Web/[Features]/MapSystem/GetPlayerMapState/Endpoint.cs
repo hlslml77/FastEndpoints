@@ -7,7 +7,7 @@ namespace MapSystem.GetPlayerMapState;
 /// <summary>
 /// 获取玩家地图状态（已访问点位、已完成点位、所有进度）
 /// </summary>
-public class Endpoint : Endpoint<GetPlayerMapStateRequest, GetPlayerMapStateResponse>
+public class Endpoint : Endpoint<EmptyRequest, GetPlayerMapStateResponse>
 {
     private readonly IMapService _mapService;
 
@@ -26,7 +26,7 @@ public class Endpoint : Endpoint<GetPlayerMapStateRequest, GetPlayerMapStateResp
             .WithDescription("返回玩家已访问过的点位、已完成的点位以及所有路线进度信息"));
     }
 
-    public override async Task HandleAsync(GetPlayerMapStateRequest req, CancellationToken ct)
+    public override async Task HandleAsync(EmptyRequest req, CancellationToken ct)
     {
         try
         {
