@@ -1,21 +1,18 @@
 Role API
 
 获取玩家角色信息
-POST /api/role-growth/get-player
-请求 Body: GetPlayerRoleRequest（可为空；从JWT解析用户ID）
+POST /api/role/get-player
+请求 Body: 空对象 {} 或不传（从JWT解析用户ID）
 返回: PlayerRoleResponse
 认证: 需要JWT token，权限: web_access
 
 完成运动
-POST /api/role-growth/complete-sport
+POST /api/role/complete-sport
 请求 Body: CompleteSportRequest（从JWT解析用户ID）
 返回: PlayerRoleResponse
 认证: 需要JWT token，权限: web_access
 
 数据模型
-
-GetPlayerRoleRequest
-{}
 
 PlayerRoleResponse
 {
@@ -102,14 +99,11 @@ VisitMapLocationResponse
 
 获取玩家地图状态
 POST /api/map/player-state
-请求 Body: GetPlayerMapStateRequest（可为空；从JWT解析用户ID）
+请求 Body: 空对象 {} 或不传（从JWT解析用户ID）
 返回: GetPlayerMapStateResponse
 认证: 需要JWT token，权限: web_access
 
 数据模型（仅与本接口相关）
-
-GetPlayerMapStateRequest
-{}
 
 GetPlayerMapStateResponse
 {
