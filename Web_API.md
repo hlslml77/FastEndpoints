@@ -1,94 +1,125 @@
-Role API
+Web API 文档（客户端版）
 
-获取玩家角色信息
+本项目为纯 API 服务（无静态站点）。所有业务接口均使用 JWT Bearer 认证，并要求权限 web_access（除换取 Token 的接口外）。
+
+- 基础路径：/api
+- Content-Type：application/json; charset=utf-8
+- 认证头：Authorization: Bearer <webToken>
+
+1. 获取访问令牌（无需鉴权）
+POST /api/auth/exchange
+
+用客户端提供的 userId  换取 Web 专用 Token。
+
+请求体
+{
+  "userId": "123456",
+  "appToken": "可选"
+}
+
+响应体
+{
+  "webToken": "<JWT字符串>",
+  "expiresIn": 43200,
+  "tokenType": "Bearer",
+  "userId": "123456"
+}
+
+示例（curl）
+curl -X POST https://host/api/auth/exchange \
+  -H "Content-Type: application/json" \
+  -d '{"userId":"123456"}'
+
+拿到 webToken 后，访问其它接口时放入 Authorization 头。
+
+---
+
+1. 角色系统（Role）
+
+2.1 获取玩家角色信息
 POST /api/role/get-player
-请求 Body: 空对象 {} 或不传（从JWT解析用户ID）
-返回: PlayerRoleResponse
-认证: 需要JWT token，权限: web_access
 
-完成运动
+- 认证：需要 Bearer Token（权限 web_access）
+- 请求体：空对象 {} 或不传（从 JWT 的 sub 解析用户ID）
+
+响应示例
+{
+  "userId": 123456,
+  "currentLevel": 5,
+  "currentExperience": 1200,
+  "experienceToNextLevel": 1500,
+  "upperLimb": 3,
+  "lowerLimb": 2,
+  "core": 4,
+  "heartLungs": 1,
+  "todayAttributePoints": 1,
+  "availableAttributePoints": 2,
+  "speedBonus": 0.15,
+  "lastUpdateTime": "2025-01-01T00:00:00Z"
+}
+
+示例（curl）
+curl -X POST https://host/api/role/get-player \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" -d '{}'
+
+2.2 完成运动
 POST /api/role/complete-sport
-请求 Body: CompleteSportRequest（从JWT解析用户ID）
-返回: PlayerRoleResponse
-认证: 需要JWT token，权限: web_access
 
-数据模型
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：根据运动类型与距离增加属性
+- 注意：distance 单位为“公里”
 
-PlayerRoleResponse
+请求体
 {
-  "userId": 0,
-  "currentLevel": 0,
-  "currentExperience": 0,
-  "experienceToNextLevel": 0,
-  "upperLimb": 0,
-  "lowerLimb": 0,
-  "core": 0,
-  "heartLungs": 0,
-  "todayAttributePoints": 0,
-  "availableAttributePoints": 0,
-  "speedBonus": 0.0,
-  "lastUpdateTime": "2023-01-01T00:00:00Z"
+  "deviceType": 1,   // 1=自行车, 2=跑步, 3=划船
+  "distance": 2.5,   // 公里
+  "calorie": 180
 }
 
-CompleteSportRequest
-{
-  "deviceType": 0, // 1=自行车, 2=跑步, 3=划船
-  "distance": 0.0,
-  "calorie": 0
-}
+响应体：同“获取玩家角色信息”
 
---------------------------------------------------------------------------------
+---
 
-MapSystem API
+3. 地图系统（MapSystem）
 
-保存地图进度
+3.1 保存地图进度
 POST /api/map/save-progress
-请求 Body: SaveMapProgressRequest
-返回: SaveMapProgressResponse
-认证: 需要JWT token，权限: web_access
 
-访问地图点位
+- 认证：需要 Bearer Token（权限 web_access）
+- 注意：distanceMeters 单位为“米”
+
+请求体
+{
+  "startLocationId": 10011,
+  "endLocationId": 10012,
+  "distanceMeters": 850.5
+}
+
+响应体
+{
+  "id": 1,
+  "userId": 123456,
+  "startLocationId": 10011,
+  "endLocationId": 10012,
+  "distanceMeters": 850.5,
+  "createdAt": "2025-01-01T00:00:00Z"
+}
+
+3.2 访问地图点位
 POST /api/map/visit-location
-请求 Body: VisitMapLocationRequest
-返回: VisitMapLocationResponse
-认证: 需要JWT token，权限: web_access
 
-数据模型
-
-SaveMapProgressRequest
+请求体
 {
-  "startLocationId": 0,
-  "endLocationId": 0,
-  "distanceMeters": 0.0
+  "locationId": 10011
 }
 
-SaveMapProgressResponse
-{
-  "id": 0,
-  "userId": 0,
-  "startLocationId": 0,
-  "endLocationId": 0,
-  "distanceMeters": 0.0,
-  "createdAt": "2023-01-01T00:00:00Z"
-}
-
-VisitMapLocationRequest
-{
-  "locationId": 0
-}
-
-VisitMapLocationResponse
+响应体
 {
   "isFirstVisit": true,
-  "rewards": [
-    {
-      "itemId": 8000,
-      "amount": 20
-    }
-  ],
+  "rewards": [{ "itemId": 8000, "amount": 20 }],
   "visitCount": 1,
-  "firstVisitTime": "2023-01-01T00:00:00Z",
-  "lastVisitTime": "2023-01-01T00:00:00Z",
+  "firstVisitTime": "2025-01-01T00:00:00Z",
+  "lastVisitTime": "2025-01-01T01:00:00Z",
   "locationInfo": {
     "locationId": 10011,
     "description": "黄岩镇",
@@ -97,15 +128,12 @@ VisitMapLocationResponse
   }
 }
 
-获取玩家地图状态
+3.3 获取玩家地图状态
 POST /api/map/player-state
-请求 Body: 空对象 {} 或不传（从JWT解析用户ID）
-返回: GetPlayerMapStateResponse
-认证: 需要JWT token，权限: web_access
 
-数据模型（仅与本接口相关）
+请求体：空对象 {} 或不传（从 JWT 的 sub 解析用户ID）
 
-GetPlayerMapStateResponse
+响应体
 {
   "visitedLocationIds": [10011, 10012],
   "completedLocationIds": [10011, 10012],
@@ -114,59 +142,26 @@ GetPlayerMapStateResponse
       "startLocationId": 10011,
       "endLocationId": 10012,
       "distanceMeters": 10.0,
-      "createdAt": "2023-01-01T00:00:00Z"
+      "createdAt": "2025-01-01T00:00:00Z"
     }
   ]
 }
 
+---
 
---------------------------------------------------------------------------------
+4. 统一错误格式（示例）
 
-Token Exchange API
-
-Token交换端点
-POST `/api/auth/exchange`
-
-根据客户端传入的 userId 生成 Web 服务专用 Token（把 userId 写入 JWT 的 sub）。
-
-请求模型
-json
+当参数或认证有误时，返回类似：
 {
-  "userId": "123456",
-  "appToken": "..." // 可选，不解析
+  "errors": ["未能从令牌解析用户ID"],
+  "statusCode": 400
 }
 
-响应模型
-json
-{
-  "webToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-}
-
-使用流程
-1. 客户端调用交换接口并传入 userId
-2. 服务端生成 Web Token，并把 userId 写入 JWT 的 sub
-3. 客户端使用 Web Token 访问其他 API
-
-示例代码
-// 1. Token交换
-const response = await fetch('/api/auth/exchange', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId: '123456' })
-});
-
-const { webToken } = await response.json();
-
-// 2. 使用Web Token访问API（示例：获取地图状态）
-const apiResponse = await fetch('/api/map/player-state', {
-    method: 'POST',
-    headers: {
-        'Authorization': `Bearer ${webToken}`,
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({})
-});
-```
+5. 调用要点
+- 交换 Token 时 appToken 为可选；若提交，服务端可验证 appToken 并校验其中用户与 userId 一致
+- 所有业务接口需携带 Authorization: Bearer <webToken>
+- userId 来自换取到的 Token 的 sub
+- 注意单位：complete-sport 使用 公里；save-progress 使用 米
+- 时间均为 UTC ISO8601 字符串
 
 
---------------------------------------------------------------------------------
