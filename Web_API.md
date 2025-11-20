@@ -34,7 +34,7 @@ curl -X POST https://host/api/auth/exchange \
 
 ---
 
-1. 角色系统（Role）
+2. 角色系统（Role）
 
 2.1 获取玩家角色信息
 POST /api/role/get-player
