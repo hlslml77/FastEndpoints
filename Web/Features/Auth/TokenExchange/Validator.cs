@@ -9,18 +9,21 @@ public class Validator : Validator<TokenExchangeRequest>
 {
     public Validator()
     {
-        RuleFor(x => x.AppToken)
+        RuleFor(x => x.UserId)
             .NotEmpty()
-            .WithMessage("APP Token is required")
-            .Must(BeValidJwtFormat)
-            .WithMessage("Invalid JWT token format");
+            .WithMessage("userId is required");
+
+        // AppToken 可选；若传则做基本格式校验
+        When(x => !string.IsNullOrWhiteSpace(x.AppToken), () =>
+        {
+            RuleFor(x => x.AppToken!)
+                .Must(BeValidJwtFormat)
+                .WithMessage("Invalid JWT token format");
+        });
     }
 
     private bool BeValidJwtFormat(string token)
     {
-        if (string.IsNullOrWhiteSpace(token))
-            return false;
-
         // JWT格式验证：应该有3个部分，用.分隔
         var parts = token.Split('.');
         return parts.Length == 3;

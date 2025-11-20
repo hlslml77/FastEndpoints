@@ -5,24 +5,24 @@ using Web.Data.Entities;
 namespace Web.Services;
 
 /// <summary>
-/// 玩家角色成长服务
+/// 玩家角色服务
 /// </summary>
-public interface IPlayerRoleGrowthService
+public interface IPlayerRoleService
 {
-    Task<PlayerRoleGrowth> GetOrCreatePlayerAsync(long userId);
-    Task<PlayerRoleGrowth> CompleteSportAsync(long userId, int deviceType, decimal distance, int calorie);
+    Task<PlayerRole> GetOrCreatePlayerAsync(long userId);
+    Task<PlayerRole> CompleteSportAsync(long userId, int deviceType, decimal distance, int calorie);
 }
 
-public class PlayerRoleGrowthService : IPlayerRoleGrowthService
+public class PlayerRoleService : IPlayerRoleService
 {
     private readonly AppDbContext _dbContext;
     private readonly IRoleConfigService _configService;
-    private readonly ILogger<PlayerRoleGrowthService> _logger;
+    private readonly ILogger<PlayerRoleService> _logger;
 
-    public PlayerRoleGrowthService(
+    public PlayerRoleService(
         AppDbContext dbContext,
         IRoleConfigService configService,
-        ILogger<PlayerRoleGrowthService> logger)
+        ILogger<PlayerRoleService> logger)
     {
         _dbContext = dbContext;
         _configService = configService;
@@ -32,14 +32,14 @@ public class PlayerRoleGrowthService : IPlayerRoleGrowthService
     /// <summary>
     /// 获取或创建玩家角色
     /// </summary>
-    public async Task<PlayerRoleGrowth> GetOrCreatePlayerAsync(long userId)
+    public async Task<PlayerRole> GetOrCreatePlayerAsync(long userId)
     {
-        var player = await _dbContext.PlayerRoleGrowth.FindAsync(userId);
+        var player = await _dbContext.PlayerRole.FindAsync(userId);
 
         if (player == null)
         {
             var config = _configService.GetRoleConfig();
-            player = new PlayerRoleGrowth
+            player = new PlayerRole
             {
                 UserId = userId,
                 CurrentLevel = 1,
@@ -52,7 +52,7 @@ public class PlayerRoleGrowthService : IPlayerRoleGrowthService
                 LastUpdateTime = DateTime.UtcNow
             };
 
-            _dbContext.PlayerRoleGrowth.Add(player);
+            _dbContext.PlayerRole.Add(player);
             await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation("Created new player role for user {UserId}", userId);
@@ -64,7 +64,7 @@ public class PlayerRoleGrowthService : IPlayerRoleGrowthService
     /// <summary>
     /// 检查并升级
     /// </summary>
-    private void CheckAndLevelUp(PlayerRoleGrowth player)
+    private void CheckAndLevelUp(PlayerRole player)
     {
         while (true)
         {
@@ -102,7 +102,7 @@ public class PlayerRoleGrowthService : IPlayerRoleGrowthService
     /// <summary>
     /// 完成运动，统一处理属性和经验增长
     /// </summary>
-    public async Task<PlayerRoleGrowth> CompleteSportAsync(long userId, int deviceType, decimal distance, int calorie)
+    public async Task<PlayerRole> CompleteSportAsync(long userId, int deviceType, decimal distance, int calorie)
     {
         var player = await GetOrCreatePlayerAsync(userId);
         var sportConfig = _configService.GetSportConfig(deviceType, distance);

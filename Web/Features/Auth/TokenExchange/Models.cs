@@ -6,9 +6,14 @@ namespace Web.Features.Auth.TokenExchange;
 public class TokenExchangeRequest
 {
     /// <summary>
-    /// APP生成的JWT Token
+    /// 用户ID（直接由客户端传入，用于写入JWT的 sub）
     /// </summary>
-    public string AppToken { get; set; } = string.Empty;
+    public string UserId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// APP生成的JWT Token（可选，当前不解析）
+    /// </summary>
+    public string? AppToken { get; set; }
 }
 
 /// <summary>

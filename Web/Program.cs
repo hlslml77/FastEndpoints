@@ -63,7 +63,7 @@ bld.Services.AddHttpClient("AppService", client =>
 
 bld.Services
    .AddSingleton<IRoleConfigService, RoleConfigService>()
-   .AddScoped<IPlayerRoleGrowthService, PlayerRoleGrowthService>()
+   .AddScoped<IPlayerRoleService, PlayerRoleService>()
    .AddSingleton<IMapConfigService, MapConfigService>()
    .AddScoped<IMapService, MapService>()
    .AddSingleton(new SingltonSVC(0))

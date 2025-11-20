@@ -5,10 +5,6 @@ namespace MapSystem;
 /// </summary>
 public class SaveMapProgressRequest
 {
-    /// <summary>
-    /// 用户ID
-    /// </summary>
-    public long UserId { get; set; }
 
     /// <summary>
     /// 起点位置ID
@@ -67,11 +63,6 @@ public class SaveMapProgressResponse
 /// </summary>
 public class VisitMapLocationRequest
 {
-    /// <summary>
-    /// 用户ID
-    /// </summary>
-    public long UserId { get; set; }
-
     /// <summary>
     /// 地图点位ID
     /// </summary>
@@ -156,3 +147,43 @@ public class MapLocationInfo
     public int Hierarchy { get; set; }
 }
 
+
+
+/// <summary>
+/// 获取玩家地图状态请求（从JWT中解析用户ID，请求体可为空）
+/// </summary>
+public class GetPlayerMapStateRequest
+{
+}
+
+/// <summary>
+/// 进度记录DTO
+/// </summary>
+public class PlayerProgressDto
+{
+    public int StartLocationId { get; set; }
+    public int EndLocationId { get; set; }
+    public decimal DistanceMeters { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+/// <summary>
+/// 获取玩家地图状态响应
+/// </summary>
+public class GetPlayerMapStateResponse
+{
+    /// <summary>
+    /// 已访问点位ID列表
+    /// </summary>
+    public List<int> VisitedLocationIds { get; set; } = new();
+
+    /// <summary>
+    /// 已完成点位ID列表
+    /// </summary>
+    public List<int> CompletedLocationIds { get; set; } = new();
+
+    /// <summary>
+    /// 所有路线进度记录
+    /// </summary>
+    public List<PlayerProgressDto> ProgressRecords { get; set; } = new();
+}

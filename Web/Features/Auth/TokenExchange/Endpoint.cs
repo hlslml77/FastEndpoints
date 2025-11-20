@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
+using System.Security.Claims;
 
 namespace Web.Features.Auth.TokenExchange;
 
@@ -37,27 +38,38 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
             }
             */
 
-            // 2. 生成Web服务专用的JWT Token (暂时跳过验证)
+            // 2. 使用客户端传入的UserId作为JWT的sub
+            var userId = (req.UserId ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                AddError("userId is required");
+                ThrowError("userId is required");
+                return Task.CompletedTask;
+            }
+
+            // 3. 生成Web服务专用的JWT Token，并把用户ID写入sub
             var webToken = JwtBearer.CreateToken(o =>
             {
                 o.SigningKey = _config["TokenKey"]!;
                 o.ExpireAt = DateTime.UtcNow.AddHours(6); // Web token有效期6小时
 
-                // 最大化权限配置 - 所有读写权限
-                // 基础访问权限
+                // 用户ID（用于服务端从JWT解析）
+                o.User.Claims.Add(new System.Security.Claims.Claim("sub", userId));
+
+                // 权限
                 o.User.Permissions.Add("web_access");
                 o.User.Permissions.Add("api_read");
                 o.User.Permissions.Add("api_write");
                 o.User.Permissions.Add("profile_update");
             });
 
-            // 3. 返回Web Token
+            // 4. 返回Web Token
             Response = new TokenExchangeResponse
             {
                 WebToken = webToken,
                 ExpiresIn = 43200, // 6小时
                 TokenType = "Bearer",
-                UserId = "anonymous" // 暂时使用匿名用户
+                UserId = userId
             };
 
             return Task.CompletedTask;

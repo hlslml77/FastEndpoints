@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using FastEndpoints;
+using Web.Auth;
+
 
 namespace TestCases.EmptyRequestTest;
 
@@ -9,5 +12,5 @@ namespace TestCases.EmptyRequestTest;
 public class EmptyRequestEndpoint : Endpoint<EmptyRequest, EmptyResponse>
 {
     public override async Task HandleAsync(EmptyRequest req, CancellationToken ct)
-        => await Send.OkAsync(ct);
+        => await HttpContext.Response.SendAsync(200, cancellation: ct);
 }

@@ -1,23 +1,21 @@
-RoleGrowth API
+Role API
 
 获取玩家角色信息
 POST /api/role-growth/get-player
-请求 Body: GetPlayerRoleRequest
+请求 Body: GetPlayerRoleRequest（可为空；从JWT解析用户ID）
 返回: PlayerRoleResponse
 认证: 需要JWT token，权限: web_access
 
 完成运动
 POST /api/role-growth/complete-sport
-请求 Body: CompleteSportRequest
+请求 Body: CompleteSportRequest（从JWT解析用户ID）
 返回: PlayerRoleResponse
 认证: 需要JWT token，权限: web_access
 
 数据模型
 
 GetPlayerRoleRequest
-{
-  "userId": 0
-}
+{}
 
 PlayerRoleResponse
 {
@@ -37,13 +35,12 @@ PlayerRoleResponse
 
 CompleteSportRequest
 {
-  "userId": 0,
   "deviceType": 0, // 1=自行车, 2=跑步, 3=划船
   "distance": 0.0,
   "calorie": 0
 }
 
----
+--------------------------------------------------------------------------------
 
 MapSystem API
 
@@ -63,7 +60,6 @@ POST /api/map/visit-location
 
 SaveMapProgressRequest
 {
-  "userId": 0,
   "startLocationId": 0,
   "endLocationId": 0,
   "distanceMeters": 0.0
@@ -81,7 +77,6 @@ SaveMapProgressResponse
 
 VisitMapLocationRequest
 {
-  "userId": 0,
   "locationId": 0
 }
 
@@ -105,19 +100,46 @@ VisitMapLocationResponse
   }
 }
 
----
+获取玩家地图状态
+POST /api/map/player-state
+请求 Body: GetPlayerMapStateRequest（可为空；从JWT解析用户ID）
+返回: GetPlayerMapStateResponse
+认证: 需要JWT token，权限: web_access
+
+数据模型（仅与本接口相关）
+
+GetPlayerMapStateRequest
+{}
+
+GetPlayerMapStateResponse
+{
+  "visitedLocationIds": [10011, 10012],
+  "completedLocationIds": [10011, 10012],
+  "progressRecords": [
+    {
+      "startLocationId": 10011,
+      "endLocationId": 10012,
+      "distanceMeters": 10.0,
+      "createdAt": "2023-01-01T00:00:00Z"
+    }
+  ]
+}
+
+
+--------------------------------------------------------------------------------
 
 Token Exchange API
 
 Token交换端点
 POST `/api/auth/exchange`
 
-用APP Token换取Web服务专用Token
+根据客户端传入的 userId 生成 Web 服务专用 Token（把 userId 写入 JWT 的 sub）。
 
 请求模型
 json
 {
-  "appToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "userId": "123456",
+  "appToken": "..." // 可选，不解析
 }
 
 响应模型
@@ -127,28 +149,30 @@ json
 }
 
 使用流程
-1. 客户端使用APP Token调用交换接口
-//2. Web服务验证APP Token有效性
-3. 生成Web服务专用Token并返回
-4. 客户端使用Web Token访问其他API
+1. 客户端调用交换接口并传入 userId
+2. 服务端生成 Web Token，并把 userId 写入 JWT 的 sub
+3. 客户端使用 Web Token 访问其他 API
 
 示例代码
 // 1. Token交换
 const response = await fetch('/api/auth/exchange', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ appToken: 'your-app-token' })
+    body: JSON.stringify({ userId: '123456' })
 });
 
 const { webToken } = await response.json();
 
-// 2. 使用Web Token访问API
-const apiResponse = await fetch('/api/role-growth/get-player', {
+// 2. 使用Web Token访问API（示例：获取地图状态）
+const apiResponse = await fetch('/api/map/player-state', {
     method: 'POST',
     headers: {
         'Authorization': `Bearer ${webToken}`,
         'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ userId: 123 })
+    body: JSON.stringify({})
 });
 ```
+
+
+--------------------------------------------------------------------------------

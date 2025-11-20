@@ -9,9 +9,10 @@ public class AppDbContext : DbContext
     {
     }
 
-    public DbSet<PlayerRoleGrowth> PlayerRoleGrowth { get; set; }
+    public DbSet<PlayerRole> PlayerRole { get; set; }
     public DbSet<PlayerMapProgress> PlayerMapProgress { get; set; }
     public DbSet<PlayerMapLocationVisit> PlayerMapLocationVisit { get; set; }
+    public DbSet<PlayerCompletedLocation> PlayerCompletedLocation { get; set; }
 
     // Add your DbSet properties here. For example:
     // public DbSet<Product> Products { get; set; }
@@ -22,6 +23,9 @@ public class AppDbContext : DbContext
 
         // 配置复合主键
         modelBuilder.Entity<PlayerMapLocationVisit>()
+            .HasKey(e => new { e.UserId, e.LocationId });
+
+        modelBuilder.Entity<PlayerCompletedLocation>()
             .HasKey(e => new { e.UserId, e.LocationId });
     }
 }

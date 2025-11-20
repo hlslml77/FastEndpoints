@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Web.Data.Entities;
 
 /// <summary>
-/// 玩家角色成长数据表
+/// 玩家角色数据表
 /// </summary>
-[Table("player_role_growth")]
-public class PlayerRoleGrowth
+[Table("player_role")]
+public class PlayerRole
 {
     /// <summary>
     /// 用户ID（主键）
@@ -149,3 +149,31 @@ public class PlayerMapLocationVisit
     public DateTime LastVisitTime { get; set; }
 }
 
+
+
+/// <summary>
+/// 玩家已完成点位表
+/// </summary>
+[Table("player_completed_location")]
+public class PlayerCompletedLocation
+{
+    /// <summary>
+    /// 用户ID（复合主键之一）
+    /// </summary>
+    [Key]
+    [Column("user_id", Order = 0)]
+    public long UserId { get; set; }
+
+    /// <summary>
+    /// 地图点位ID（复合主键之一）
+    /// </summary>
+    [Key]
+    [Column("location_id", Order = 1)]
+    public int LocationId { get; set; }
+
+    /// <summary>
+    /// 完成时间
+    /// </summary>
+    [Column("completed_time")]
+    public DateTime CompletedTime { get; set; }
+}

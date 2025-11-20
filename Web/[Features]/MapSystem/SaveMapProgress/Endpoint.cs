@@ -1,5 +1,6 @@
 using Web.Services;
 using FastEndpoints;
+using System.Security.Claims;
 
 namespace MapSystem.SaveMapProgress;
 
@@ -30,6 +31,15 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
     {
         try
         {
+            // 从JWT解析用户ID（优先 sub，其次 userId/NameIdentifier）
+            var userIdStr = User?.Claims?.FirstOrDefault(c =>
+                c.Type == "sub" || c.Type == "userId" || c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var userId))
+            {
+                ThrowError("未能从令牌解析用户ID");
+                return;
+            }
+
             // 验证输入
             if (req.DistanceMeters <= 0)
             {
@@ -38,7 +48,7 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
             }
 
             var progress = await _mapService.SaveMapProgressAsync(
-                req.UserId,
+                userId,
                 req.StartLocationId,
                 req.EndLocationId,
                 req.DistanceMeters);
@@ -53,7 +63,7 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
                 CreatedAt = progress.CreatedAt
             };
 
-            await Send.OkAsync(response, ct);
+            await HttpContext.Response.SendAsync(response, 200, cancellation: ct);
         }
         catch (Exception ex)
         {

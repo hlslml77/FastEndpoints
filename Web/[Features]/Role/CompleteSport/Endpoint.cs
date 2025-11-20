@@ -1,17 +1,19 @@
 using Web.Services;
 using FastEndpoints;
+using System.Security.Claims;
+using RoleApi;
 
-namespace RoleGrowth.CompleteSport;
+namespace RoleApi.CompleteSport;
 
 /// <summary>
 /// 完成运动端点
 /// </summary>
 public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
 {
-    private readonly IPlayerRoleGrowthService _roleGrowthService;
+    private readonly IPlayerRoleService _roleGrowthService;
     private readonly IRoleConfigService _configService;
 
-    public Endpoint(IPlayerRoleGrowthService roleGrowthService, IRoleConfigService configService)
+    public Endpoint(IPlayerRoleService roleGrowthService, IRoleConfigService configService)
     {
         _roleGrowthService = roleGrowthService;
         _configService = configService;
@@ -19,11 +21,11 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
 
     public override void Configure()
     {
-        Post("/role-growth/complete-sport");
+        Post("/role/complete-sport");
         // 需要JWT token验证，要求web_access权限
         Permissions("web_access");
         Description(x => x
-            .WithTags("RoleGrowth")
+            .WithTags("Role")
             .WithSummary("完成运动")
             .WithDescription("记录玩家完成的运动，根据运动类型和距离增加对应属性。运动类型: Bicycle, Run, Rowing。需要JWT token验证。"));
     }
@@ -32,7 +34,16 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
     {
         try
         {
-            var player = await _roleGrowthService.CompleteSportAsync(req.UserId, req.DeviceType, req.Distance, req.Calorie);
+            // 从JWT解析用户ID（优先 sub，其次 userId/NameIdentifier）
+            var userIdStr = User?.Claims?.FirstOrDefault(c =>
+                c.Type == "sub" || c.Type == "userId" || c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var userId))
+            {
+                ThrowError("未能从令牌解析用户ID");
+                return;
+            }
+
+            var player = await _roleGrowthService.CompleteSportAsync(userId, req.DeviceType, req.Distance, req.Calorie);
             var config = _configService.GetRoleConfig();
             var speedBonus = config.CalculateSpeedBonus(
                 player.AttrUpperLimb,
@@ -57,7 +68,7 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
                 LastUpdateTime = player.LastUpdateTime
             };
 
-            await Send.OkAsync(response, ct);
+            await HttpContext.Response.SendAsync(response, 200, cancellation: ct);
         }
         catch (ArgumentException ex)
         {

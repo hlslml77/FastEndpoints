@@ -1,5 +1,6 @@
 using Web.Services;
 using FastEndpoints;
+using System.Security.Claims;
 
 namespace MapSystem.VisitMapLocation;
 
@@ -30,7 +31,16 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
     {
         try
         {
-            var result = await _mapService.VisitMapLocationAsync(req.UserId, req.LocationId);
+            // 从JWT解析用户ID（优先 sub，其次 userId/NameIdentifier）
+            var userIdStr = User?.Claims?.FirstOrDefault(c =>
+                c.Type == "sub" || c.Type == "userId" || c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var userId))
+            {
+                ThrowError("未能从令牌解析用户ID");
+                return;
+            }
+
+            var result = await _mapService.VisitMapLocationAsync(userId, req.LocationId);
 
             // 转换奖励格式
             List<RewardItem>? rewards = null;
@@ -59,7 +69,7 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
                 } : null
             };
 
-            await Send.OkAsync(response, ct);
+            await HttpContext.Response.SendAsync(response, 200, cancellation: ct);
         }
         catch (ArgumentException ex)
         {

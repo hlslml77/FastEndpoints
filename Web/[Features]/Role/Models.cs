@@ -1,4 +1,4 @@
-namespace RoleGrowth;
+namespace RoleApi;
 
 /// <summary>
 /// 玩家角色信息响应
@@ -67,15 +67,10 @@ public class PlayerRoleResponse
 }
 
 /// <summary>
-/// 完成运动请求
+/// 完成运动请求（从JWT解析用户ID）
 /// </summary>
 public class CompleteSportRequest
 {
-    /// <summary>
-    /// 用户ID
-    /// </summary>
-    public long UserId { get; set; }
-
     /// <summary>
     /// 设备类型 (例如: 1=Bicycle, 2=Run, 3=Rowing)
     /// </summary>

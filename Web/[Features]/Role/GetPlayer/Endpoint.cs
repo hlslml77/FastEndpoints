@@ -1,17 +1,17 @@
 using Web.Services;
 using FastEndpoints;
+using System.Security.Claims;
+using RoleApi;
 
-namespace RoleGrowth.GetPlayerRole;
+
+
+namespace RoleApi.GetPlayer;
 
 /// <summary>
-/// 获取玩家角色信息请求
+/// 获取玩家角色信息请求（从JWT解析用户ID，请求体可为空）
 /// </summary>
 public class GetPlayerRoleRequest
 {
-    /// <summary>
-    /// 用户ID
-    /// </summary>
-    public long UserId { get; set; }
 }
 
 /// <summary>
@@ -19,10 +19,10 @@ public class GetPlayerRoleRequest
 /// </summary>
 public class Endpoint : Endpoint<GetPlayerRoleRequest, PlayerRoleResponse>
 {
-    private readonly IPlayerRoleGrowthService _roleGrowthService;
+    private readonly IPlayerRoleService _roleGrowthService;
     private readonly IRoleConfigService _configService;
 
-    public Endpoint(IPlayerRoleGrowthService roleGrowthService, IRoleConfigService configService)
+    public Endpoint(IPlayerRoleService roleGrowthService, IRoleConfigService configService)
     {
         _roleGrowthService = roleGrowthService;
         _configService = configService;
@@ -30,18 +30,27 @@ public class Endpoint : Endpoint<GetPlayerRoleRequest, PlayerRoleResponse>
 
     public override void Configure()
     {
-        Post("/role-growth/get-player");
+        Post("/role/get-player");
         // 需要JWT token验证，要求web_access权限
         Permissions("web_access");
         Description(x => x
-            .WithTags("RoleGrowth")
+            .WithTags("Role")
             .WithSummary("获取玩家角色信息")
-            .WithDescription("获取指定用户的角色成长信息，包括等级、经验、属性等。需要JWT token验证。"));
+            .WithDescription("获取指定用户的角色信息，包括等级、经验、属性等。需要JWT token验证。"));
     }
 
     public override async Task HandleAsync(GetPlayerRoleRequest req, CancellationToken ct)
     {
-        var player = await _roleGrowthService.GetOrCreatePlayerAsync(req.UserId);
+        // 从JWT解析用户ID（优先 sub，其次 userId/NameIdentifier）
+        var userIdStr = User?.Claims?.FirstOrDefault(c =>
+            c.Type == "sub" || c.Type == "userId" || c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var userId))
+        {
+            ThrowError("未能从令牌解析用户ID");
+            return;
+        }
+
+        var player = await _roleGrowthService.GetOrCreatePlayerAsync(userId);
         var config = _configService.GetRoleConfig();
         var speedBonus = config.CalculateSpeedBonus(
             player.AttrUpperLimb,
@@ -66,7 +75,7 @@ public class Endpoint : Endpoint<GetPlayerRoleRequest, PlayerRoleResponse>
             LastUpdateTime = player.LastUpdateTime
         };
 
-        await Send.OkAsync(response, ct);
+        await HttpContext.Response.SendAsync(response, 200, cancellation: ct);
     }
 }
 

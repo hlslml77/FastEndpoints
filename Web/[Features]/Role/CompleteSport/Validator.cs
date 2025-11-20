@@ -1,7 +1,8 @@
 using FastEndpoints;
 using FluentValidation;
+using RoleApi;
 
-namespace RoleGrowth.CompleteSport;
+namespace RoleApi.CompleteSport;
 
 /// <summary>
 /// Validator for the CompleteSport request
@@ -10,9 +11,6 @@ public class Validator : Validator<CompleteSportRequest>
 {
     public Validator()
     {
-        RuleFor(x => x.UserId)
-            .GreaterThan(0).WithMessage("A valid user ID is required.");
-
         RuleFor(x => x.DeviceType)
             .GreaterThan(0).WithMessage("A valid DeviceType is required.");
 

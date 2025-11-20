@@ -23,3 +23,13 @@ CREATE TABLE IF NOT EXISTS `player_map_location_visit` (
   INDEX `idx_location_id` (`location_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家地图点位访问记录表';
 
+
+
+-- 创建玩家已完成点位表
+CREATE TABLE IF NOT EXISTS `player_completed_location` (
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `location_id` INT NOT NULL COMMENT '地图点位ID',
+  `completed_time` DATETIME NOT NULL COMMENT '完成时间',
+  PRIMARY KEY (`user_id`, `location_id`),
+  INDEX `idx_completed_time` (`completed_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家已完成点位表';
