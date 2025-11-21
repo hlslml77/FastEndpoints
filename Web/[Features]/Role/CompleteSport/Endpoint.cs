@@ -45,11 +45,6 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
 
             var player = await _roleGrowthService.CompleteSportAsync(userId, req.DeviceType, req.Distance, req.Calorie);
             var config = _configService.GetRoleConfig();
-            var speedBonus = config.CalculateSpeedBonus(
-                player.AttrUpperLimb,
-                player.AttrLowerLimb,
-                player.AttrCore,
-                player.AttrHeartLungs);
             var nextLevelExp = _configService.GetExperienceForLevel(player.CurrentLevel);
 
             var response = new PlayerRoleResponse
@@ -64,7 +59,7 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
                 HeartLungs = player.AttrHeartLungs,
                 TodayAttributePoints = player.TodayAttributePoints,
                 AvailableAttributePoints = config.DailyAttributePointsLimit - player.TodayAttributePoints,
-                SpeedBonus = speedBonus,
+                SpeedBonus = player.SecSpeed,
                 LastUpdateTime = player.LastUpdateTime
             };
 

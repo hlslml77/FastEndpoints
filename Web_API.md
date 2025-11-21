@@ -66,12 +66,13 @@ curl -X POST https://host/api/role/get-player \
 POST /api/role/complete-sport
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：根据运动类型与距离增加属性
+- 说明：按设备类型与距离，根据策划表对四个主属性进行加点（UpperLimb/LowerLimb/Core/HeartLungs）
+- 设备类型：0=跑步机，1=单车，2=划船机，3=手环
 - 注意：distance 单位为“公里”
 
 请求体
 {
-  "deviceType": 1,   // 1=自行车, 2=跑步, 3=划船
+  "deviceType": 1,   // 0=跑步机, 1=单车, 2=划船机, 3=手环
   "distance": 2.5,   // 公里
   "calorie": 180
 }

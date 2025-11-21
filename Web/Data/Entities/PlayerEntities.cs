@@ -58,6 +58,34 @@ public class PlayerRole
     [Column("today_attribute_points")]
     public int TodayAttributePoints { get; set; } = 0;
 
+    // 副属性（由四个主属性按配表换算得到）
+    [Column("sec_attack")]
+    public decimal SecAttack { get; set; }
+
+    [Column("sec_hp")]
+    public decimal SecHP { get; set; }
+
+    [Column("sec_defense")]
+    public decimal SecDefense { get; set; }
+
+    [Column("sec_attack_speed")]
+    public decimal SecAttackSpeed { get; set; }
+
+    [Column("sec_critical")]
+    public decimal SecCritical { get; set; }
+
+    [Column("sec_critical_damage")]
+    public decimal SecCriticalDamage { get; set; }
+
+    [Column("sec_speed")]
+    public decimal SecSpeed { get; set; }
+
+    [Column("sec_efficiency")]
+    public decimal SecEfficiency { get; set; }
+
+    [Column("sec_energy")]
+    public decimal SecEnergy { get; set; }
+
     /// <summary>
     /// 最后更新时间
     /// </summary>

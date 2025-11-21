@@ -38,31 +38,51 @@ public class PlayerRoleService : IPlayerRoleService
 
         if (player == null)
         {
-            var config = _configService.GetRoleConfig();
+            // 初始主属性来自 Role_Attribute.json（按 Name 匹配）
+            var defs = _configService.GetAttributeDefs();
+            int initUpper = defs.FirstOrDefault(d => string.Equals(d.Name, "UpperLimb", StringComparison.OrdinalIgnoreCase))?.Initial ?? 0;
+            int initLower = defs.FirstOrDefault(d => string.Equals(d.Name, "LowerLimb", StringComparison.OrdinalIgnoreCase))?.Initial ?? 0;
+            int initCore = defs.FirstOrDefault(d => string.Equals(d.Name, "Core", StringComparison.OrdinalIgnoreCase))?.Initial ?? 0;
+            int initHeart = defs.FirstOrDefault(d => string.Equals(d.Name, "HeartLungs", StringComparison.OrdinalIgnoreCase))?.Initial ?? 0;
+
             player = new PlayerRole
             {
                 UserId = userId,
                 CurrentLevel = 1,
                 CurrentExperience = 0,
-                AttrUpperLimb = config.InitialUpperLimb,
-                AttrLowerLimb = config.InitialLowerLimb,
-                AttrCore = config.InitialCore,
-                AttrHeartLungs = config.InitialHeartLungs,
+                AttrUpperLimb = initUpper,
+                AttrLowerLimb = initLower,
+                AttrCore = initCore,
+                AttrHeartLungs = initHeart,
                 TodayAttributePoints = 0,
                 LastUpdateTime = DateTime.UtcNow
             };
+
+            RecalculateSecondary(player);
 
             _dbContext.PlayerRole.Add(player);
             await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation("Created new player role for user {UserId}", userId);
         }
+        else
+        {
+            // 如果副属性还未计算过，则补计算一次
+            if (player.SecAttack == 0 && player.SecHP == 0 && player.SecDefense == 0 &&
+                player.SecAttackSpeed == 0 && player.SecCritical == 0 && player.SecCriticalDamage == 0 &&
+                player.SecSpeed == 0 && player.SecEfficiency == 0 && player.SecEnergy == 0)
+            {
+                RecalculateSecondary(player);
+                player.LastUpdateTime = DateTime.UtcNow;
+                await _dbContext.SaveChangesAsync();
+            }
+        }
 
         return player;
     }
 
     /// <summary>
-    /// 检查并升级
+    /// 检查并升级（根据 Role_Upgrade.json 的 Rank 配表），并在每次升级后重算副属性
     /// </summary>
     private void CheckAndLevelUp(PlayerRole player)
     {
@@ -81,11 +101,14 @@ public class PlayerRoleService : IPlayerRoleService
                 player.CurrentExperience -= nextLevelConfig.Experience;
                 player.CurrentLevel++;
 
-                // 增加属性
+                // 增加主属性
                 player.AttrUpperLimb += nextLevelConfig.UpperLimb;
                 player.AttrLowerLimb += nextLevelConfig.LowerLimb;
                 player.AttrCore += nextLevelConfig.Core;
                 player.AttrHeartLungs += nextLevelConfig.HeartLungs;
+
+                // 升级后重算副属性
+                RecalculateSecondary(player);
 
                 _logger.LogInformation(
                     "User {UserId} leveled up to {Level}! Attributes: Upper={Upper}, Lower={Lower}, Core={Core}, Heart={Heart}",
@@ -100,34 +123,75 @@ public class PlayerRoleService : IPlayerRoleService
     }
 
     /// <summary>
+    /// 根据四个主属性与配表，重算并写回所有副属性
+    /// </summary>
+    private void RecalculateSecondary(PlayerRole player)
+    {
+        var defs = _configService.GetAttributeDefs();
+
+        decimal attack = 0, hp = 0, defense = 0, atkSpd = 0, critical = 0, critDmg = 0, speed = 0, eff = 0, energy = 0;
+        foreach (var def in defs)
+        {
+            int pts = def.Name?.ToLowerInvariant() switch
+            {
+                "upperlimb" => player.AttrUpperLimb,
+                "lowerlimb" => player.AttrLowerLimb,
+                "core" => player.AttrCore,
+                "heartlungs" => player.AttrHeartLungs,
+                _ => 0
+            };
+
+            attack += pts * def.Attack;
+            hp += pts * def.HP;
+            defense += pts * def.Defense;
+            atkSpd += pts * def.AttackSpeed;
+            critical += pts * def.Critical;
+            critDmg += pts * def.CriticalDamage;
+            speed += pts * def.Speed;
+            eff += pts * def.Efficiency;
+            energy += pts * def.Energy;
+        }
+
+        player.SecAttack = attack;
+        player.SecHP = hp;
+        player.SecDefense = defense;
+        player.SecAttackSpeed = atkSpd;
+        player.SecCritical = critical;
+        player.SecCriticalDamage = critDmg;
+        player.SecSpeed = speed;
+        player.SecEfficiency = eff;
+        player.SecEnergy = energy;
+    }
+
+    /// <summary>
     /// 完成运动，统一处理属性和经验增长
     /// </summary>
     public async Task<PlayerRole> CompleteSportAsync(long userId, int deviceType, decimal distance, int calorie)
     {
         var player = await GetOrCreatePlayerAsync(userId);
-        var sportConfig = _configService.GetSportConfig(deviceType, distance);
+        var dist = _configService.GetSportDistribution(deviceType, distance);
 
-        if (sportConfig == null)
+        if (dist == null)
         {
-            throw new ArgumentException($"Invalid sport configuration: deviceType={deviceType} at {distance}km");
+            throw new ArgumentException($"Invalid sport distribution: deviceType={deviceType} at {distance}km");
         }
 
-        // 1. 根据运动类型增加对应属性
-        switch (deviceType)
-        {
-            case 1: // Bicycle
-                if (sportConfig.BicycleLowerLimb > 0)
-                    player.AttrLowerLimb += sportConfig.BicycleLowerLimb.Value;
-                break;
-            case 2: // Run
-                if (sportConfig.RunHeartLungs > 0)
-                    player.AttrHeartLungs += sportConfig.RunHeartLungs.Value;
-                break;
-            case 3: // Rowing
-                if (sportConfig.RowingUpperLimb > 0)
-                    player.AttrUpperLimb += sportConfig.RowingUpperLimb.Value;
-                break;
-        }
+        // 1. 根据分配表增加对应主属性，并累计今日属性点（按总和限制）
+        var cfg = _configService.GetRoleConfig();
+        var addedPoints = dist.UpperLimb + dist.LowerLimb + dist.Core + dist.HeartLungs;
+
+        player.AttrUpperLimb += dist.UpperLimb;
+        player.AttrLowerLimb += dist.LowerLimb;
+        player.AttrCore += dist.Core;
+        player.AttrHeartLungs += dist.HeartLungs;
+
+        // 应用每日上限（简单起见，不跨天清零，后续可根据需求在每日刷新时清零）
+        player.TodayAttributePoints += addedPoints;
+        if (player.TodayAttributePoints > cfg.DailyAttributePointsLimit)
+            player.TodayAttributePoints = cfg.DailyAttributePointsLimit;
+
+        // 1.1 重算副属性
+        RecalculateSecondary(player);
 
         // 2. 根据消耗的热量增加经验值
         var experience = _configService.GetExperienceFromJoules(calorie);

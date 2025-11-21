@@ -1,152 +1,86 @@
 namespace Web.Data.Config;
 
 /// <summary>
-/// 角色配置 - 对应 Role_Config 表
+/// 角色配置：全局配置项（目前只使用每日属性点上限）
 /// </summary>
 public class RoleConfig
 {
     /// <summary>
-    /// 玩家初始上肢力量
-    /// </summary>
-    public int InitialUpperLimb { get; set; } = 10;
-
-    /// <summary>
-    /// 玩家初始下肢力量
-    /// </summary>
-    public int InitialLowerLimb { get; set; } = 10;
-
-    /// <summary>
-    /// 玩家初始核心力量
-    /// </summary>
-    public int InitialCore { get; set; } = 10;
-
-    /// <summary>
-    /// 玩家初始心肺力量
-    /// </summary>
-    public int InitialHeartLungs { get; set; } = 10;
-
-    /// <summary>
-    /// 上肢力量对速度的加成比例
-    /// </summary>
-    public decimal UpperLimbSpeedBonus { get; set; } = 0.02m;
-
-    /// <summary>
-    /// 下肢力量对速度的加成比例
-    /// </summary>
-    public decimal LowerLimbSpeedBonus { get; set; } = 0.02m;
-
-    /// <summary>
-    /// 核心力量对速度的加成比例
-    /// </summary>
-    public decimal CoreSpeedBonus { get; set; } = 0.02m;
-
-    /// <summary>
-    /// 心肺力量对速度的加成比例
-    /// </summary>
-    public decimal HeartLungsSpeedBonus { get; set; } = 0.02m;
-
-    /// <summary>
-    /// 每日可获得属性点上限
+    /// 每日可获得属性点上限（来自 Role_Config.json ID=1 的 Value1）
     /// </summary>
     public int DailyAttributePointsLimit { get; set; } = 10;
-
-    /// <summary>
-    /// 计算速度加成
-    /// </summary>
-    public decimal CalculateSpeedBonus(int upperLimb, int lowerLimb, int core, int heartLungs)
-    {
-        return (upperLimb * UpperLimbSpeedBonus) +
-               (lowerLimb * LowerLimbSpeedBonus) +
-               (core * CoreSpeedBonus) +
-               (heartLungs * HeartLungsSpeedBonus);
-    }
 }
 
 /// <summary>
-/// 角色升级配置 - 对应 Role_Upgrade 表
+/// 四个主属性的定义与每点带来的副属性加成（来自 Role_Attribute.json）
+/// 注意：不再使用 AttributeID，按 Name 匹配 UpperLimb/LowerLimb/Core/HeartLungs
+/// </summary>
+public class RoleAttributeDef
+{
+    public int Id { get; set; }
+    public int Initial { get; set; }
+    public string? Name { get; set; }
+
+    // 每点主属性带来的副属性加成
+    public decimal Attack { get; set; }
+    public decimal HP { get; set; }
+    public decimal Defense { get; set; }
+    public decimal AttackSpeed { get; set; }
+    public decimal Critical { get; set; }
+    public decimal CriticalDamage { get; set; }
+    public decimal Speed { get; set; }
+    public decimal Efficiency { get; set; }
+    public decimal Energy { get; set; }
+}
+
+/// <summary>
+/// 角色升级配置（来自 Role_Upgrade.json）
+/// 注意：JSON 字段为 Rank，与旧版本的 Id 不同
 /// </summary>
 public class RoleUpgradeConfig
 {
-    /// <summary>
-    /// 等级ID
-    /// </summary>
-    public int Id { get; set; }
-
-    /// <summary>
-    /// 升到下一级所需经验
-    /// </summary>
+    public int Rank { get; set; }
     public int Experience { get; set; }
-
-    /// <summary>
-    /// 升级提升上肢力量值
-    /// </summary>
     public int UpperLimb { get; set; }
-
-    /// <summary>
-    /// 升级提升下肢力量值
-    /// </summary>
     public int LowerLimb { get; set; }
-
-    /// <summary>
-    /// 升级提升核心力量值
-    /// </summary>
     public int Core { get; set; }
-
-    /// <summary>
-    /// 升级提升心肺力量值
-    /// </summary>
     public int HeartLungs { get; set; }
 }
 
 /// <summary>
-/// 运动配置 - 对应 Role_Sport 表
+/// 运动配置（来自 Role_Sport.json）
+/// Distance（公里）以及不同设备类型下对四个主属性的加点分布
+/// UpperLimb/LowerLimb/Core/HeartLungs 为二维数组 [ [DeviceType, Points], ... ]
+/// 设备类型：0=跑步机，1=单车，2=划船机，3=手环
 /// </summary>
-public class RoleSportConfig
+public class RoleSportEntry
 {
-    /// <summary>
-    /// ID
-    /// </summary>
-    public int Id { get; set; }
-
-    /// <summary>
-    /// 距离（公里）
-    /// </summary>
+    public int ID { get; set; }
     public decimal Distance { get; set; }
-
-    /// <summary>
-    /// 自行车提升下肢力量
-    /// </summary>
-    public int? BicycleLowerLimb { get; set; }
-
-    /// <summary>
-    /// 跑步提升心肺力量
-    /// </summary>
-    public int? RunHeartLungs { get; set; }
-
-    /// <summary>
-    /// 划船机提升上肢力量
-    /// </summary>
-    public int? RowingUpperLimb { get; set; }
+    public List<List<int>>? UpperLimb { get; set; }
+    public List<List<int>>? LowerLimb { get; set; }
+    public List<List<int>>? Core { get; set; }
+    public List<List<int>>? HeartLungs { get; set; }
 }
 
 /// <summary>
-/// 经验配置 - 对应 Role_Experience 表
+/// 计算得到的分配结果：四个主属性分别增加的点数
+/// </summary>
+public class SportDistributionResult
+{
+    public int UpperLimb { get; set; }
+    public int LowerLimb { get; set; }
+    public int Core { get; set; }
+    public int HeartLungs { get; set; }
+}
+
+/// <summary>
+/// 经验配置 - 对应 Role_Experience.json
 /// </summary>
 public class RoleExperienceConfig
 {
-    /// <summary>
-    /// ID
-    /// </summary>
     public int Id { get; set; }
-
-    /// <summary>
-    /// 消耗热量值（焦耳）
-    /// </summary>
     public int Joule { get; set; }
-
-    /// <summary>
-    /// 获得经验值
-    /// </summary>
     public int Experience { get; set; }
 }
 
