@@ -11,6 +11,22 @@ public interface IPlayerRoleService
 {
     Task<PlayerRole> GetOrCreatePlayerAsync(long userId);
     Task<PlayerRole> CompleteSportAsync(long userId, int deviceType, decimal distance, int calorie);
+
+    // 即时计算副属性（不落库）
+    SecondaryAttributes ComputeSecondary(PlayerRole player);
+}
+
+public class SecondaryAttributes
+{
+    public decimal Attack { get; set; }
+    public decimal HP { get; set; }
+    public decimal Defense { get; set; }
+    public decimal AttackSpeed { get; set; }
+    public decimal Critical { get; set; }
+    public decimal CriticalDamage { get; set; }
+    public decimal Speed { get; set; }
+    public decimal Efficiency { get; set; }
+    public decimal Energy { get; set; }
 }
 
 public class PlayerRoleService : IPlayerRoleService
@@ -58,31 +74,17 @@ public class PlayerRoleService : IPlayerRoleService
                 LastUpdateTime = DateTime.UtcNow
             };
 
-            RecalculateSecondary(player);
-
             _dbContext.PlayerRole.Add(player);
             await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation("Created new player role for user {UserId}", userId);
-        }
-        else
-        {
-            // 如果副属性还未计算过，则补计算一次
-            if (player.SecAttack == 0 && player.SecHP == 0 && player.SecDefense == 0 &&
-                player.SecAttackSpeed == 0 && player.SecCritical == 0 && player.SecCriticalDamage == 0 &&
-                player.SecSpeed == 0 && player.SecEfficiency == 0 && player.SecEnergy == 0)
-            {
-                RecalculateSecondary(player);
-                player.LastUpdateTime = DateTime.UtcNow;
-                await _dbContext.SaveChangesAsync();
-            }
         }
 
         return player;
     }
 
     /// <summary>
-    /// 检查并升级（根据 Role_Upgrade.json 的 Rank 配表），并在每次升级后重算副属性
+    /// 检查并升级（根据 Role_Upgrade.json 的 Rank 配表）
     /// </summary>
     private void CheckAndLevelUp(PlayerRole player)
     {
@@ -107,9 +109,6 @@ public class PlayerRoleService : IPlayerRoleService
                 player.AttrCore += nextLevelConfig.Core;
                 player.AttrHeartLungs += nextLevelConfig.HeartLungs;
 
-                // 升级后重算副属性
-                RecalculateSecondary(player);
-
                 _logger.LogInformation(
                     "User {UserId} leveled up to {Level}! Attributes: Upper={Upper}, Lower={Lower}, Core={Core}, Heart={Heart}",
                     player.UserId, player.CurrentLevel,
@@ -123,16 +122,17 @@ public class PlayerRoleService : IPlayerRoleService
     }
 
     /// <summary>
-    /// 根据四个主属性与配表，重算并写回所有副属性
+    /// 即时计算副属性，不落库
     /// </summary>
-    private void RecalculateSecondary(PlayerRole player)
+    public SecondaryAttributes ComputeSecondary(PlayerRole player)
     {
         var defs = _configService.GetAttributeDefs();
 
         decimal attack = 0, hp = 0, defense = 0, atkSpd = 0, critical = 0, critDmg = 0, speed = 0, eff = 0, energy = 0;
         foreach (var def in defs)
         {
-            int pts = def.Name?.ToLowerInvariant() switch
+            var name = def.Name?.ToLowerInvariant();
+            var pts = name switch
             {
                 "upperlimb" => player.AttrUpperLimb,
                 "lowerlimb" => player.AttrLowerLimb,
@@ -152,15 +152,18 @@ public class PlayerRoleService : IPlayerRoleService
             energy += pts * def.Energy;
         }
 
-        player.SecAttack = attack;
-        player.SecHP = hp;
-        player.SecDefense = defense;
-        player.SecAttackSpeed = atkSpd;
-        player.SecCritical = critical;
-        player.SecCriticalDamage = critDmg;
-        player.SecSpeed = speed;
-        player.SecEfficiency = eff;
-        player.SecEnergy = energy;
+        return new SecondaryAttributes
+        {
+            Attack = attack,
+            HP = hp,
+            Defense = defense,
+            AttackSpeed = atkSpd,
+            Critical = critical,
+            CriticalDamage = critDmg,
+            Speed = speed,
+            Efficiency = eff,
+            Energy = energy
+        };
     }
 
     /// <summary>
@@ -190,8 +193,7 @@ public class PlayerRoleService : IPlayerRoleService
         if (player.TodayAttributePoints > cfg.DailyAttributePointsLimit)
             player.TodayAttributePoints = cfg.DailyAttributePointsLimit;
 
-        // 1.1 重算副属性
-        RecalculateSecondary(player);
+        // 1.1 副属性改为即时计算，不再落库
 
         // 2. 根据消耗的热量增加经验值
         var experience = _configService.GetExperienceFromJoules(calorie);

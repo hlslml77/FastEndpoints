@@ -60,13 +60,34 @@ public class RoleConfigService : IRoleConfigService
         var cfgPath = Path.Combine(path, "Role_Config.json");
         if (File.Exists(cfgPath))
         {
-            var cfgNodes = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(File.ReadAllText(cfgPath), options);
-            var daily = cfgNodes?.FirstOrDefault(n => (n.TryGetValue("ID", out var id) && Convert.ToInt32(id) == 1) ||
-                                                      (n.TryGetValue("Id", out var id2) && Convert.ToInt32(id2) == 1));
-            if (daily != null)
+            var cfgContent = File.ReadAllText(cfgPath);
+            var root = JsonSerializer.Deserialize<JsonElement>(cfgContent);
+            if (root.ValueKind == JsonValueKind.Array)
             {
-                if (daily.TryGetValue("Value1", out var v1) && v1 != null)
-                    _roleConfig.DailyAttributePointsLimit = Convert.ToInt32(v1);
+                foreach (var item in root.EnumerateArray())
+                {
+                    var id = 0;
+                    if (item.TryGetProperty("ID", out var idEl))
+                    {
+                        if (idEl.ValueKind == JsonValueKind.Number) id = idEl.GetInt32();
+                        else if (idEl.ValueKind == JsonValueKind.String && int.TryParse(idEl.GetString(), out var tmp)) id = tmp;
+                    }
+                    else if (item.TryGetProperty("Id", out var idEl2))
+                    {
+                        if (idEl2.ValueKind == JsonValueKind.Number) id = idEl2.GetInt32();
+                        else if (idEl2.ValueKind == JsonValueKind.String && int.TryParse(idEl2.GetString(), out var tmp2)) id = tmp2;
+                    }
+
+                    if (id == 1)
+                    {
+                        if (item.TryGetProperty("Value1", out var v))
+                        {
+                            if (v.ValueKind == JsonValueKind.Number) _roleConfig.DailyAttributePointsLimit = v.GetInt32();
+                            else if (v.ValueKind == JsonValueKind.String && int.TryParse(v.GetString(), out var lim)) _roleConfig.DailyAttributePointsLimit = lim;
+                        }
+                        break;
+                    }
+                }
             }
         }
 
@@ -92,23 +113,33 @@ public class RoleConfigService : IRoleConfigService
         var sportPath = Path.Combine(path, "Role_Sport.json");
         if (File.Exists(sportPath))
         {
-            // Distance 在 JSON 中是字符串，转换为 decimal
-            var raw = JsonSerializer.Deserialize<List<Dictionary<string, object?>>>(File.ReadAllText(sportPath), options) ?? new();
-            foreach (var n in raw)
+            var content = File.ReadAllText(sportPath);
+            var root = JsonSerializer.Deserialize<JsonElement>(content);
+            if (root.ValueKind == JsonValueKind.Array)
             {
-                var entry = new RoleSportEntry();
-                if (n.TryGetValue("ID", out var idVal)) entry.ID = Convert.ToInt32(idVal);
-                if (n.TryGetValue("Distance", out var dVal) && dVal != null)
+                foreach (var item in root.EnumerateArray())
                 {
-                    entry.Distance = Convert.ToDecimal(dVal.ToString(), System.Globalization.CultureInfo.InvariantCulture);
+                    var entry = new RoleSportEntry();
+                    if (item.TryGetProperty("ID", out var idEl) && idEl.ValueKind == JsonValueKind.Number)
+                        entry.ID = idEl.GetInt32();
+
+                    if (item.TryGetProperty("Distance", out var dEl))
+                    {
+                        if (dEl.ValueKind == JsonValueKind.String)
+                            entry.Distance = Convert.ToDecimal(dEl.GetString(), System.Globalization.CultureInfo.InvariantCulture);
+                        else if (dEl.ValueKind == JsonValueKind.Number)
+                            entry.Distance = dEl.GetDecimal();
+                    }
+
+                    entry.UpperLimb = TryToMatrix(item, "UpperLimb");
+                    entry.LowerLimb = TryToMatrix(item, "LowerLimb");
+                    entry.Core = TryToMatrix(item, "Core");
+                    entry.HeartLungs = TryToMatrix(item, "HeartLungs");
+
+                    _sportEntries.Add(entry);
                 }
-                entry.UpperLimb = TryToMatrix(n, "UpperLimb");
-                entry.LowerLimb = TryToMatrix(n, "LowerLimb");
-                entry.Core = TryToMatrix(n, "Core");
-                entry.HeartLungs = TryToMatrix(n, "HeartLungs");
-                _sportEntries.Add(entry);
+                _sportEntries.Sort((a, b) => a.Distance.CompareTo(b.Distance));
             }
-            _sportEntries.Sort((a, b) => a.Distance.CompareTo(b.Distance));
         }
 
         // 5) Role_Experience.json
@@ -121,19 +152,34 @@ public class RoleConfigService : IRoleConfigService
         }
     }
 
-    private static readonly JsonSerializerOptions s_jsonOpts = new() { PropertyNameCaseInsensitive = true };
-    private static List<List<int>>? TryToMatrix(Dictionary<string, object?> node, string key)
+    private static List<List<int>>? TryToMatrix(JsonElement node, string propName)
     {
-        if (!node.TryGetValue(key, out var val) || val == null) return null;
-        try
-        {
-            var json = JsonSerializer.Serialize(val, s_jsonOpts);
-            return JsonSerializer.Deserialize<List<List<int>>>(json, s_jsonOpts);
-        }
-        catch
-        {
+        if (!node.TryGetProperty(propName, out var prop) || prop.ValueKind != JsonValueKind.Array)
             return null;
+
+        var result = new List<List<int>>();
+        foreach (var row in prop.EnumerateArray())
+        {
+            if (row.ValueKind != JsonValueKind.Array) continue;
+            int deviceType = 0, points = 0, idx = 0;
+            foreach (var cell in row.EnumerateArray())
+            {
+                if (idx == 0)
+                {
+                    if (cell.ValueKind == JsonValueKind.Number) deviceType = cell.GetInt32();
+                    else if (cell.ValueKind == JsonValueKind.String && int.TryParse(cell.GetString(), out var v)) deviceType = v;
+                }
+                else if (idx == 1)
+                {
+                    if (cell.ValueKind == JsonValueKind.Number) points = cell.GetInt32();
+                    else if (cell.ValueKind == JsonValueKind.String && int.TryParse(cell.GetString(), out var v2)) points = v2;
+                }
+                idx++;
+            }
+            if (idx >= 2)
+                result.Add(new List<int> { deviceType, points });
         }
+        return result.Count == 0 ? null : result;
     }
 
     public RoleConfig GetRoleConfig() => _roleConfig;

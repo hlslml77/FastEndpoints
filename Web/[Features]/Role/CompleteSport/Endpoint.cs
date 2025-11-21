@@ -47,6 +47,9 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
             var config = _configService.GetRoleConfig();
             var nextLevelExp = _configService.GetExperienceForLevel(player.CurrentLevel);
 
+            // 即时计算副属性（不落库）
+            var sec = _roleGrowthService.ComputeSecondary(player);
+
             var response = new PlayerRoleResponse
             {
                 UserId = player.UserId,
@@ -59,7 +62,7 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
                 HeartLungs = player.AttrHeartLungs,
                 TodayAttributePoints = player.TodayAttributePoints,
                 AvailableAttributePoints = config.DailyAttributePointsLimit - player.TodayAttributePoints,
-                SpeedBonus = player.SecSpeed,
+                SpeedBonus = sec.Speed,
                 LastUpdateTime = player.LastUpdateTime
             };
 

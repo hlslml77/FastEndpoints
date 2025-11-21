@@ -310,7 +310,8 @@ sealed partial class OperationProcessor(DocumentOptions docOpts) : IOperationPro
         var isGetRequest = apiDescription.HttpMethod == "GET";
         var reqDtoProps = reqDtoIsList is true
                               ? null
-                              : reqDtoType?.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy).ToList();
+                              : reqDtoType?
+                              .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy).ToList();
 
         if (reqDtoType != Types.EmptyRequest && reqDtoProps?.Any() is false && !GlobalConfig.AllowEmptyRequestDtos) //see: RequestBinder.cs > static ctor
         {

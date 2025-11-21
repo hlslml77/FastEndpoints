@@ -44,6 +44,23 @@ public class Endpoint : Endpoint<EmptyRequest, PlayerRoleResponse>
         var config = _configService.GetRoleConfig();
         var nextLevelExp = _configService.GetExperienceForLevel(player.CurrentLevel);
 
+        // 即时计算速度副属性（不落库）
+        var defs = _configService.GetAttributeDefs();
+        decimal speedBonus = 0;
+        foreach (var def in defs)
+        {
+            var name = def.Name?.ToLowerInvariant();
+            var pts = name switch
+            {
+                "upperlimb" => player.AttrUpperLimb,
+                "lowerlimb" => player.AttrLowerLimb,
+                "core" => player.AttrCore,
+                "heartlungs" => player.AttrHeartLungs,
+                _ => 0
+            };
+            speedBonus += pts * def.Speed;
+        }
+
         var response = new PlayerRoleResponse
         {
             UserId = player.UserId,
@@ -56,7 +73,7 @@ public class Endpoint : Endpoint<EmptyRequest, PlayerRoleResponse>
             HeartLungs = player.AttrHeartLungs,
             TodayAttributePoints = player.TodayAttributePoints,
             AvailableAttributePoints = config.DailyAttributePointsLimit - player.TodayAttributePoints,
-            SpeedBonus = player.SecSpeed,
+            SpeedBonus = speedBonus,
             LastUpdateTime = player.LastUpdateTime
         };
 
