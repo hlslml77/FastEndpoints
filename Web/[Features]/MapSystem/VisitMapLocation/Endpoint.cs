@@ -24,7 +24,7 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
         Description(x => x
             .WithTags("MapSystem")
             .WithSummary("访问地图点位")
-            .WithDescription("记录玩家访问地图点位，首次访问发放首次奖励，非首次访问发放固定奖励。需要JWT token验证。"));
+            .WithDescription("记录玩家访问地图点位。客户端上报是否完成：首次访问发放首次奖励；完成则发放完成奖励（使用固定奖励字段）。需要JWT token验证。"));
     }
 
     public override async Task HandleAsync(VisitMapLocationRequest req, CancellationToken ct)
@@ -40,7 +40,7 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
                 return;
             }
 
-            var result = await _mapService.VisitMapLocationAsync(userId, req.LocationId);
+            var result = await _mapService.VisitMapLocationAsync(userId, req.LocationId, req.IsCompleted);
 
             // 转换奖励格式
             List<RewardItem>? rewards = null;

@@ -67,6 +67,11 @@ public class VisitMapLocationRequest
     /// 地图点位ID
     /// </summary>
     public int LocationId { get; set; }
+
+    /// <summary>
+    /// 是否完成该点位（由客户端上报）
+    /// </summary>
+    public bool IsCompleted { get; set; }
 }
 
 /// <summary>

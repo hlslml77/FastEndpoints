@@ -18,7 +18,7 @@ public interface IMapService
     /// <summary>
     /// 访问地图点位，返回是否首次访问和奖励信息
     /// </summary>
-    Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId);
+    Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId, bool isCompleted);
 
     /// <summary>
     /// 获取玩家的地图访问记录
@@ -116,45 +116,15 @@ public class MapService : IMapService
                 userId, startLocationId, endLocationId, distanceMeters);
         }
 
-        // 如果进度达到或超过配置的线路距离，则将起点与终点标记为完成
-        var startConfig = _mapConfigService.GetMapConfigByLocationId(startLocationId);
-        int? requiredDistance = null;
-        if (startConfig?.TheNextPointDistance != null)
-        {
-            var pair = startConfig.TheNextPointDistance.FirstOrDefault(p => p.Count >= 2 && p[0] == endLocationId);
-            if (pair != null && pair.Count >= 2)
-                requiredDistance = pair[1];
-        }
-
-        if (requiredDistance.HasValue && distanceMeters >= requiredDistance.Value)
-        {
-            if (!await _dbContext.PlayerCompletedLocation.AnyAsync(c => c.UserId == userId && c.LocationId == startLocationId))
-            {
-                _dbContext.PlayerCompletedLocation.Add(new PlayerCompletedLocation
-                {
-                    UserId = userId,
-                    LocationId = startLocationId,
-                    CompletedTime = DateTime.UtcNow
-                });
-            }
-            if (!await _dbContext.PlayerCompletedLocation.AnyAsync(c => c.UserId == userId && c.LocationId == endLocationId))
-            {
-                _dbContext.PlayerCompletedLocation.Add(new PlayerCompletedLocation
-                {
-                    UserId = userId,
-                    LocationId = endLocationId,
-                    CompletedTime = DateTime.UtcNow
-                });
-            }
-            _logger.LogInformation("Marked start {Start} and end {End} as completed for user {UserId}", startLocationId, endLocationId, userId);
-        }
+        // 不再由服务器根据距离自动判定完成。是否完成由客户端在 /map/visit-location 上报。
+        // 因此此处仅保存进度，不写入 PlayerCompletedLocation。
 
         await _dbContext.SaveChangesAsync();
 
         return progress;
     }
 
-    public async Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId)
+    public async Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId, bool isCompleted)
     {
         // 获取地图配置
         var mapConfig = _mapConfigService.GetMapConfigByLocationId(locationId);
@@ -196,10 +166,39 @@ public class MapService : IMapService
 
         var isFirstVisit = existingVisit == null;
 
+        // 如果客户端上报完成，则记录到完成点位表
+        if (isCompleted)
+        {
+            var hasCompleted = await _dbContext.PlayerCompletedLocation
+                .AnyAsync(c => c.UserId == userId && c.LocationId == locationId);
+            if (!hasCompleted)
+            {
+                _dbContext.PlayerCompletedLocation.Add(new PlayerCompletedLocation
+                {
+                    UserId = userId,
+                    LocationId = locationId,
+                    CompletedTime = DateTime.UtcNow
+                });
+            }
+        }
+
         await _dbContext.SaveChangesAsync();
 
-        // 根据是否首次访问返回不同的奖励
-        var rewards = isFirstVisit ? mapConfig.FirstReward : mapConfig.FixedReward;
+        // 奖励规则：
+        // - 首次访问发首次奖励
+        // - 完成发完成奖励（目前使用 FixedReward 作为完成奖励）
+        // 两者可以同时发放，奖励合并返回
+        List<List<int>>? rewards = null;
+        if (isFirstVisit && mapConfig.FirstReward != null)
+        {
+            rewards ??= new List<List<int>>();
+            rewards.AddRange(mapConfig.FirstReward);
+        }
+        if (isCompleted && mapConfig.FixedReward != null)
+        {
+            rewards ??= new List<List<int>>();
+            rewards.AddRange(mapConfig.FixedReward);
+        }
 
         return new MapLocationVisitResult
         {

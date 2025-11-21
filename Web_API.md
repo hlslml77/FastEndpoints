@@ -87,6 +87,8 @@ POST /api/map/save-progress
 
 - 认证：需要 Bearer Token（权限 web_access）
 - 注意：distanceMeters 单位为“米”
+- 仅保存进度，不会自动标记点位为完成
+- 若需标记完成，请在“访问地图点位”接口上报 isCompleted=true
 
 请求体
 {
@@ -108,9 +110,16 @@ POST /api/map/save-progress
 3.2 访问地图点位
 POST /api/map/visit-location
 
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：客户端上报是否完成该点位（isCompleted）。奖励规则：
+  - 首次访问发放“首次奖励”（FirstReward）
+  - 完成发放“完成奖励”（使用 FixedReward 字段）
+  - 若同时满足，两个奖励会合并返回
+
 请求体
 {
-  "locationId": 10011
+  "locationId": 10011,
+  "isCompleted": true
 }
 
 响应体
@@ -129,6 +138,9 @@ POST /api/map/visit-location
 }
 
 3.3 获取玩家地图状态
+
+- 认证：需要 Bearer Token（权限 web_access）
+
 POST /api/map/player-state
 
 请求体：空对象 {} 或不传（从 JWT 的 sub 解析用户ID）
@@ -149,7 +161,7 @@ POST /api/map/player-state
 
 ---
 
-4. 统一错误格式（示例）
+1. 统一错误格式（示例）
 
 当参数或认证有误时，返回类似：
 {
