@@ -63,6 +63,15 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
                 TodayAttributePoints = player.TodayAttributePoints,
                 AvailableAttributePoints = config.DailyAttributePointsLimit - player.TodayAttributePoints,
                 SpeedBonus = sec.Speed,
+                SecAttack = sec.Attack,
+                SecHP = sec.HP,
+                SecDefense = sec.Defense,
+                SecAttackSpeed = sec.AttackSpeed,
+                SecCritical = sec.Critical,
+                SecCriticalDamage = sec.CriticalDamage,
+                SecSpeed = sec.Speed,
+                SecEfficiency = sec.Efficiency,
+                SecEnergy = sec.Energy,
                 LastUpdateTime = player.LastUpdateTime
             };
 
