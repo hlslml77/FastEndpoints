@@ -12,11 +12,13 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
 {
     private readonly IPlayerRoleService _roleGrowthService;
     private readonly IRoleConfigService _configService;
+    private readonly ILogger<Endpoint> _logger;
 
-    public Endpoint(IPlayerRoleService roleGrowthService, IRoleConfigService configService)
+    public Endpoint(IPlayerRoleService roleGrowthService, IRoleConfigService configService, ILogger<Endpoint> logger)
     {
         _roleGrowthService = roleGrowthService;
         _configService = configService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -79,7 +81,13 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
         }
         catch (ArgumentException ex)
         {
+            _logger.LogWarning(ex, "CompleteSport argument error. deviceType={DeviceType}, distance={Distance}, calorie={Calorie}", req.DeviceType, req.Distance, req.Calorie);
             ThrowError(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "CompleteSport failed");
+            ThrowError("服务器内部错误");
         }
     }
 }

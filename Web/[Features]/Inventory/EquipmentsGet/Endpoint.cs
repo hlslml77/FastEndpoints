@@ -28,7 +28,8 @@ public class ResponseEquipment
 public class Endpoint : EndpointWithoutRequest<List<ResponseEquipment>>
 {
     private readonly IInventoryService _svc;
-    public Endpoint(IInventoryService svc) => _svc = svc;
+    private readonly ILogger<Endpoint> _logger;
+    public Endpoint(IInventoryService svc, ILogger<Endpoint> logger) { _svc = svc; _logger = logger; }
 
     public override void Configure()
     {
@@ -47,29 +48,37 @@ public class Endpoint : EndpointWithoutRequest<List<ResponseEquipment>>
             return;
         }
 
-        var eqs = await _svc.GetEquipmentsAsync(userId, ct);
-        var resp = eqs.Select(e => new ResponseEquipment
+        try
         {
-            Id = e.Id,
-            EquipId = e.EquipId,
-            Quality = e.Quality,
-            Part = e.Part,
-            Attack = e.Attack,
-            HP = e.HP,
-            Defense = e.Defense,
-            Critical = e.Critical,
-            AttackSpeed = e.AttackSpeed,
-            CriticalDamage = e.CriticalDamage,
-            UpperLimb = e.UpperLimb,
-            LowerLimb = e.LowerLimb,
-            Core = e.Core,
-            HeartLungs = e.HeartLungs,
-            IsEquipped = e.IsEquipped,
-            CreatedAt = e.CreatedAt,
-            UpdatedAt = e.UpdatedAt
-        }).ToList();
+            var eqs = await _svc.GetEquipmentsAsync(userId, ct);
+            var resp = eqs.Select(e => new ResponseEquipment
+            {
+                Id = e.Id,
+                EquipId = e.EquipId,
+                Quality = e.Quality,
+                Part = e.Part,
+                Attack = e.Attack,
+                HP = e.HP,
+                Defense = e.Defense,
+                Critical = e.Critical,
+                AttackSpeed = e.AttackSpeed,
+                CriticalDamage = e.CriticalDamage,
+                UpperLimb = e.UpperLimb,
+                LowerLimb = e.LowerLimb,
+                Core = e.Core,
+                HeartLungs = e.HeartLungs,
+                IsEquipped = e.IsEquipped,
+                CreatedAt = e.CreatedAt,
+                UpdatedAt = e.UpdatedAt
+            }).ToList();
 
-        await HttpContext.Response.SendAsync(resp, 200, cancellation: ct);
+            await HttpContext.Response.SendAsync(resp, 200, cancellation: ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Get equipments failed. userId={UserId}", userId);
+            ThrowError("服务器内部错误");
+        }
     }
 }
 

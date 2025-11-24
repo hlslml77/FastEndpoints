@@ -10,10 +10,12 @@ namespace MapSystem.GetPlayerMapState;
 public class Endpoint : Endpoint<EmptyRequest, GetPlayerMapStateResponse>
 {
     private readonly IMapService _mapService;
+    private readonly ILogger<Endpoint> _logger;
 
-    public Endpoint(IMapService mapService)
+    public Endpoint(IMapService mapService, ILogger<Endpoint> logger)
     {
         _mapService = mapService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -61,7 +63,8 @@ public class Endpoint : Endpoint<EmptyRequest, GetPlayerMapStateResponse>
         }
         catch (Exception ex)
         {
-            ThrowError($"获取玩家地图状态失败: {ex.Message}");
+            _logger.LogError(ex, "GetPlayerMapState failed");
+            ThrowError("服务器内部错误");
         }
     }
 }

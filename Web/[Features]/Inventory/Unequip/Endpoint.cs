@@ -17,7 +17,8 @@ public class Response
 public class Endpoint : Endpoint<Request, Response>
 {
     private readonly IInventoryService _svc;
-    public Endpoint(IInventoryService svc) => _svc = svc;
+    private readonly ILogger<Endpoint> _logger;
+    public Endpoint(IInventoryService svc, ILogger<Endpoint> logger) { _svc = svc; _logger = logger; }
 
     public override void Configure()
     {
@@ -42,7 +43,23 @@ public class Endpoint : Endpoint<Request, Response>
             return;
         }
 
-        await _svc.UnequipAsync(userId, req.EquipmentRecordId, ct);
+        try
+        {
+            await _svc.UnequipAsync(userId, req.EquipmentRecordId, ct);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Unequip failed: equipment not found. userId={UserId}, equipmentRecordId={EquipmentRecordId}", userId, req.EquipmentRecordId);
+            ThrowError("装备不存在");
+            return;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unequip failed with server error. userId={UserId}, equipmentRecordId={EquipmentRecordId}", userId, req.EquipmentRecordId);
+            ThrowError("服务器内部错误");
+            return;
+        }
+
         await HttpContext.Response.SendAsync(new Response { Success = true }, 200, cancellation: ct);
     }
 }

@@ -7,7 +7,8 @@ namespace InventoryApi.ItemsPost;
 public class Endpoint : EndpointWithoutRequest<List<InventoryApi.ItemsGet.ResponseItem>>
 {
     private readonly IInventoryService _svc;
-    public Endpoint(IInventoryService svc) => _svc = svc;
+    private readonly ILogger<Endpoint> _logger;
+    public Endpoint(IInventoryService svc, ILogger<Endpoint> logger) { _svc = svc; _logger = logger; }
 
     public override void Configure()
     {
@@ -26,15 +27,23 @@ public class Endpoint : EndpointWithoutRequest<List<InventoryApi.ItemsGet.Respon
             return;
         }
 
-        var items = await _svc.GetItemsAsync(userId, ct);
-        var resp = items.Select(i => new InventoryApi.ItemsGet.ResponseItem
+        try
         {
-            ItemId = i.ItemId,
-            Amount = i.Amount,
-            UpdatedAt = i.UpdatedAt
-        }).ToList();
+            var items = await _svc.GetItemsAsync(userId, ct);
+            var resp = items.Select(i => new InventoryApi.ItemsGet.ResponseItem
+            {
+                ItemId = i.ItemId,
+                Amount = i.Amount,
+                UpdatedAt = i.UpdatedAt
+            }).ToList();
 
-        await HttpContext.Response.SendAsync(resp, 200, cancellation: ct);
+            await HttpContext.Response.SendAsync(resp, 200, cancellation: ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Get items (POST) failed. userId={UserId}", userId);
+            ThrowError("服务器内部错误");
+        }
     }
 }
 

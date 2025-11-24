@@ -10,10 +10,12 @@ namespace MapSystem.SaveMapProgress;
 public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse>
 {
     private readonly IMapService _mapService;
+    private readonly ILogger<Endpoint> _logger;
 
-    public Endpoint(IMapService mapService)
+    public Endpoint(IMapService mapService, ILogger<Endpoint> logger)
     {
         _mapService = mapService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -65,9 +67,15 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
 
             await HttpContext.Response.SendAsync(response, 200, cancellation: ct);
         }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "SaveMapProgress argument error. start={Start}, end={End}, dist={Dist}", req.StartLocationId, req.EndLocationId, req.DistanceMeters);
+            ThrowError(ex.Message);
+        }
         catch (Exception ex)
         {
-            ThrowError(ex.Message);
+            _logger.LogError(ex, "SaveMapProgress failed");
+            ThrowError("服务器内部错误");
         }
     }
 }

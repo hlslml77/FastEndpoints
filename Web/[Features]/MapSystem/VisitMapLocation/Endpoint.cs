@@ -10,10 +10,12 @@ namespace MapSystem.VisitMapLocation;
 public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationResponse>
 {
     private readonly IMapService _mapService;
+    private readonly ILogger<Endpoint> _logger;
 
-    public Endpoint(IMapService mapService)
+    public Endpoint(IMapService mapService, ILogger<Endpoint> logger)
     {
         _mapService = mapService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -73,11 +75,13 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
         }
         catch (ArgumentException ex)
         {
+            _logger.LogWarning(ex, "VisitMapLocation argument error. locationId={LocationId}, isCompleted={IsCompleted}", req.LocationId, req.IsCompleted);
             ThrowError(ex.Message);
         }
         catch (Exception ex)
         {
-            ThrowError($"访问地图点位失败: {ex.Message}");
+            _logger.LogError(ex, "VisitMapLocation failed");
+            ThrowError("服务器内部错误");
         }
     }
 }

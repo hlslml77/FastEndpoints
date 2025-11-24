@@ -16,11 +16,13 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
 {
     private readonly IConfiguration _config;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger<Endpoint> _logger;
 
-    public Endpoint(IConfiguration config, IHttpClientFactory httpClientFactory)
+    public Endpoint(IConfiguration config, IHttpClientFactory httpClientFactory, ILogger<Endpoint> logger)
     {
         _config = config;
         _httpClientFactory = httpClientFactory;
+        _logger = logger;
     }
 
     public override Task HandleAsync(TokenExchangeRequest req, CancellationToken ct)
@@ -42,7 +44,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
             var userId = (req.UserId ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(userId))
             {
-                AddError("userId is required");
+                _logger.LogWarning("Token exchange failed: missing userId");
                 ThrowError("userId is required");
                 return Task.CompletedTask;
             }
@@ -76,8 +78,8 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
         }
         catch (Exception ex)
         {
-            AddError("Token exchange failed: " + ex.Message);
-            ThrowError("Token exchange failed: " + ex.Message);
+            _logger.LogError(ex, "Token exchange failed");
+            ThrowError("Token exchange failed");
             return Task.CompletedTask;
         }
     }
@@ -95,7 +97,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
             // 方式2：调用APP服务的验证接口
             var httpClient = _httpClientFactory.CreateClient("AppService");
             var response = await httpClient.PostAsJsonAsync("/auth/validate", new { token = appToken }, ct);
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 return new TokenValidationResult { IsValid = false, ErrorMessage = "APP token validation failed" };
@@ -112,6 +114,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "ValidateAppTokenAsync failed");
             return new TokenValidationResult { IsValid = false, ErrorMessage = ex.Message };
         }
     }

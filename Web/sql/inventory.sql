@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `player_item` (
   INDEX `idx_updated_at` (`updated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家道具表';
 
--- 2) 玩家装备表（使用BLOB存储JSON格式的装备数据）
+-- 2) 玩家装备表
 CREATE TABLE IF NOT EXISTS `player_equipment_item` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '装备实例ID',
   `user_id` BIGINT NOT NULL COMMENT '用户ID',
