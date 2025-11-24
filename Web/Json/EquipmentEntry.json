@@ -1,0 +1,32 @@
+[
+  {
+    "ID": 1,
+    "Name": "critical",
+    "Value": 20.0,
+    "Description": "暴击率提升{0}%"
+  },
+  {
+    "ID": 2,
+    "Name": "output",
+    "Value": 20.0,
+    "Description": "资源产出效率提升{0}%"
+  },
+  {
+    "ID": 3,
+    "Name": "experience",
+    "Value": 1.0,
+    "Description": "经验获取速度提升{0}%"
+  },
+  {
+    "ID": 4,
+    "Name": "energy",
+    "Value": 10.0,
+    "Description": "能量储存上限增加{0}km"
+  },
+  {
+    "ID": 5,
+    "Name": "speed",
+    "Value": 0.5,
+    "Description": "平均速度提升{0}kph"
+  }
+]

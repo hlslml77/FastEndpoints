@@ -171,7 +171,100 @@ POST /api/map/player-state
 
 ---
 
-1. 统一错误格式（示例）
+4. 背包与装备（Inventory）
+
+4.1 查询玩家道具清单
+GET /api/inventory/items
+POST /api/inventory/items
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 请求体（POST）：可为空 {}
+
+响应示例
+[
+  { "itemId": 8000, "amount": 20, "updatedAt": "2025-01-01T00:00:00Z" },
+  { "itemId": 8001, "amount": 3,  "updatedAt": "2025-01-01T00:10:00Z" }
+]
+
+示例（curl）
+curl -X GET https://host/api/inventory/items \
+  -H "Authorization: Bearer <webToken>"
+
+curl -X POST https://host/api/inventory/items \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" -d '{}'
+
+4.2 查询玩家装备清单
+GET /api/inventory/equipments
+POST /api/inventory/equipments
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 请求体（POST）：可为空 {}
+
+响应示例（按更新时间倒序）
+[
+  {
+    "id": 101,
+    "equipId": 20001,
+    "quality": 3,
+    "part": 1,
+    "attack": 15,
+    "hp": 120,
+    "defense": null,
+    "critical": 2,
+    "attackSpeed": 1,
+    "criticalDamage": 5,
+    "upperLimb": 1,
+    "lowerLimb": 0,
+    "core": 0,
+    "heartLungs": 0,
+    "isEquipped": true,
+    "createdAt": "2025-01-01T00:00:00Z",
+    "updatedAt": "2025-01-01T01:00:00Z"
+  }
+]
+
+示例（curl）
+curl -X GET https://host/api/inventory/equipments \
+  -H "Authorization: Bearer <webToken>"
+
+curl -X POST https://host/api/inventory/equipments \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" -d '{}'
+
+4.3 穿戴指定装备
+POST /api/inventory/equip
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：同一部位会自动卸下原装备
+
+请求体
+{ "equipmentRecordId": 101 }
+
+响应体
+{ "success": true }
+
+示例（curl）
+curl -X POST https://host/api/inventory/equip \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"equipmentRecordId":101}'
+
+4.4 卸下指定装备
+POST /api/inventory/unequip
+
+- 认证：需要 Bearer Token（权限 web_access）
+
+请求体
+{ "equipmentRecordId": 101 }
+
+响应体
+{ "success": true }
+
+示例（curl）
+curl -X POST https://host/api/inventory/unequip \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"equipmentRecordId":101}'
+
+----------------------------------------------------------------------------------------------------------
+统一错误格式（示例）
 
 当参数或认证有误时，返回类似：
 {
@@ -179,11 +272,10 @@ POST /api/map/player-state
   "statusCode": 400
 }
 
-5. 调用要点
+调用要点
 - 交换 Token 时 appToken 为可选；若提交，服务端可验证 appToken 并校验其中用户与 userId 一致
 - 所有业务接口需携带 Authorization: Bearer <webToken>
 - userId 来自换取到的 Token 的 sub
 - 注意单位：complete-sport 使用 公里；save-progress 使用 米
 - 时间均为 UTC ISO8601 字符串
-
 

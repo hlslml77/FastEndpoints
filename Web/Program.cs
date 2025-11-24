@@ -66,6 +66,8 @@ bld.Services
    .AddScoped<IPlayerRoleService, PlayerRoleService>()
    .AddSingleton<IMapConfigService, MapConfigService>()
    .AddScoped<IMapService, MapService>()
+   .AddSingleton<IItemConfigService, ItemConfigService>()
+   .AddScoped<IInventoryService, InventoryService>()
    .AddSingleton(new SingltonSVC(0))
    .AddJobQueues<Job, JobStorage>()
    .RegisterServicesFromWeb()

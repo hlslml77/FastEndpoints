@@ -14,8 +14,9 @@ public class AppDbContext : DbContext
     public DbSet<PlayerMapLocationVisit> PlayerMapLocationVisit { get; set; }
     public DbSet<PlayerCompletedLocation> PlayerCompletedLocation { get; set; }
 
-    // Add your DbSet properties here. For example:
-    // public DbSet<Product> Products { get; set; }
+    // Inventory/Equipment
+    public DbSet<PlayerItem> PlayerItem { get; set; }
+    public DbSet<PlayerEquipmentItem> PlayerEquipmentItem { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,6 +28,9 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<PlayerCompletedLocation>()
             .HasKey(e => new { e.UserId, e.LocationId });
+
+        modelBuilder.Entity<PlayerItem>()
+            .HasKey(e => new { e.UserId, e.ItemId });
     }
 }
 
