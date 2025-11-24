@@ -67,15 +67,18 @@ public class MapService : IMapService
 {
     private readonly AppDbContext _dbContext;
     private readonly IMapConfigService _mapConfigService;
+    private readonly IInventoryService _inventoryService;
     private readonly ILogger<MapService> _logger;
 
     public MapService(
         AppDbContext dbContext,
         IMapConfigService mapConfigService,
+        IInventoryService inventoryService,
         ILogger<MapService> logger)
     {
         _dbContext = dbContext;
         _mapConfigService = mapConfigService;
+        _inventoryService = inventoryService;
         _logger = logger;
     }
 
@@ -198,6 +201,21 @@ public class MapService : IMapService
         {
             rewards ??= new List<List<int>>();
             rewards.AddRange(mapConfig.FixedReward);
+        }
+
+        // 发放奖励到背包与装备表（依据物品配置由 InventoryService 判定）
+        if (rewards != null && rewards.Count > 0)
+        {
+            foreach (var r in rewards)
+            {
+                if (r.Count >= 2)
+                {
+                    var itemId = r[0];
+                    var amount = r[1];
+                    await _inventoryService.GrantItemAsync(userId, itemId, amount);
+                }
+            }
+            _logger.LogInformation("Granted {Count} rewards to user {UserId} for location {LocationId}", rewards.Count, userId, locationId);
         }
 
         return new MapLocationVisitResult
