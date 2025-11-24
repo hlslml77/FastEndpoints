@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Web.Features.Auth.TokenExchange;
+namespace Web.Auth.TokenExchange;
 
 /// <summary>
 /// Token交换请求验证器
@@ -29,3 +29,4 @@ public class Validator : Validator<TokenExchangeRequest>
         return parts.Length == 3;
     }
 }
+

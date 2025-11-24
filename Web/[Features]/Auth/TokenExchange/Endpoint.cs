@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Security.Claims;
 
-namespace Web.Features.Auth.TokenExchange;
+namespace Web.Auth.TokenExchange;
 
 /// <summary>
 /// Token交换端点 - 用APP Token换取Web服务专用Token
@@ -89,7 +89,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
             // 方式1：如果知道APP的签名密钥，直接验证
             if (!string.IsNullOrEmpty(_config["AppPublicKey"]))
             {
-                return await ValidateTokenWithKeyAsync(appToken, ct);
+                return await ValidateTokenWithKeyAsync(appToken);
             }
 
             // 方式2：调用APP服务的验证接口
@@ -116,7 +116,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
         }
     }
 
-    private Task<TokenValidationResult> ValidateTokenWithKeyAsync(string appToken, CancellationToken ct)
+    private Task<TokenValidationResult> ValidateTokenWithKeyAsync(string appToken)
     {
         // 使用APP的公钥直接验证token
         // 这里简化处理，实际需要使用JWT库验证
@@ -133,7 +133,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
         };
 
         var principal = tokenHandler.ValidateToken(appToken, validationParameters, out var validatedToken);
-        
+
         return Task.FromResult(new TokenValidationResult
         {
             IsValid = true,
@@ -150,3 +150,4 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
         return new RsaSecurityKey(rsa);
     }
 }
+

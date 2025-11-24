@@ -1,4 +1,4 @@
-namespace Web.Features.Auth.TokenExchange;
+namespace Web.Auth.TokenExchange;
 
 /// <summary>
 /// Token交换请求模型
@@ -63,3 +63,4 @@ internal class AppTokenValidationResponse
     public string Username { get; set; } = string.Empty;
     public List<string> Roles { get; set; } = new();
 }
+
