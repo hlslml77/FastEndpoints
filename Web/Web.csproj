@@ -20,6 +20,11 @@
 
     <ItemGroup>
         <PackageReference Include="FastEndpoints" />
+        <PackageReference Include="Serilog.AspNetCore" />
+        <PackageReference Include="Serilog.Sinks.Console" />
+        <PackageReference Include="Serilog.Sinks.File" />
+        <PackageReference Include="Serilog.Settings.Configuration" />
+
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
 
         <PackageReference Include="MySqlConnector" />

@@ -5,6 +5,7 @@ using Web.Data;
 using FastEndpoints.Swagger;
 using NJsonSchema;
 using NSwag;
+using Serilog;
 using TestCases.ClientStreamingTest;
 using TestCases.CommandBusTest;
 using TestCases.CommandHandlerTest;
@@ -26,6 +27,16 @@ var bld = WebApplication.CreateBuilder(new WebApplicationOptions
     Args = args,
     WebRootPath = string.Empty
 });
+// configure Serilog for console + rolling file
+bld.Logging.ClearProviders();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(bld.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/web-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
+    .CreateLogger();
+bld.Host.UseSerilog(Log.Logger, dispose: true);
+
 
 bld.AddHandlerServer();
 
