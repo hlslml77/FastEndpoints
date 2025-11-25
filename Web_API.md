@@ -264,18 +264,42 @@ curl -X POST https://host/api/inventory/unequip \
   -d '{"equipmentRecordId":101}'
 
 ----------------------------------------------------------------------------------------------------------
-统一错误格式（示例）
+统一错误返回与错误码
 
-当参数或认证有误时，返回类似：
-{
-  "errors": ["未能从令牌解析用户ID"],
-  "statusCode": 400
-}
+- 统一错误返回结构：
+  {
+    "statusCode": 400,
+    "code": 1001,
+    "message": "未能从令牌解析用户ID"
+  }
+
+- 字段说明：
+  - statusCode：HTTP 状态码
+  - code：业务错误码（int），客户端可据此做分支
+  - message：错误信息（中文），用于直接显示或调试
+
+- 错误码：
+  - 通用（Common）
+    - 1001 BadRequest（参数错误/格式不正确等）
+    - 1002 NotFound（资源不存在）
+    - 1003 Conflict（资源冲突）
+    - 1004 InternalError（服务器内部错误）
+    - 1005 RateLimited（限流）
+    - 1006 Unprocessable（语义错误，无法处理）
+  - 认证（Auth）
+    - 2001 Unauthorized（未认证/令牌无效）
+    - 2002 Forbidden（无权限）
+  - 背包与装备（Inventory）
+    - 3001 EquipmentNotFound（装备不存在）
+    - 3002 EquipPartConflict（同部位冲突）
+    - 3003 ItemNotFound（道具配置不存在）
+    - 3004 EquipmentConfigNotFound（装备词条配置不存在）
+  - 角色（Role）
+    - 4001 InvalidDeviceType（设备类型非法）
+    - 4002 InvalidSportDistribution（无匹配的运动分配）
+  - 地图（Map）
+    - 5001 LocationNotFound（地点不存在）
 
 调用要点
 - 交换 Token 时 appToken 为可选；若提交，服务端可验证 appToken 并校验其中用户与 userId 一致
 - 所有业务接口需携带 Authorization: Bearer <webToken>
-- userId 来自换取到的 Token 的 sub
-- 注意单位：complete-sport 使用 公里；save-progress 使用 米
-- 时间均为 UTC ISO8601 字符串
-
