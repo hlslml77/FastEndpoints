@@ -38,14 +38,16 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
                 c.Type == "sub" || c.Type == "userId" || c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var userId))
             {
-                ThrowError("未能从令牌解析用户ID");
+                var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "未能从令牌解析用户ID" };
+                await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
                 return;
             }
 
             // 验证输入
             if (req.DistanceMeters <= 0)
             {
-                ThrowError("距离必须大于0");
+                var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "距离必须大于0" };
+                await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
                 return;
             }
 
@@ -70,12 +72,14 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
         catch (ArgumentException ex)
         {
             _logger.LogWarning(ex, "SaveMapProgress argument error. start={Start}, end={End}, dist={Dist}", req.StartLocationId, req.EndLocationId, req.DistanceMeters);
-            ThrowError(ex.Message);
+            var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = ex.Message };
+            await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "SaveMapProgress failed");
-            ThrowError("服务器内部错误");
+            var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
+            await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }
     }
 }

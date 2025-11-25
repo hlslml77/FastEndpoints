@@ -78,7 +78,7 @@ public class RoleConfigService : IRoleConfigService
                         else if (idEl2.ValueKind == JsonValueKind.String && int.TryParse(idEl2.GetString(), out var tmp2)) id = tmp2;
                     }
 
-                    if (id == 1)
+                    if (id == RoleConfigIds.DailyAttributePointsRowId)
                     {
                         if (item.TryGetProperty("Value1", out var v))
                         {

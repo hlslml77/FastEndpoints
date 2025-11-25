@@ -45,7 +45,8 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
             if (string.IsNullOrWhiteSpace(userId))
             {
                 _logger.LogWarning("Token exchange failed: missing userId");
-                ThrowError("userId is required");
+                var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "userId is required" };
+                HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
                 return Task.CompletedTask;
             }
 
@@ -79,7 +80,8 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
         catch (Exception ex)
         {
             _logger.LogError(ex, "Token exchange failed");
-            ThrowError("Token exchange failed");
+            var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "Token exchange failed" };
+            HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
             return Task.CompletedTask;
         }
     }

@@ -34,7 +34,7 @@ public class InventoryService : IInventoryService
         if (amount <= 0) return;
         var itemCfg = _cfg.GetItem(itemId) ?? throw new ArgumentException($"Item {itemId} not found");
 
-        if (itemCfg.PropType == 1)
+        if (itemCfg.PropType == ItemPropTypes.Stackable)
         {
             var rec = await _db.PlayerItem.FirstOrDefaultAsync(x => x.UserId == userId && x.ItemId == itemId, ct);
             if (rec == null)
@@ -48,7 +48,7 @@ public class InventoryService : IInventoryService
                 rec.UpdatedAt = DateTime.UtcNow;
             }
         }
-        else if (itemCfg.PropType == 2)
+        else if (itemCfg.PropType == ItemPropTypes.Equipment)
         {
             // create equipment records with rolled stats
             var eqCfg = _cfg.GetEquipmentByEquipId(itemId) ?? throw new ArgumentException($"Equip config not found for {itemId}");
@@ -102,7 +102,7 @@ public class InventoryService : IInventoryService
     {
         if (amount <= 0) return;
         var itemCfg = _cfg.GetItem(itemId) ?? throw new ArgumentException($"Item {itemId} not found");
-        if (itemCfg.PropType != 1) throw new ArgumentException("Only stackable items can be consumed");
+        if (itemCfg.PropType != ItemPropTypes.Stackable) throw new ArgumentException("Only stackable items can be consumed");
         var rec = await _db.PlayerItem.FirstOrDefaultAsync(x => x.UserId == userId && x.ItemId == itemId, ct);
         if (rec == null || rec.Amount < amount) throw new ArgumentException("Not enough items");
         rec.Amount -= amount;

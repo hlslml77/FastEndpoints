@@ -40,7 +40,8 @@ public class Endpoint : Endpoint<EmptyRequest, PlayerRoleResponse>
                 c.Type == "sub" || c.Type == "userId" || c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var userId))
             {
-                ThrowError("未能从令牌解析用户ID");
+                var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "未能从令牌解析用户ID" };
+                await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
                 return;
             }
 
@@ -81,7 +82,8 @@ public class Endpoint : Endpoint<EmptyRequest, PlayerRoleResponse>
         catch (Exception ex)
         {
             _logger.LogError(ex, "Get player failed");
-            ThrowError("服务器内部错误");
+            var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
+            await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }
     }
 }

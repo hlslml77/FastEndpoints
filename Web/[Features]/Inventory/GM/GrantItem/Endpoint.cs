@@ -32,17 +32,20 @@ public class Endpoint : Endpoint<Request, Response>
     {
         if (req.UserId <= 0)
         {
-            ThrowError("userId 无效");
+            var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "userId 无效" };
+            await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
             return;
         }
         if (req.ItemId <= 0)
         {
-            ThrowError("itemId 无效");
+            var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "itemId 无效" };
+            await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
             return;
         }
         if (req.Amount <= 0)
         {
-            ThrowError("amount 必须大于0");
+            var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "amount 必须大于0" };
+            await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
             return;
         }
 
@@ -53,13 +56,21 @@ public class Endpoint : Endpoint<Request, Response>
         catch (ArgumentException ex)
         {
             _logger.LogWarning(ex, "Grant item failed. userId={UserId}, itemId={ItemId}, amount={Amount}", req.UserId, req.ItemId, req.Amount);
-            ThrowError(ex.Message);
+            var msg = ex.Message ?? string.Empty;
+            var code = msg.Contains("Equip config not found", StringComparison.OrdinalIgnoreCase)
+                ? Web.Data.ErrorCodes.Inventory.EquipmentConfigNotFound
+                : (msg.Contains("Item", StringComparison.OrdinalIgnoreCase) && msg.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                    ? Web.Data.ErrorCodes.Inventory.ItemNotFound
+                    : Web.Data.ErrorCodes.Common.BadRequest;
+            var errorBody = new { statusCode = 400, code = code, message = ex.Message };
+            await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
             return;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Grant item failed with server error. userId={UserId}, itemId={ItemId}, amount={Amount}", req.UserId, req.ItemId, req.Amount);
-            ThrowError("服务器内部错误");
+            var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
+            await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
             return;
         }
 
