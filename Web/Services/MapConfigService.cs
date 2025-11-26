@@ -30,7 +30,7 @@ public class MapConfigService : IMapConfigService
 
         try
         {
-            var jsonPath = Path.Combine(AppContext.BaseDirectory, "Json", "MapBase.json");
+            var jsonPath = Path.Combine(AppContext.BaseDirectory, "Json", "WorldUiMap_MapBase.json");
             LoadFromJson(jsonPath);
             Log.Information("Map configuration loaded successfully from {Path}. Total configs: {Count}",
                 jsonPath, _mapConfigs.Count);

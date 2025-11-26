@@ -1,0 +1,99 @@
+[
+  {
+    "ID": 1001,
+    "Type": 1,
+    "Quantity": 1,
+    "Event": 1,
+    "ResourceRandom": [
+      1001,
+      1002
+    ],
+    "DropRandom": [
+      5,
+      7
+    ],
+    "Direction": 1,
+    "Distance": 15,
+    "Angle": 90,
+    "PlayerDistance": 500,
+    "SustainedDistance": 10
+  },
+  {
+    "ID": 1002,
+    "Type": 0,
+    "Quantity": 0,
+    "Event": 0,
+    "ResourceRandom": null,
+    "DropRandom": null,
+    "Direction": 0,
+    "Distance": 0,
+    "Angle": 0,
+    "PlayerDistance": 0,
+    "SustainedDistance": 0
+  },
+  {
+    "ID": 1003,
+    "Type": 0,
+    "Quantity": 0,
+    "Event": 0,
+    "ResourceRandom": null,
+    "DropRandom": null,
+    "Direction": 0,
+    "Distance": 0,
+    "Angle": 0,
+    "PlayerDistance": 0,
+    "SustainedDistance": 0
+  },
+  {
+    "ID": 1004,
+    "Type": 0,
+    "Quantity": 0,
+    "Event": 0,
+    "ResourceRandom": null,
+    "DropRandom": null,
+    "Direction": 0,
+    "Distance": 0,
+    "Angle": 0,
+    "PlayerDistance": 0,
+    "SustainedDistance": 0
+  },
+  {
+    "ID": 1005,
+    "Type": 0,
+    "Quantity": 0,
+    "Event": 0,
+    "ResourceRandom": null,
+    "DropRandom": null,
+    "Direction": 0,
+    "Distance": 0,
+    "Angle": 0,
+    "PlayerDistance": 0,
+    "SustainedDistance": 0
+  },
+  {
+    "ID": 1006,
+    "Type": 0,
+    "Quantity": 0,
+    "Event": 0,
+    "ResourceRandom": null,
+    "DropRandom": null,
+    "Direction": 0,
+    "Distance": 0,
+    "Angle": 0,
+    "PlayerDistance": 0,
+    "SustainedDistance": 0
+  },
+  {
+    "ID": 1007,
+    "Type": 0,
+    "Quantity": 0,
+    "Event": 0,
+    "ResourceRandom": null,
+    "DropRandom": null,
+    "Direction": 0,
+    "Distance": 0,
+    "Angle": 0,
+    "PlayerDistance": 0,
+    "SustainedDistance": 0
+  }
+]

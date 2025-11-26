@@ -73,6 +73,8 @@ bld.Services
    .AddScoped<IMapService, MapService>()
    .AddSingleton<IItemConfigService, ItemConfigService>()
    .AddScoped<IInventoryService, InventoryService>()
+   .AddSingleton<ITravelEventConfigService, TravelEventConfigService>()
+   .AddSingleton<ITravelDropPointConfigService, TravelDropPointConfigService>()
    .AddSingleton(new SingltonSVC(0))
    .AddJobQueues<Job, JobStorage>()
    .RegisterServicesFromWeb()

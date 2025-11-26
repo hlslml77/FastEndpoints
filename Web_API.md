@@ -263,7 +263,76 @@ curl -X POST https://host/api/inventory/unequip \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
   -d '{"equipmentRecordId":101}'
 
-----------------------------------------------------------------------------------------------------------
+---
+
+5. 旅行系统（Travel）
+
+5.1 事件奖励（基于 Travel_EventList.json）
+POST /api/travel/event/reward
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 策划表：Web/Json/Travel_EventList.json
+- 说明：客户端传入事件ID（配置表的 ID 字段），服务端按以下规则发放奖励：
+  - 随机从 ResourceRandom 中抽取一个物品ID
+  - 按 DropRandom：
+    - 若为单个数 n，则数量 amount = max(1, n)
+    - 若为两个数 [min, max]，则在区间内随机（含上限）
+
+请求体
+{
+  "eventId": 1001
+}
+
+响应体
+{
+  "success": true,
+  "itemId": 1001,
+  "amount": 6
+}
+
+示例（curl）
+curl -X POST https://host/api/travel/event/reward \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"eventId":1001}'
+
+5.2 距离掉落奖励（基于 Travel_DropPoint.json）
+POST /api/travel/drop-point/reward
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 策划表：Web/Json/Travel_DropPoint.json
+- 说明：客户端传入关卡ID与距离，服务端根据配置发放随机奖励与/或固定奖励：
+  - 配置匹配：
+    - 优先选择同 LevelID 下 Distance 列表包含请求 Distance 的配置
+    - 若找不到，则回退到 Distance 为 null 的配置（取第一条）
+  - 随机奖励：当 DropRandom 与 QuantitiesRandom 都配置且非空时触发
+    - 从 DropRandom 中随机一个物品ID
+    - 数量按 QuantitiesRandom：
+      - 单个数 n => amount = max(1, n)
+      - 两个数 [min, max] => 区间随机（含上限）
+  - 固定奖励：遍历 FixReward（若配置）中每一对 [itemId, amount] 逐条发放
+  - 两种奖励同时配置则都发；缺失任一则只发存在的那一种
+
+请求体
+{
+  "levelId": 101,
+  "distance": 600
+}
+
+响应体
+{
+  "success": true,
+  "rewards": [
+    { "itemId": 1001, "amount": 2 },
+    { "itemId": 1002, "amount": 50 }
+  ]
+}
+
+示例（curl）
+curl -X POST https://host/api/travel/drop-point/reward \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"levelId":101, "distance":600}'
+
+-------------------------------------------------------------------------------------------------------
 统一错误返回与错误码
 
 - 统一错误返回结构：
