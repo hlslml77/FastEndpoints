@@ -13,16 +13,16 @@ POST /api/auth/exchange
 
 请求体
 {
-  "userId": "123456",
-  "appToken": "可选"
+  "userId": "123456", // string
+  "appToken": "可选" // string, optional
 }
 
 响应体
 {
-  "webToken": "<JWT字符串>",
-  "expiresIn": 43200,
-  "tokenType": "Bearer",
-  "userId": "123456"
+  "webToken": "<JWT字符串>", // string (JWT)
+  "expiresIn": 43200,       // int (seconds)
+  "tokenType": "Bearer",    // string
+  "userId": "123456"        // string
 }
 
 示例（curl）
@@ -44,27 +44,27 @@ POST /api/role/get-player
 
 响应示例
 {
-  "userId": 123456,
-  "currentLevel": 5,
-  "currentExperience": 1200,
-  "experienceToNextLevel": 1500,
-  "upperLimb": 12,
-  "lowerLimb": 11,
-  "core": 10,
-  "heartLungs": 9,
-  "todayAttributePoints": 4,
-  "availableAttributePoints": 6,
-  "speedBonus": 0.23,                  // 等同于 secSpeed
-  "secAttack": 1.75,
-  "secHP": 0.50,
-  "secDefense": 0.40,
-  "secAttackSpeed": 0.30,
-  "secCritical": 0.20,
-  "secCriticalDamage": 0.35,
-  "secSpeed": 0.23,
-  "secEfficiency": 0.10,
-  "secEnergy": 0.15,
-  "lastUpdateTime": "2025-01-01T00:00:00Z"
+  "userId": 123456,                 // long
+  "currentLevel": 5,               // int
+  "currentExperience": 1200,       // int
+  "experienceToNextLevel": 1500,   // int
+  "upperLimb": 12,                 // int
+  "lowerLimb": 11,                 // int
+  "core": 10,                      // int
+  "heartLungs": 9,                 // int
+  "todayAttributePoints": 4,       // int
+  "availableAttributePoints": 6,   // int
+  "speedBonus": 0.23,              // double 等同于 secSpeed
+  "secAttack": 1.75,               // double
+  "secHP": 0.50,                   // double
+  "secDefense": 0.40,              // double
+  "secAttackSpeed": 0.30,          // double
+  "secCritical": 0.20,             // double
+  "secCriticalDamage": 0.35,       // double
+  "secSpeed": 0.23,                // double
+  "secEfficiency": 0.10,           // double
+  "secEnergy": 0.15,               // double
+  "lastUpdateTime": "2025-01-01T00:00:00Z" // DateTime (ISO 8601)
 }
 
 示例（curl）
@@ -81,9 +81,9 @@ POST /api/role/complete-sport
 
 请求体
 {
-  "deviceType": 1,   // 0=跑步机, 1=单车, 2=划船机, 3=手环
-  "distance": 2.5,   // 公里
-  "calorie": 180
+  "deviceType": 1,   // int (0=跑步机, 1=单车, 2=划船机, 3=手环)
+  "distance": 2.5,   // double, 单位: 公里
+  "calorie": 180     // int
 }
 
 响应体：同“获取玩家角色信息”
@@ -102,19 +102,19 @@ POST /api/map/save-progress
 
 请求体
 {
-  "startLocationId": 10011,
-  "endLocationId": 10012,
-  "distanceMeters": 850.5
+  "startLocationId": 10011, // int
+  "endLocationId": 10012,   // int
+  "distanceMeters": 850.5   // double, 单位: 米
 }
 
 响应体
 {
-  "id": 1,
-  "userId": 123456,
-  "startLocationId": 10011,
-  "endLocationId": 10012,
-  "distanceMeters": 850.5,
-  "createdAt": "2025-01-01T00:00:00Z"
+  "id": 1,                        // long
+  "userId": 123456,               // long
+  "startLocationId": 10011,       // int
+  "endLocationId": 10012,         // int
+  "distanceMeters": 850.5,        // double, 单位: 米
+  "createdAt": "2025-01-01T00:00:00Z" // DateTime (ISO 8601)
 }
 
 3.2 访问地图点位
@@ -128,22 +128,22 @@ POST /api/map/visit-location
 
 请求体
 {
-  "locationId": 10011,
-  "isCompleted": true
+  "locationId": 10011, // int
+  "isCompleted": true  // bool
 }
 
 响应体
 {
-  "isFirstVisit": true,
-  "rewards": [{ "itemId": 8000, "amount": 20 }],
-  "visitCount": 1,
-  "firstVisitTime": "2025-01-01T00:00:00Z",
-  "lastVisitTime": "2025-01-01T01:00:00Z",
+  "isFirstVisit": true,                                        // bool
+  "rewards": [{ "itemId": 8000, "amount": 20 }],            // List<Reward>
+  "visitCount": 1,                                             // int
+  "firstVisitTime": "2025-01-01T00:00:00Z",                   // DateTime (ISO 8601)
+  "lastVisitTime": "2025-01-01T01:00:00Z",                    // DateTime (ISO 8601)
   "locationInfo": {
-    "locationId": 10011,
-    "description": "黄岩镇",
-    "scenicSpot": "这点有xxxxx描述",
-    "hierarchy": 1
+    "locationId": 10011,                                      // int
+    "description": "黄岩镇",                                  // string
+    "scenicSpot": "这点有xxxxx描述",                          // string
+    "hierarchy": 1                                            // int
   }
 }
 
@@ -157,14 +157,14 @@ POST /api/map/player-state
 
 响应体
 {
-  "visitedLocationIds": [10011, 10012],
-  "completedLocationIds": [10011, 10012],
-  "progressRecords": [
+  "visitedLocationIds": [10011, 10012],   // int[]
+  "completedLocationIds": [10011, 10012], // int[]
+  "progressRecords": [                    // List<ProgressRecord>
     {
-      "startLocationId": 10011,
-      "endLocationId": 10012,
-      "distanceMeters": 10.0,
-      "createdAt": "2025-01-01T00:00:00Z"
+      "startLocationId": 10011,          // int
+      "endLocationId": 10012,            // int
+      "distanceMeters": 10.0,            // double, 单位: 米
+      "createdAt": "2025-01-01T00:00:00Z" // DateTime (ISO 8601)
     }
   ]
 }
@@ -182,7 +182,7 @@ POST /api/inventory/items
 
 响应示例
 [
-  { "itemId": 8000, "amount": 20, "updatedAt": "2025-01-01T00:00:00Z" },
+  { "itemId": 8000, "amount": 20, "updatedAt": "2025-01-01T00:00:00Z" }, // itemId:int, amount:int, updatedAt:DateTime(ISO 8601)
   { "itemId": 8001, "amount": 3,  "updatedAt": "2025-01-01T00:10:00Z" }
 ]
 
@@ -203,23 +203,23 @@ POST /api/inventory/equipments
 响应示例（按更新时间倒序）
 [
   {
-    "id": 101,
-    "equipId": 20001,
-    "quality": 3,
-    "part": 1,
-    "attack": 15,
-    "hp": 120,
-    "defense": null,
-    "critical": 2,
-    "attackSpeed": 1,
-    "criticalDamage": 5,
-    "upperLimb": 1,
-    "lowerLimb": 0,
-    "core": 0,
-    "heartLungs": 0,
-    "isEquipped": true,
-    "createdAt": "2025-01-01T00:00:00Z",
-    "updatedAt": "2025-01-01T01:00:00Z"
+    "id": 101,                         // long
+    "equipId": 20001,                  // int
+    "quality": 3,                      // int
+    "part": 1,                         // int
+    "attack": 15,                      // int?
+    "hp": 120,                         // int?
+    "defense": null,                   // int?
+    "critical": 2,                     // int?
+    "attackSpeed": 1,                  // int?
+    "criticalDamage": 5,               // int?
+    "upperLimb": 1,                    // int?
+    "lowerLimb": 0,                    // int?
+    "core": 0,                         // int?
+    "heartLungs": 0,                   // int?
+    "isEquipped": true,                // bool
+    "createdAt": "2025-01-01T00:00:00Z", // DateTime (ISO 8601)
+    "updatedAt": "2025-01-01T01:00:00Z"  // DateTime (ISO 8601)
   }
 ]
 
@@ -237,7 +237,7 @@ POST /api/inventory/equip
 - 说明：同一部位会自动卸下原装备
 
 请求体
-{ "equipmentRecordId": 101 }
+{ "equipmentRecordId": 101 } // equipmentRecordId:int
 
 响应体
 { "success": true }
@@ -253,7 +253,7 @@ POST /api/inventory/unequip
 - 认证：需要 Bearer Token（权限 web_access）
 
 请求体
-{ "equipmentRecordId": 101 }
+{ "equipmentRecordId": 101 } // equipmentRecordId:int
 
 响应体
 { "success": true }
@@ -280,14 +280,14 @@ POST /api/travel/event/reward
 
 请求体
 {
-  "eventId": 1001
+  "eventId": 1001 // int
 }
 
 响应体
 {
-  "success": true,
-  "itemId": 1001,
-  "amount": 6
+  "success": true, // bool
+  "itemId": 1001,  // int
+  "amount": 6      // int
 }
 
 示例（curl）
@@ -314,15 +314,15 @@ POST /api/travel/drop-point/reward
 
 请求体
 {
-  "levelId": 101,
-  "distance": 600
+  "levelId": 101, // int
+  "distance": 600 // int (meters)
 }
 
 响应体
 {
-  "success": true,
-  "rewards": [
-    { "itemId": 1001, "amount": 2 },
+  "success": true, // bool
+  "rewards": [     // List<Reward>
+    { "itemId": 1001, "amount": 2 },  // itemId:int, amount:int
     { "itemId": 1002, "amount": 50 }
   ]
 }
