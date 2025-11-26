@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Web.Data.Config;
+using Serilog;
 
 namespace Web.Services;
 
@@ -21,24 +22,22 @@ public interface IMapConfigService
 
 public class MapConfigService : IMapConfigService
 {
-    private readonly ILogger<MapConfigService> _logger;
     private readonly List<MapBaseConfig> _mapConfigs;
 
-    public MapConfigService(ILogger<MapConfigService> logger)
+    public MapConfigService()
     {
-        _logger = logger;
         _mapConfigs = new List<MapBaseConfig>();
 
         try
         {
             var jsonPath = Path.Combine(AppContext.BaseDirectory, "Json", "MapBase.json");
             LoadFromJson(jsonPath);
-            _logger.LogInformation("Map configuration loaded successfully from {Path}. Total configs: {Count}", 
+            Log.Information("Map configuration loaded successfully from {Path}. Total configs: {Count}",
                 jsonPath, _mapConfigs.Count);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to load map configuration");
+            Log.Error(ex, "Failed to load map configuration");
             throw;
         }
     }

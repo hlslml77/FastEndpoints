@@ -2,6 +2,7 @@ using FastEndpoints;
 using System.Security.Claims;
 using Web.Services;
 using Web.Data.Entities;
+using Serilog;
 
 namespace InventoryApi.ItemsGet;
 
@@ -15,8 +16,7 @@ public class ResponseItem
 public class Endpoint : EndpointWithoutRequest<List<ResponseItem>>
 {
     private readonly IInventoryService _svc;
-    private readonly ILogger<Endpoint> _logger;
-    public Endpoint(IInventoryService svc, ILogger<Endpoint> logger) { _svc = svc; _logger = logger; }
+    public Endpoint(IInventoryService svc) { _svc = svc; }
 
     public override void Configure()
     {
@@ -50,7 +50,7 @@ public class Endpoint : EndpointWithoutRequest<List<ResponseItem>>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Get items failed. userId={UserId}", userId);
+            Log.Error(ex, "Get items failed. userId={UserId}", userId);
             var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }

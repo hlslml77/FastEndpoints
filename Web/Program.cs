@@ -40,14 +40,8 @@ bld.Host.UseSerilog(Log.Logger, dispose: true);
 
 bld.AddHandlerServer();
 
-// 初始化数据库
-using var loggerFactory = LoggerFactory.Create(builder =>
-{
-    builder.AddConfiguration(bld.Configuration.GetSection("Logging"));
-    builder.AddConsole();
-});
-var dbLogger = loggerFactory.CreateLogger<DatabaseInitializationService>();
-var dbInitializer = new DatabaseInitializationService(bld.Configuration, dbLogger);
+// 初始化数据库（使用 Serilog）
+var dbInitializer = new DatabaseInitializationService(bld.Configuration);
 await dbInitializer.InitializeAsync();
 
 bld.Services.AddDbContext<Web.Data.AppDbContext>(o =>

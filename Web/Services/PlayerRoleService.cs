@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Web.Data;
 using Web.Data.Entities;
+using Serilog;
 
 namespace Web.Services;
 
@@ -33,16 +34,13 @@ public class PlayerRoleService : IPlayerRoleService
 {
     private readonly AppDbContext _dbContext;
     private readonly IRoleConfigService _configService;
-    private readonly ILogger<PlayerRoleService> _logger;
 
     public PlayerRoleService(
         AppDbContext dbContext,
-        IRoleConfigService configService,
-        ILogger<PlayerRoleService> logger)
+        IRoleConfigService configService)
     {
         _dbContext = dbContext;
         _configService = configService;
-        _logger = logger;
     }
 
     /// <summary>
@@ -77,7 +75,7 @@ public class PlayerRoleService : IPlayerRoleService
             _dbContext.PlayerRole.Add(player);
             await _dbContext.SaveChangesAsync();
 
-            _logger.LogInformation("Created new player role for user {UserId}", userId);
+            Log.Information("Created new player role for user {UserId}", userId);
         }
 
         return player;
@@ -109,7 +107,7 @@ public class PlayerRoleService : IPlayerRoleService
                 player.AttrCore += nextLevelConfig.Core;
                 player.AttrHeartLungs += nextLevelConfig.HeartLungs;
 
-                _logger.LogInformation(
+                Log.Information(
                     "User {UserId} leveled up to {Level}! Attributes: Upper={Upper}, Lower={Lower}, Core={Core}, Heart={Heart}",
                     player.UserId, player.CurrentLevel,
                     player.AttrUpperLimb, player.AttrLowerLimb, player.AttrCore, player.AttrHeartLungs);
@@ -200,7 +198,7 @@ public class PlayerRoleService : IPlayerRoleService
         if (experience > 0)
         {
             player.CurrentExperience += experience;
-            _logger.LogInformation(
+            Log.Information(
                 "User {UserId} gained {Experience} experience from {Calorie} calories.",
                 userId, experience, calorie);
 
@@ -211,7 +209,7 @@ public class PlayerRoleService : IPlayerRoleService
         player.LastUpdateTime = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
 
-        _logger.LogInformation(
+        Log.Information(
             "User {UserId} completed sport with device {DeviceType} for {Distance}km. Current level: {Level}, Experience: {CurrentExp}",
             userId, deviceType, distance, player.CurrentLevel, player.CurrentExperience);
 

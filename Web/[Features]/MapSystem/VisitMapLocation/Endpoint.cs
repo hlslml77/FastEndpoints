@@ -1,6 +1,7 @@
 using Web.Services;
 using FastEndpoints;
 using System.Security.Claims;
+using Serilog;
 
 namespace MapSystem.VisitMapLocation;
 
@@ -10,12 +11,10 @@ namespace MapSystem.VisitMapLocation;
 public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationResponse>
 {
     private readonly IMapService _mapService;
-    private readonly ILogger<Endpoint> _logger;
 
-    public Endpoint(IMapService mapService, ILogger<Endpoint> logger)
+    public Endpoint(IMapService mapService)
     {
         _mapService = mapService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -76,7 +75,7 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "VisitMapLocation argument error. locationId={LocationId}, isCompleted={IsCompleted}", req.LocationId, req.IsCompleted);
+            Log.Warning(ex, "VisitMapLocation argument error. locationId={LocationId}, isCompleted={IsCompleted}", req.LocationId, req.IsCompleted);
             var isNotFound = ex.Message?.IndexOf("Location", StringComparison.OrdinalIgnoreCase) >= 0;
             var errorBody = isNotFound
                 ? new { statusCode = 404, code = Web.Data.ErrorCodes.Map.LocationNotFound, message = "地点不存在" }
@@ -85,7 +84,7 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "VisitMapLocation failed");
+            Log.Error(ex, "VisitMapLocation failed");
             var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }

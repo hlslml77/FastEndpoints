@@ -6,6 +6,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Security.Claims;
 
+using Serilog;
+
 namespace Web.Auth.TokenExchange;
 
 /// <summary>
@@ -16,13 +18,11 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
 {
     private readonly IConfiguration _config;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<Endpoint> _logger;
 
-    public Endpoint(IConfiguration config, IHttpClientFactory httpClientFactory, ILogger<Endpoint> logger)
+    public Endpoint(IConfiguration config, IHttpClientFactory httpClientFactory)
     {
         _config = config;
         _httpClientFactory = httpClientFactory;
-        _logger = logger;
     }
 
     public override Task HandleAsync(TokenExchangeRequest req, CancellationToken ct)
@@ -44,7 +44,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
             var userId = (req.UserId ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(userId))
             {
-                _logger.LogWarning("Token exchange failed: missing userId");
+                Log.Warning("Token exchange failed: missing userId");
                 var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "userId is required" };
                 HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
                 return Task.CompletedTask;
@@ -79,7 +79,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Token exchange failed");
+            Log.Error(ex, "Token exchange failed");
             var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "Token exchange failed" };
             HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
             return Task.CompletedTask;
@@ -116,7 +116,7 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "ValidateAppTokenAsync failed");
+            Log.Error(ex, "ValidateAppTokenAsync failed");
             return new TokenValidationResult { IsValid = false, ErrorMessage = ex.Message };
         }
     }

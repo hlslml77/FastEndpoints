@@ -1,5 +1,6 @@
 ﻿using Web.Services;
 using _Claim = System.Security.Claims.Claim;
+using Serilog;
 
 namespace Admin.Login;
 
@@ -7,10 +8,10 @@ public class Endpoint : Endpoint<Request, Response>
 {
     readonly IConfiguration _config;
 
-    public Endpoint(ILogger<Endpoint> logger, IEmailService emailService, IConfiguration configuration)
+    public Endpoint(IEmailService emailService, IConfiguration configuration)
     {
         _config = configuration;
-        logger.LogInformation("constructor injection works!");
+        Log.Information("constructor injection works!");
         _ = emailService.SendEmail();
     }
 
@@ -96,8 +97,7 @@ public class Endpoint : Endpoint<Request, Response>
 
 public class Endpoint_V1 : Endpoint
 {
-    public Endpoint_V1(ILogger<Endpoint_V1> logger, IEmailService emailService, IConfiguration configuration) : base(
-        logger,
+    public Endpoint_V1(IEmailService emailService, IConfiguration configuration) : base(
         emailService,
         configuration) { }
 

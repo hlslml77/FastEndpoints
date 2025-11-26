@@ -2,6 +2,7 @@ using Web.Services;
 using FastEndpoints;
 using System.Security.Claims;
 using RoleApi;
+using Serilog;
 
 namespace RoleApi.CompleteSport;
 
@@ -12,13 +13,11 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
 {
     private readonly IPlayerRoleService _roleGrowthService;
     private readonly IRoleConfigService _configService;
-    private readonly ILogger<Endpoint> _logger;
 
-    public Endpoint(IPlayerRoleService roleGrowthService, IRoleConfigService configService, ILogger<Endpoint> logger)
+    public Endpoint(IPlayerRoleService roleGrowthService, IRoleConfigService configService)
     {
         _roleGrowthService = roleGrowthService;
         _configService = configService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -34,17 +33,21 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
 
     public override async Task HandleAsync(CompleteSportRequest req, CancellationToken ct)
     {
+        long userId = 0;
         try
         {
             // 从JWT解析用户ID（优先 sub，其次 userId/NameIdentifier）
             var userIdStr = User?.Claims?.FirstOrDefault(c =>
                 c.Type == "sub" || c.Type == "userId" || c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var userId))
+            if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out userId))
             {
                 var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "未能从令牌解析用户ID" };
                 await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
                 return;
             }
+
+            // 记录用户运动信息
+            Log.Information("玩家 {UserId} 完成运动: 类型={DeviceType}, 距离={Distance}km", userId, req.DeviceType, req.Distance);
 
             var player = await _roleGrowthService.CompleteSportAsync(userId, req.DeviceType, req.Distance, req.Calorie);
             var config = _configService.GetRoleConfig();
@@ -82,7 +85,7 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "CompleteSport argument error. deviceType={DeviceType}, distance={Distance}, calorie={Calorie}", req.DeviceType, req.Distance, req.Calorie);
+            Log.Warning(ex, "玩家 {UserId} 运动参数异常: {Message}", userId, ex.Message ?? "参数错误");
             var msg = ex.Message ?? string.Empty;
             var code = msg.Contains("Invalid sport distribution", StringComparison.OrdinalIgnoreCase)
                 ? Web.Data.ErrorCodes.Role.InvalidSportDistribution
@@ -92,7 +95,7 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "CompleteSport failed");
+            Log.Error(ex, "CompleteSport 处理失败. UserId={UserId}", userId);
             var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }

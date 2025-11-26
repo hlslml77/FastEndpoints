@@ -1,4 +1,5 @@
 using Web.Services;
+using Serilog;
 
 namespace Customers.Create;
 
@@ -48,7 +49,7 @@ public class Endpoint : Endpoint<Request>
 
     public override async Task HandleAsync(Request r, CancellationToken t)
     {
-        Logger.LogInformation("customer creation has begun!");
+        Log.Information("customer creation has begun!");
 
         if (r.PhoneNumbers?.Count() < 2)
             ThrowError("Not enough phone numbers!");

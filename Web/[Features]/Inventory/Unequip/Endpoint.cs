@@ -1,6 +1,7 @@
 using FastEndpoints;
 using System.Security.Claims;
 using Web.Services;
+using Serilog;
 
 namespace InventoryApi.Unequip;
 
@@ -17,8 +18,7 @@ public class Response
 public class Endpoint : Endpoint<Request, Response>
 {
     private readonly IInventoryService _svc;
-    private readonly ILogger<Endpoint> _logger;
-    public Endpoint(IInventoryService svc, ILogger<Endpoint> logger) { _svc = svc; _logger = logger; }
+    public Endpoint(IInventoryService svc) { _svc = svc; }
 
     public override void Configure()
     {
@@ -51,14 +51,14 @@ public class Endpoint : Endpoint<Request, Response>
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "Unequip failed: equipment not found. userId={UserId}, equipmentRecordId={EquipmentRecordId}", userId, req.EquipmentRecordId);
+            Log.Warning(ex, "Unequip failed: equipment not found. userId={UserId}, equipmentRecordId={EquipmentRecordId}", userId, req.EquipmentRecordId);
             var errorBody = new { statusCode = 404, code = Web.Data.ErrorCodes.Inventory.EquipmentNotFound, message = "装备不存在" };
             await HttpContext.Response.SendAsync(errorBody, 404, cancellation: ct);
             return;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unequip failed with server error. userId={UserId}, equipmentRecordId={EquipmentRecordId}", userId, req.EquipmentRecordId);
+            Log.Error(ex, "Unequip failed with server error. userId={UserId}, equipmentRecordId={EquipmentRecordId}", userId, req.EquipmentRecordId);
             var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
             return;

@@ -1,6 +1,7 @@
 using Web.Services;
 using FastEndpoints;
 using System.Security.Claims;
+using Serilog;
 
 namespace MapSystem.SaveMapProgress;
 
@@ -10,12 +11,10 @@ namespace MapSystem.SaveMapProgress;
 public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse>
 {
     private readonly IMapService _mapService;
-    private readonly ILogger<Endpoint> _logger;
 
-    public Endpoint(IMapService mapService, ILogger<Endpoint> logger)
+    public Endpoint(IMapService mapService)
     {
         _mapService = mapService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -71,13 +70,13 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "SaveMapProgress argument error. start={Start}, end={End}, dist={Dist}", req.StartLocationId, req.EndLocationId, req.DistanceMeters);
+            Log.Warning(ex, "SaveMapProgress argument error. start={Start}, end={End}, dist={Dist}", req.StartLocationId, req.EndLocationId, req.DistanceMeters);
             var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = ex.Message };
             await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "SaveMapProgress failed");
+            Log.Error(ex, "SaveMapProgress failed");
             var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }

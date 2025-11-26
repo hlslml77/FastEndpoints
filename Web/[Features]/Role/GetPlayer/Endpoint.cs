@@ -1,6 +1,7 @@
 using Web.Services;
 using FastEndpoints;
 using System.Security.Claims;
+using Serilog;
 
 namespace RoleApi.GetPlayer;
 
@@ -11,13 +12,11 @@ public class Endpoint : Endpoint<EmptyRequest, PlayerRoleResponse>
 {
     private readonly IPlayerRoleService _roleGrowthService;
     private readonly IRoleConfigService _configService;
-    private readonly ILogger<Endpoint> _logger;
 
-    public Endpoint(IPlayerRoleService roleGrowthService, IRoleConfigService configService, ILogger<Endpoint> logger)
+    public Endpoint(IPlayerRoleService roleGrowthService, IRoleConfigService configService)
     {
         _roleGrowthService = roleGrowthService;
         _configService = configService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -81,7 +80,7 @@ public class Endpoint : Endpoint<EmptyRequest, PlayerRoleResponse>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Get player failed");
+            Log.Error(ex, "Get player failed");
             var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }

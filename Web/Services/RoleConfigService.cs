@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Web.Data.Config;
+using Serilog;
 
 namespace Web.Services;
 
@@ -33,21 +34,19 @@ public class RoleConfigService : IRoleConfigService
     private readonly List<RoleUpgradeConfig> _upgradeConfigs = new();
     private readonly List<RoleSportEntry> _sportEntries = new();
     private readonly List<RoleExperienceConfig> _experienceConfigs = new();
-    private readonly ILogger<RoleConfigService> _logger;
 
-    public RoleConfigService(ILogger<RoleConfigService> logger)
+    public RoleConfigService()
     {
-        _logger = logger;
         var jsonPath = Path.Combine(AppContext.BaseDirectory, "Json");
 
         try
         {
             LoadFromJson(jsonPath);
-            _logger.LogInformation("Role configuration loaded successfully from {Path}", jsonPath);
+            Log.Information("Role configuration loaded successfully from {Path}", jsonPath);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to load role configuration from {Path}", jsonPath);
+            Log.Error(ex, "Failed to load role configuration from {Path}", jsonPath);
             throw;
         }
     }

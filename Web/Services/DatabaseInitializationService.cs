@@ -1,6 +1,9 @@
 using MySqlConnector;
+using Serilog;
 
 namespace Web.Services;
+
+// 使用 Serilog 的静态 Log 类进行日志记录
 
 /// <summary>
 /// 数据库初始化服务
@@ -8,14 +11,10 @@ namespace Web.Services;
 public class DatabaseInitializationService
 {
     private readonly IConfiguration _configuration;
-    private readonly ILogger<DatabaseInitializationService> _logger;
 
-    public DatabaseInitializationService(
-        IConfiguration configuration,
-        ILogger<DatabaseInitializationService> logger)
+    public DatabaseInitializationService(IConfiguration configuration)
     {
         _configuration = configuration;
-        _logger = logger;
     }
 
     /// <summary>
@@ -26,7 +25,7 @@ public class DatabaseInitializationService
         var connectionString = _configuration.GetConnectionString("DefaultConnection");
         if (string.IsNullOrEmpty(connectionString))
         {
-            _logger.LogError("数据库连接字符串未配置");
+            Log.Error("数据库连接字符串未配置");
             throw new InvalidOperationException("数据库连接字符串未配置");
         }
 
@@ -35,7 +34,7 @@ public class DatabaseInitializationService
         var databaseName = builder.Database;
         var serverConnectionString = connectionString.Replace($"Database={databaseName};", "");
 
-        _logger.LogInformation("开始初始化数据库: {DatabaseName}", databaseName);
+        Log.Information("开始初始化数据库: {DatabaseName}", databaseName);
 
         try
         {
@@ -45,11 +44,11 @@ public class DatabaseInitializationService
             // 2. 执行SQL文件
             await ExecuteSqlFilesAsync(connectionString);
 
-            _logger.LogInformation("数据库初始化完成");
+            Log.Information("数据库初始化完成");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "数据库初始化失败");
+            Log.Error(ex, "数据库初始化失败");
             throw;
         }
     }
@@ -65,27 +64,27 @@ public class DatabaseInitializationService
         // 检查数据库是否存在
         var checkDbCommand = connection.CreateCommand();
         checkDbCommand.CommandText = $"SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{databaseName}'";
-        
+
         var result = await checkDbCommand.ExecuteScalarAsync();
-        
+
         if (result == null)
         {
             // 数据库不存在，创建它
-            _logger.LogInformation("数据库 {DatabaseName} 不存在，正在创建...", databaseName);
-            
+            Log.Information("数据库 {DatabaseName} 不存在，正在创建...", databaseName);
+
             var createDbCommand = connection.CreateCommand();
             createDbCommand.CommandText = $@"
-                CREATE DATABASE `{databaseName}` 
-                CHARACTER SET utf8mb4 
+                CREATE DATABASE `{databaseName}`
+                CHARACTER SET utf8mb4
                 COLLATE utf8mb4_unicode_ci";
-            
+
             await createDbCommand.ExecuteNonQueryAsync();
-            
-            _logger.LogInformation("数据库 {DatabaseName} 创建成功", databaseName);
+
+            Log.Information("数据库 {DatabaseName} 创建成功", databaseName);
         }
         else
         {
-            _logger.LogInformation("数据库 {DatabaseName} 已存在", databaseName);
+            Log.Information("数据库 {DatabaseName} 已存在", databaseName);
         }
     }
 
@@ -95,10 +94,10 @@ public class DatabaseInitializationService
     private async Task ExecuteSqlFilesAsync(string connectionString)
     {
         var sqlDirectory = Path.Combine(AppContext.BaseDirectory, "sql");
-        
+
         if (!Directory.Exists(sqlDirectory))
         {
-            _logger.LogWarning("SQL目录不存在: {SqlDirectory}", sqlDirectory);
+            Log.Warning("SQL目录不存在: {SqlDirectory}", sqlDirectory);
             return;
         }
 
@@ -108,11 +107,11 @@ public class DatabaseInitializationService
 
         if (sqlFiles.Count == 0)
         {
-            _logger.LogInformation("SQL目录中没有找到SQL文件");
+            Log.Information("SQL目录中没有找到SQL文件");
             return;
         }
 
-        _logger.LogInformation("找到 {Count} 个SQL文件，开始执行...", sqlFiles.Count);
+        Log.Information("找到 {Count} 个SQL文件，开始执行...", sqlFiles.Count);
 
         await using var connection = new MySqlConnection(connectionString);
         await connection.OpenAsync();
@@ -122,10 +121,10 @@ public class DatabaseInitializationService
             try
             {
                 var fileName = Path.GetFileName(sqlFile);
-                _logger.LogInformation("正在执行SQL文件: {FileName}", fileName);
+                Log.Information("正在执行SQL文件: {FileName}", fileName);
 
                 var sqlContent = await File.ReadAllTextAsync(sqlFile);
-                
+
                 // 分割SQL语句（以分号分隔，但要处理存储过程等特殊情况）
                 var sqlStatements = SplitSqlStatements(sqlContent);
 
@@ -136,28 +135,27 @@ public class DatabaseInitializationService
 
                     var command = connection.CreateCommand();
                     command.CommandText = sql;
-                    
+
                     try
                     {
                         await command.ExecuteNonQueryAsync();
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "执行SQL语句时出现警告（可能是表已存在等正常情况）: {Sql}", 
-                            sql.Length > 100 ? sql.Substring(0, 100) + "..." : sql);
+                        Log.Warning(ex, "执行SQL语句时出现警告（可能是表已存在等正常情况）: {Sql}", sql.Length > 100 ? sql.Substring(0, 100) + "..." : sql);
                     }
                 }
 
-                _logger.LogInformation("SQL文件执行成功: {FileName}", fileName);
+                Log.Information("SQL文件执行成功: {FileName}", fileName);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "执行SQL文件失败: {SqlFile}", sqlFile);
+                Log.Error(ex, "执行SQL文件失败: {SqlFile}", sqlFile);
                 // 继续执行其他文件
             }
         }
 
-        _logger.LogInformation("所有SQL文件执行完成");
+        Log.Information("所有SQL文件执行完成");
     }
 
     /// <summary>

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Web.Data;
 using Web.Data.Entities;
 using Web.Data.Config;
+using Serilog;
 
 namespace Web.Services;
 
@@ -21,12 +22,11 @@ public class InventoryService : IInventoryService
 {
     private readonly AppDbContext _db;
     private readonly IItemConfigService _cfg;
-    private readonly ILogger<InventoryService> _logger;
     private readonly Random _rand = new();
 
-    public InventoryService(AppDbContext db, IItemConfigService cfg, ILogger<InventoryService> logger)
+    public InventoryService(AppDbContext db, IItemConfigService cfg)
     {
-        _db = db; _cfg = cfg; _logger = logger;
+        _db = db; _cfg = cfg;
     }
 
     public async Task GrantItemAsync(long userId, int itemId, int amount, CancellationToken ct = default)
@@ -95,7 +95,7 @@ public class InventoryService : IInventoryService
         }
 
         await _db.SaveChangesAsync(ct);
-        _logger.LogInformation("Granted item {ItemId} x{Amount} to user {UserId}", itemId, amount, userId);
+        Log.Information("Granted item {ItemId} x{Amount} to user {UserId}", itemId, amount, userId);
     }
 
     public async Task ConsumeItemAsync(long userId, int itemId, int amount, CancellationToken ct = default)

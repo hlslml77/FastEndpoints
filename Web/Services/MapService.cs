@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Web.Data;
 using Web.Data.Config;
 using Web.Data.Entities;
+using Serilog;
 
 namespace Web.Services;
 
@@ -68,18 +69,15 @@ public class MapService : IMapService
     private readonly AppDbContext _dbContext;
     private readonly IMapConfigService _mapConfigService;
     private readonly IInventoryService _inventoryService;
-    private readonly ILogger<MapService> _logger;
 
     public MapService(
         AppDbContext dbContext,
         IMapConfigService mapConfigService,
-        IInventoryService inventoryService,
-        ILogger<MapService> logger)
+        IInventoryService inventoryService)
     {
         _dbContext = dbContext;
         _mapConfigService = mapConfigService;
         _inventoryService = inventoryService;
-        _logger = logger;
     }
 
     public async Task<PlayerMapProgress> SaveMapProgressAsync(
@@ -98,7 +96,7 @@ public class MapService : IMapService
             // 更新现有进度
             progress.DistanceMeters = distanceMeters;
             progress.CreatedAt = DateTime.UtcNow; // 更新时间
-            _logger.LogInformation(
+            Log.Information(
                 "Updated map progress for user {UserId}: {Start} -> {End}, Distance: {Distance}m",
                 userId, startLocationId, endLocationId, distanceMeters);
         }
@@ -114,7 +112,7 @@ public class MapService : IMapService
                 CreatedAt = DateTime.UtcNow
             };
             _dbContext.PlayerMapProgress.Add(progress);
-            _logger.LogInformation(
+            Log.Information(
                 "Saved new map progress for user {UserId}: {Start} -> {End}, Distance: {Distance}m",
                 userId, startLocationId, endLocationId, distanceMeters);
         }
@@ -155,7 +153,7 @@ public class MapService : IMapService
             };
 
             _dbContext.PlayerMapLocationVisit.Add(visitRecord);
-            _logger.LogInformation("User {UserId} first visit to location {LocationId}", userId, locationId);
+            Log.Information("User {UserId} first visit to location {LocationId}", userId, locationId);
         }
         else
         {
@@ -163,7 +161,7 @@ public class MapService : IMapService
             existingVisit.VisitCount++;
             existingVisit.LastVisitTime = DateTime.UtcNow;
             visitRecord = existingVisit;
-            _logger.LogInformation("User {UserId} revisit location {LocationId}, count: {Count}",
+            Log.Information("User {UserId} revisit location {LocationId}, count: {Count}",
                 userId, locationId, visitRecord.VisitCount);
         }
 
@@ -215,7 +213,7 @@ public class MapService : IMapService
                     await _inventoryService.GrantItemAsync(userId, itemId, amount);
                 }
             }
-            _logger.LogInformation("Granted {Count} rewards to user {UserId} for location {LocationId}", rewards.Count, userId, locationId);
+            Log.Information("Granted {Count} rewards to user {UserId} for location {LocationId}", rewards.Count, userId, locationId);
         }
 
         return new MapLocationVisitResult

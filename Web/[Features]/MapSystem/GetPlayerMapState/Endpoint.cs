@@ -1,6 +1,7 @@
 using FastEndpoints;
 using Web.Services;
 using System.Security.Claims;
+using Serilog;
 
 namespace MapSystem.GetPlayerMapState;
 
@@ -10,12 +11,10 @@ namespace MapSystem.GetPlayerMapState;
 public class Endpoint : Endpoint<EmptyRequest, GetPlayerMapStateResponse>
 {
     private readonly IMapService _mapService;
-    private readonly ILogger<Endpoint> _logger;
 
-    public Endpoint(IMapService mapService, ILogger<Endpoint> logger)
+    public Endpoint(IMapService mapService)
     {
         _mapService = mapService;
-        _logger = logger;
     }
 
     public override void Configure()
@@ -64,7 +63,7 @@ public class Endpoint : Endpoint<EmptyRequest, GetPlayerMapStateResponse>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "GetPlayerMapState failed");
+            Log.Error(ex, "GetPlayerMapState failed");
             var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }

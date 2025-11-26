@@ -1,6 +1,6 @@
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using Web.Data.Config;
+using Serilog;
 
 namespace Web.Services;
 
@@ -15,11 +15,9 @@ public class ItemConfigService : IItemConfigService
 {
     private readonly List<ItemConfig> _items = new();
     private readonly List<EquipmentConfig> _equipments = new();
-    private readonly ILogger<ItemConfigService> _logger;
 
-    public ItemConfigService(ILogger<ItemConfigService> logger)
+    public ItemConfigService()
     {
-        _logger = logger;
         var basePath = Path.Combine(AppContext.BaseDirectory, "Json");
         Load(basePath);
     }
@@ -41,7 +39,7 @@ public class ItemConfigService : IItemConfigService
             var equips = JsonSerializer.Deserialize<List<EquipmentConfig>>(File.ReadAllText(equipPath), opts);
             if (equips != null) _equipments.AddRange(equips);
         }
-        _logger.LogInformation("Loaded {ItemCount} items and {EquipCount} equipment entries", _items.Count, _equipments.Count);
+        Log.Information("Loaded {ItemCount} items and {EquipCount} equipment entries", _items.Count, _equipments.Count);
     }
 
     public ItemConfig? GetItem(int id) => _items.FirstOrDefault(i => i.ID == id);
