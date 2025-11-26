@@ -1,6 +1,7 @@
 using FastEndpoints;
 using System.Security.Claims;
 using Web.Services;
+using Serilog;
 
 namespace InventoryApi.GM.GrantItemDev;
 
@@ -18,8 +19,7 @@ public class Response
 public class Endpoint : Endpoint<Request, Response>
 {
     private readonly IInventoryService _svc;
-    private readonly ILogger<Endpoint> _logger;
-    public Endpoint(IInventoryService svc, ILogger<Endpoint> logger) { _svc = svc; _logger = logger; }
+    public Endpoint(IInventoryService svc) { _svc = svc; }
 
     public override void Configure()
     {
@@ -59,7 +59,7 @@ public class Endpoint : Endpoint<Request, Response>
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "[DEV] Grant item failed. userId={UserId}, itemId={ItemId}, amount={Amount}", userId, req.ItemId, req.Amount);
+            Log.Warning(ex, "[DEV] Grant item failed. userId={UserId}, itemId={ItemId}, amount={Amount}", userId, req.ItemId, req.Amount);
             var msg = ex.Message ?? string.Empty;
             var code = msg.Contains("Equip config not found", StringComparison.OrdinalIgnoreCase)
                 ? Web.Data.ErrorCodes.Inventory.EquipmentConfigNotFound
@@ -72,7 +72,7 @@ public class Endpoint : Endpoint<Request, Response>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[DEV] Grant item failed with server error. userId={UserId}, itemId={ItemId}, amount={Amount}", userId, req.ItemId, req.Amount);
+            Log.Error(ex, "[DEV] Grant item failed with server error. userId={UserId}, itemId={ItemId}, amount={Amount}", userId, req.ItemId, req.Amount);
             var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
             return;
