@@ -19,7 +19,7 @@ POST /api/auth/exchange
 
 请求体
 {
-  "userId": "123456", // string（必须为 long 数字格式）
+  "userId": "123456", // string
   "appToken": "可选" // string, optional
 }
 
