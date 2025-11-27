@@ -17,6 +17,7 @@ public class PlayerItem
 
     [Column("updated_at")]
     public DateTime UpdatedAt { get; set; }
+
 }
 
 [Table("player_equipment_item")]

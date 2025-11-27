@@ -79,6 +79,7 @@ bld.Services
    .AddJobQueues<Job, JobStorage>()
    .RegisterServicesFromWeb()
    .AddAntiforgery()
+   .AddMemoryCache()
    .SwaggerDocument(
        o =>
        {

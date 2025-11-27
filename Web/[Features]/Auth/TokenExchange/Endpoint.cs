@@ -6,153 +6,123 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Security.Claims;
 
+using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
 namespace Web.Auth.TokenExchange;
 
 /// <summary>
-/// Token交换端点 - 用APP Token换取Web服务专用Token
+/// Token交换端点 - 受控后台签发（生产可用）：需要管理密钥与时间/nonce 校验
 /// </summary>
 [HttpPost("/auth/exchange"), AllowAnonymous]
 public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
 {
     private readonly IConfiguration _config;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IMemoryCache _cache;
 
-    public Endpoint(IConfiguration config, IHttpClientFactory httpClientFactory)
+    public Endpoint(IConfiguration config, IMemoryCache cache)
     {
         _config = config;
-        _httpClientFactory = httpClientFactory;
+        _cache = cache;
     }
 
-    public override Task HandleAsync(TokenExchangeRequest req, CancellationToken ct)
+    public override async Task HandleAsync(TokenExchangeRequest req, CancellationToken ct)
     {
         try
         {
-            // 1. 验证APP Token的有效性 (暂时注释掉)
-            /*
-            var validationResult = await ValidateAppTokenAsync(req.AppToken, ct);
-            if (!validationResult.IsValid)
+            var section = _config.GetSection("AuthExchange");
+            var enabled = section.GetValue<bool>("Enabled");
+            if (!enabled)
             {
-                AddError("Invalid APP token: " + validationResult.ErrorMessage);
-                await SendErrorsAsync();
+                await HttpContext.Response.SendAsync(new { statusCode = 403, code = Web.Data.ErrorCodes.Auth.Forbidden, message = "auth exchange disabled" }, 403, cancellation: ct);
                 return;
             }
-            */
 
-            // 2. 使用客户端传入的UserId作为JWT的sub
-            var userId = (req.UserId ?? string.Empty).Trim();
-            if (string.IsNullOrWhiteSpace(userId))
+            // 1) 校验管理密钥（固定时序比较）
+            var adminKeyCfg = section["AdminKey"] ?? string.Empty;
+            var adminKeyHdr = HttpContext.Request.Headers["X-Exchange-Key"].ToString();
+            if (string.IsNullOrEmpty(adminKeyCfg) || string.IsNullOrEmpty(adminKeyHdr) || !FixedTimeEquals(adminKeyHdr, adminKeyCfg))
             {
-                Log.Warning("Token exchange failed: missing userId");
-                var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "userId is required" };
-                HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
-                return Task.CompletedTask;
+                await HttpContext.Response.SendAsync(new { statusCode = 403, code = Web.Data.ErrorCodes.Auth.Forbidden, message = "forbidden" }, 403, cancellation: ct);
+                return;
             }
 
-            // 3. 生成Web服务专用的JWT Token，并把用户ID写入sub
+            // 2) 可选：IP 白名单
+            var allowedIPs = section.GetSection("AllowedIPs").Get<string[]>() ?? Array.Empty<string>();
+            var remoteIP = HttpContext.Connection.RemoteIpAddress?.ToString();
+            if (allowedIPs.Length > 0 && (remoteIP is null || !allowedIPs.Contains(remoteIP)))
+            {
+                await HttpContext.Response.SendAsync(new { statusCode = 403, code = Web.Data.ErrorCodes.Auth.Forbidden, message = "ip not allowed" }, 403, cancellation: ct);
+                return;
+            }
+
+            // 3) 时间窗口 + nonce 防重放
+            var tsHdr = HttpContext.Request.Headers["X-Timestamp"].ToString();
+            var nonce = HttpContext.Request.Headers["X-Nonce"].ToString();
+            if (!long.TryParse(tsHdr, out var tsMs))
+            {
+                await HttpContext.Response.SendAsync(new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "invalid timestamp" }, 400, cancellation: ct);
+                return;
+            }
+            var maxSkew = section.GetValue<int>("MaxSkewSeconds", 300);
+            var nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (Math.Abs(nowMs - tsMs) > maxSkew * 1000L)
+            {
+                await HttpContext.Response.SendAsync(new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "timestamp skew too large" }, 400, cancellation: ct);
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(nonce) || nonce.Length < 12)
+            {
+                await HttpContext.Response.SendAsync(new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "invalid nonce" }, 400, cancellation: ct);
+                return;
+            }
+            var cacheKey = $"auth:ex:nonce:{nonce}";
+            if (_cache.TryGetValue(cacheKey, out _))
+            {
+                await HttpContext.Response.SendAsync(new { statusCode = 409, code = Web.Data.ErrorCodes.Common.Conflict, message = "replay detected" }, 409, cancellation: ct);
+                return;
+            }
+            _cache.Set(cacheKey, 1, TimeSpan.FromMinutes(5));
+
+            // 4) 校验 userId 并签发最小权限短效 Web Token
+            var userId = (req.UserId ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(userId) || !long.TryParse(userId, out _))
+            {
+                await HttpContext.Response.SendAsync(new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "userId is required" }, 400, cancellation: ct);
+                return;
+            }
+
             var webToken = JwtBearer.CreateToken(o =>
             {
                 o.SigningKey = _config["TokenKey"]!;
-                o.ExpireAt = DateTime.UtcNow.AddHours(6); // Web token有效期6小时
-
-                // 用户ID（用于服务端从JWT解析）
+                o.ExpireAt = DateTime.UtcNow.AddHours(6); // 6 小时
                 o.User.Claims.Add(new System.Security.Claims.Claim("sub", userId));
-
-                // 权限
-                o.User.Permissions.Add("web_access");
-                o.User.Permissions.Add("api_read");
-                o.User.Permissions.Add("api_write");
-                o.User.Permissions.Add("profile_update");
+                o.User.Permissions.Add("web_access"); // 最小权限
             });
 
-            // 4. 返回Web Token
-            Response = new TokenExchangeResponse
+            await HttpContext.Response.SendAsync(new TokenExchangeResponse
             {
                 WebToken = webToken,
-                ExpiresIn = 43200, // 6小时
+                ExpiresIn = 21600,
                 TokenType = "Bearer",
                 UserId = userId
-            };
-
-            return Task.CompletedTask;
+            }, 200, cancellation: ct);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Token exchange failed");
             var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "Token exchange failed" };
-            HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
-            return Task.CompletedTask;
+            await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }
     }
 
-    private async Task<TokenValidationResult> ValidateAppTokenAsync(string appToken, CancellationToken ct)
+    private static bool FixedTimeEquals(string a, string b)
     {
-        try
-        {
-            // 方式1：如果知道APP的签名密钥，直接验证
-            if (!string.IsNullOrEmpty(_config["AppPublicKey"]))
-            {
-                return await ValidateTokenWithKeyAsync(appToken);
-            }
-
-            // 方式2：调用APP服务的验证接口
-            var httpClient = _httpClientFactory.CreateClient("AppService");
-            var response = await httpClient.PostAsJsonAsync("/auth/validate", new { token = appToken }, ct);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return new TokenValidationResult { IsValid = false, ErrorMessage = "APP token validation failed" };
-            }
-
-            var validationData = await response.Content.ReadFromJsonAsync<AppTokenValidationResponse>(ct);
-            return new TokenValidationResult
-            {
-                IsValid = true,
-                UserId = validationData?.UserId,
-                Username = validationData?.Username,
-                Roles = validationData?.Roles ?? new List<string>()
-            };
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "ValidateAppTokenAsync failed");
-            return new TokenValidationResult { IsValid = false, ErrorMessage = ex.Message };
-        }
-    }
-
-    private Task<TokenValidationResult> ValidateTokenWithKeyAsync(string appToken)
-    {
-        // 使用APP的公钥直接验证token
-        // 这里简化处理，实际需要使用JWT库验证
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var validationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = _config["AppIssuer"],
-            ValidateAudience = true,
-            ValidAudience = _config["AppAudience"],
-            ValidateLifetime = true,
-            IssuerSigningKey = CreateRsaSecurityKey(_config["AppPublicKey"]!),
-            ClockSkew = TimeSpan.Zero
-        };
-
-        var principal = tokenHandler.ValidateToken(appToken, validationParameters, out var validatedToken);
-
-        return Task.FromResult(new TokenValidationResult
-        {
-            IsValid = true,
-            UserId = principal.FindFirst("sub")?.Value,
-            Username = principal.FindFirst("name")?.Value,
-            Roles = principal.FindAll("role").Select(c => c.Value).ToList()
-        });
-    }
-
-    private static RsaSecurityKey CreateRsaSecurityKey(string publicKeyBase64)
-    {
-        var rsa = RSA.Create();
-        rsa.ImportRSAPublicKey(Convert.FromBase64String(publicKeyBase64), out _);
-        return new RsaSecurityKey(rsa);
+        var ba = System.Text.Encoding.UTF8.GetBytes(a);
+        var bb = System.Text.Encoding.UTF8.GetBytes(b);
+        return CryptographicOperations.FixedTimeEquals(
+            ba.Length == bb.Length ? ba : ba.Concat(new byte[bb.Length - ba.Length]).ToArray(),
+            bb.Length == ba.Length ? bb : bb.Concat(new byte[ba.Length - bb.Length]).ToArray());
     }
 }
 

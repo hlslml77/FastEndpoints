@@ -9,32 +9,68 @@ Web API 文档（客户端版）
 1. 获取访问令牌（无需鉴权）
 POST /api/auth/exchange
 
-用客户端提供的 userId  换取 Web 专用 Token。
+受控后台签发（生产可用）。必须携带管理密钥与时间/nonce 防重放，仅用于受控环境（运维/GM/CI），不对公网开放。
+
+请求头
+- X-Exchange-Key: string 管理密钥（必须，与配置 AdminKey 一致）
+- X-Timestamp: long 毫秒时间戳（允许 ±MaxSkewSeconds，默认 300 秒）
+- X-Nonce: string 随机串，长度≥12（5 分钟内不可复用）
+
 
 请求体
 {
-  "userId": "123456", // string
+  "userId": "123456", // string（必须为 long 数字格式）
   "appToken": "可选" // string, optional
 }
 
 响应体
 {
   "webToken": "<JWT字符串>", // string (JWT)
-  "expiresIn": 43200,       // int (seconds)
+  "expiresIn": 21600,       // int (seconds)
   "tokenType": "Bearer",    // string
   "userId": "123456"        // string
 }
+说明
+- 最小权限：web_access
+- Token 有效期：6 小时（21600 秒）
 
 示例（curl）
+# 生成时间戳与随机 nonce（示例为 bash）
+ts=$(python - <<<'import time;print(int(time.time()*1000))')
+nonce=$(python - <<<'import secrets;print(secrets.token_hex(16))')
+
+错误响应示例
+- 403 Forbidden（管理密钥错误或未启用）
+  {
+    "statusCode": 403,
+    "code": 2002,
+    "message": "forbidden"
+  }
+- 400 Bad Request（时间戳非法/超出窗口/nonce 无效/缺少 userId）
+  {
+    "statusCode": 400,
+    "code": 1001,
+    "message": "invalid timestamp"
+  }
+- 409 Conflict（重复的 nonce，重放拦截）
+  {
+    "statusCode": 409,
+    "code": 1003,
+    "message": "replay detected"
+  }
+
 curl -X POST https://host/api/auth/exchange \
   -H "Content-Type: application/json" \
-  -d '{"userId":"123456"}'
+  -H "X-Exchange-Key: <YOUR_ADMIN_KEY>" \
+  -H "X-Timestamp: $ts" \
+  -H "X-Nonce: $nonce" \
+  -d '{"userId":"123456","appToken":"<optional>"}'
 
 拿到 webToken 后，访问其它接口时放入 Authorization 头。
 
 ---
 
-2. 角色系统（Role）
+1. 角色系统（Role）
 
 2.1 获取玩家角色信息
 POST /api/role/get-player
@@ -370,5 +406,4 @@ curl -X POST https://host/api/travel/drop-point/reward \
     - 5001 LocationNotFound（地点不存在）
 
 调用要点
-- 交换 Token 时 appToken 为可选；若提交，服务端可验证 appToken 并校验其中用户与 userId 一致
 - 所有业务接口需携带 Authorization: Bearer <webToken>
