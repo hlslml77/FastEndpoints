@@ -21,7 +21,13 @@ Set-Content -Path $LogPath -Value ("==== Test started at {0} ====" -f ([DateTime
 # Test statistics
 $script:TestStats = @{ Passed = 0; Failed = 0; Skipped = 0 }
 
-function Sanitize([string]$s) { if ($null -eq $s) { return '' } return ($s -replace '[^\x00-\x7F]', '') }
+function Sanitize([string]$s) {
+    if ($null -eq $s) { return '' }
+    $t = ($s -replace '[^\x00-\x7F]', '')    # remove non-ASCII
+    $t = ($t -replace '^\s+', '')             # trim leading whitespace
+    $t = ($t -replace '^\?\s*', '')          # drop leading '?'
+    return $t
+}
 function Step($msg){ $t = Sanitize $msg; Write-Host "`n$t" -ForegroundColor Cyan; Add-Content -Path $LogPath -Value "`n$t`n" }
 function Info($msg){ $t = Sanitize $msg; Write-Host $t -ForegroundColor Gray; Add-Content -Path $LogPath -Value $t }
 function Ok($msg){ $t = Sanitize $msg; $t = ("OK " + $t.Trim()); Write-Host $t -ForegroundColor Green; Add-Content -Path $LogPath -Value $t; $script:TestStats.Passed++ }
