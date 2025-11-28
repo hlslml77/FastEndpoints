@@ -34,13 +34,16 @@ public class PlayerRoleService : IPlayerRoleService
 {
     private readonly AppDbContext _dbContext;
     private readonly IRoleConfigService _configService;
+    private readonly IInventoryService _inventoryService;
 
     public PlayerRoleService(
         AppDbContext dbContext,
-        IRoleConfigService configService)
+        IRoleConfigService configService,
+        IInventoryService inventoryService)
     {
         _dbContext = dbContext;
         _configService = configService;
+        _inventoryService = inventoryService;
     }
 
     /// <summary>
@@ -73,6 +76,10 @@ public class PlayerRoleService : IPlayerRoleService
             };
 
             _dbContext.PlayerRole.Add(player);
+
+            // Grant initial items
+            await _inventoryService.GrantItemAsync(userId, 1002, 100);
+
             await _dbContext.SaveChangesAsync();
 
             Log.Information("Created new player role for user {UserId}", userId);
