@@ -12,7 +12,7 @@ public class Validator : Validator<CompleteSportRequest>
     public Validator()
     {
         RuleFor(x => x.DeviceType)
-            .GreaterThan(0).WithMessage("A valid DeviceType is required.");
+            .GreaterThanOrEqualTo(0).WithMessage("A valid DeviceType is required.");
 
         RuleFor(x => x.Distance)
             .GreaterThan(0).WithMessage("Distance must be a positive number.");

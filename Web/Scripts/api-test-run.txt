@@ -1,4 +1,4 @@
-==== Test started at 2025-11-28 07:31:51Z ====
+==== Test started at 2025-11-28 07:49:32Z ====
 
 [36m1) Exchanging token...[0m
 
@@ -7,37 +7,34 @@
 [36m2) Testing Role System...[0m
 
    Player Lv 2, Exp 17/20
-
-   HTTP Error: 400 (BadRequest) on http://localhost:9005/api/role/complete-sport
-   Response: {"statusCode":400,"message":"One or more errors occurred!","errors":{"deviceType":["A valid DeviceType is required."]}}
-   Completed sport. Player is now Lv 2, Exp 17/20
+   Completed sport. Player is now Lv 2, Exp 18/20
 
 [36m3) Testing Map System...[0m
 
    Visited: 1, Completed: 2
 
-   HTTP Error: 400 (BadRequest) on http://localhost:9005/api/map/visit-location
-   Response: {"statusCode":400,"code":1001,"message":"Item 8000 not found"}
+   HTTP Error: 404 (NotFound) on http://localhost:9005/api/map/visit-location
+   Response: {"statusCode":404,"code":5001,"message":"µØµã²»´æÔÚ"}
    Saved progress & visited location. Visited: 1, Completed: 2
 
 [36m4) Testing Inventory System...[0m
 
-   Player has 0 types of items.
+   Player has 2 types of items.
    Player has 3 pieces of equipment.
    Successfully equipped and unequipped item ID 2
 
 [36m5) Testing Travel System...[0m
 
-   Event reward: Item 1001 x 7
+   Event reward: Item 1002 x 6
    Drop reward: 1 items.
 
 [36m6) Testing Collection System...[0m
 
-   Collections (before): 10
-   [1] Obtained ID: 20
-   [2] Obtained ID: 21
-   [3] Obtained ID: 95
-   Collections (after): 11
+   Collections (before): 14
+   [1] Obtained ID: 12
+   [2] Obtained ID: 19
+   [3] Obtained ID: 61
+   Collections (after): 16
    Claim combo failed: Î´Âú×ãÁìÈ¡Ìõ¼þ
 
 Script finished.
