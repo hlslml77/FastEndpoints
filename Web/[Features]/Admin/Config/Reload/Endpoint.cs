@@ -73,6 +73,7 @@ public class Endpoint : EndpointWithoutRequest<object>
         var mapFiles = new HashSet<string>(new[] { "worlduimap_mapbase.json" }, StringComparer.OrdinalIgnoreCase);
         var eventFiles = new HashSet<string>(new[] { "travel_eventlist.json" }, StringComparer.OrdinalIgnoreCase);
         var dropFiles = new HashSet<string>(new[] { "travel_droppoint.json" }, StringComparer.OrdinalIgnoreCase);
+        var collectionFiles = new HashSet<string>(new[] { "collectionlist_item.json", "collectionlist_combination.json" }, StringComparer.OrdinalIgnoreCase);
 
         var matchedServiceNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var unknownFiles = new List<string>();
@@ -91,6 +92,7 @@ public class Endpoint : EndpointWithoutRequest<object>
                 else if (mapFiles.Contains(f)) matchedServiceNames.Add("map");
                 else if (eventFiles.Contains(f)) matchedServiceNames.Add("event");
                 else if (dropFiles.Contains(f)) matchedServiceNames.Add("drop");
+                else if (collectionFiles.Contains(f)) matchedServiceNames.Add("collection");
                 else unknownFiles.Add(f);
             }
         }

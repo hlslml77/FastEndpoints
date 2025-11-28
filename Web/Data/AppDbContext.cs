@@ -18,6 +18,11 @@ public class AppDbContext : DbContext
     public DbSet<PlayerItem> PlayerItem { get; set; }
     public DbSet<PlayerEquipmentItem> PlayerEquipmentItem { get; set; }
 
+    // Collections
+    public DbSet<PlayerCollection> PlayerCollection { get; set; }
+    public DbSet<PlayerCollectionComboClaim> PlayerCollectionComboClaim { get; set; }
+    public DbSet<CollectionGlobalCounter> CollectionGlobalCounter { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -31,6 +36,15 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<PlayerItem>()
             .HasKey(e => new { e.UserId, e.ItemId });
+
+        modelBuilder.Entity<PlayerCollection>()
+            .HasKey(e => new { e.UserId, e.CollectionId });
+
+        modelBuilder.Entity<PlayerCollectionComboClaim>()
+            .HasKey(e => new { e.UserId, e.ComboId });
+
+        modelBuilder.Entity<CollectionGlobalCounter>()
+            .HasKey(e => e.CollectionId);
     }
 }
 

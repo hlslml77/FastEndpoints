@@ -80,6 +80,10 @@ bld.Services
    .AddSingleton<IItemConfigService>(sp => sp.GetRequiredService<ItemConfigService>())
    .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<ItemConfigService>())
 
+   .AddSingleton<CollectionConfigService>()
+   .AddSingleton<ICollectionConfigService>(sp => sp.GetRequiredService<CollectionConfigService>())
+   .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<CollectionConfigService>())
+
    .AddSingleton<TravelEventConfigService>()
    .AddSingleton<ITravelEventConfigService>(sp => sp.GetRequiredService<TravelEventConfigService>())
    .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<TravelEventConfigService>())
@@ -91,6 +95,7 @@ bld.Services
    .AddScoped<IPlayerRoleService, PlayerRoleService>()
    .AddScoped<IMapService, MapService>()
    .AddScoped<IInventoryService, InventoryService>()
+   .AddScoped<ICollectionService, CollectionService>()
    .AddSingleton(new SingltonSVC(0))
    .AddJobQueues<Job, JobStorage>()
    .RegisterServicesFromWeb()
@@ -238,7 +243,7 @@ app.UseRequestLocalization(
    .UseJwtRevocation<JwtBlacklistChecker>()
    .UseAuthentication()
    .UseAuthorization()
-   .UseAntiforgeryFE(additionalContentTypes: ["application/json"])
+   .UseAntiforgeryFE(additionalContentTypes: new[] { "application/json" })
    .UseOutputCache()
    .UseFastEndpoints(
        c =>

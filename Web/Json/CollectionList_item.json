@@ -1,0 +1,1010 @@
+[
+  {
+    "ID": 0,
+    "CollectionName": "Lake Stone Heart Light",
+    "Weight": 100,
+    "Image": 0,
+    "ClothingParts": [
+      11,
+      1
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "Captures the vibrant, multi-colored pebbles found at the bottom of Lake McDonald, symbolizing the lake's unique beauty and the journey's colorful start."
+  },
+  {
+    "ID": 1,
+    "CollectionName": "Lakeside Silhouette Metal Tag",
+    "Weight": 500,
+    "Image": 1,
+    "ClothingParts": [
+      11,
+      2
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "A minimalist representation of the tranquil lake and towering trees, highlighting the serene landscape of the initial section."
+  },
+  {
+    "ID": 2,
+    "CollectionName": "Lake McDonald Tag",
+    "Weight": 2000,
+    "Image": 2,
+    "ClothingParts": [
+      11,
+      3
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "Features a direct image of the iconic colorful stones from Lake McDonald, a simple yet distinct reminder of the area."
+  },
+  {
+    "ID": 3,
+    "CollectionName": "Lake McDonald Panorama",
+    "Weight": 6000,
+    "Image": 3,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A breathtaking wide shot of Lake McDonald under the soft morning light."
+  },
+  {
+    "ID": 4,
+    "CollectionName": "Lake Bottom Colored Pebbles",
+    "Weight": 6000,
+    "Image": 4,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 1,
+    "Description": "A detailed view of the unique, vibrant pebbles beneath the clear waters."
+  },
+  {
+    "ID": 5,
+    "CollectionName": "McDonald Falls",
+    "Weight": 6000,
+    "Image": 5,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 30,
+    "Description": "A snapshot of the beautiful cascading waters near the lake."
+  },
+  {
+    "ID": 6,
+    "CollectionName": "Serene Lakeside Forest Path",
+    "Weight": 6000,
+    "Image": 6,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Captures the peaceful, tree-lined trails along the lake."
+  },
+  {
+    "ID": 7,
+    "CollectionName": "Boat Reflection on Lake Surface",
+    "Weight": 6000,
+    "Image": 7,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A picturesque image of boats gently reflected on the calm lake."
+  },
+  {
+    "ID": 8,
+    "CollectionName": "Sunlight Through Forest Canopy",
+    "Weight": 6000,
+    "Image": 8,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Shows rays of sunlight piercing through the dense forest leaves."
+  },
+  {
+    "ID": 9,
+    "CollectionName": "Stream Flowing Through Rocks",
+    "Weight": 6000,
+    "Image": 9,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A close-up of a small stream winding its way over ancient rocks."
+  },
+  {
+    "ID": 10,
+    "CollectionName": "West Entrance Sign",
+    "Weight": 6000,
+    "Image": 10,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "The welcoming gateway to Glacier National Park from a scenic distance."
+  },
+  {
+    "ID": 11,
+    "CollectionName": "Lake Ripple Badge",
+    "Weight": 6000,
+    "Image": 11,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge featuring the gentle ripples on the lake's surface."
+  },
+  {
+    "ID": 12,
+    "CollectionName": "Pine Tree Silhouette Badge",
+    "Weight": 6000,
+    "Image": 12,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A simple badge with the iconic silhouette of a pine tree."
+  },
+  {
+    "ID": 13,
+    "CollectionName": "Colored Pebble Pattern Badge",
+    "Weight": 6000,
+    "Image": 13,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge adorned with a mosaic pattern inspired by Lake McDonald's stones."
+  },
+  {
+    "ID": 14,
+    "CollectionName": "Antler Badge",
+    "Weight": 6000,
+    "Image": 14,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Represents the wildlife commonly seen in the lakeside forest."
+  },
+  {
+    "ID": 15,
+    "CollectionName": "Small Waterfall Icon Badge",
+    "Weight": 6000,
+    "Image": 15,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "An icon of a small, tranquil waterfall, common in this lush area."
+  },
+  {
+    "ID": 16,
+    "CollectionName": "West Gate Welcome Badge",
+    "Weight": 6000,
+    "Image": 16,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge symbolizing the warm welcome upon entering the park from the west."
+  },
+  {
+    "ID": 17,
+    "CollectionName": "Lakeside Stroll Badge",
+    "Weight": 6000,
+    "Image": 17,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Commemorates a peaceful walk along the shores of Lake McDonald."
+  },
+  {
+    "ID": 18,
+    "CollectionName": "Heart of the Forest Badge",
+    "Weight": 6000,
+    "Image": 18,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Represents the deep, untouched beauty of the surrounding forest."
+  },
+  {
+    "ID": 19,
+    "CollectionName": "Smooth Lakeside Stone",
+    "Weight": 6000,
+    "Image": 19,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual smooth stone, reminiscent of those found on the lake shore."
+  },
+  {
+    "ID": 20,
+    "CollectionName": "A Bundle of Pine Needles",
+    "Weight": 6000,
+    "Image": 20,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A small collection of fragrant pine needles from the forest."
+  },
+  {
+    "ID": 21,
+    "CollectionName": "Miniature Mushroom Model",
+    "Weight": 6000,
+    "Image": 21,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A tiny, detailed model of a forest mushroom."
+  },
+  {
+    "ID": 22,
+    "CollectionName": "A Piece of Damp Moss",
+    "Weight": 6000,
+    "Image": 22,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual sample of the soft, damp moss found in shaded areas."
+  },
+  {
+    "ID": 23,
+    "CollectionName": "Clear Lake Water Sample",
+    "Weight": 6000,
+    "Image": 23,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A pristine sample of the crystal-clear waters of Lake McDonald."
+  },
+  {
+    "ID": 24,
+    "CollectionName": "Wild Berries",
+    "Weight": 6000,
+    "Image": 24,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A small cluster of wild berries, a common sight in the park."
+  },
+  {
+    "ID": 25,
+    "CollectionName": "Bird Song Recording",
+    "Weight": 6000,
+    "Image": 25,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A recording of the melodious birdsong heard in the forest."
+  },
+  {
+    "ID": 26,
+    "CollectionName": "Lakeside Breeze",
+    "Weight": 6000,
+    "Image": 26,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual wisp of the refreshing breeze off the lake."
+  },
+  {
+    "ID": 27,
+    "CollectionName": "Continental Divide Pendant",
+    "Weight": 100,
+    "Image": 27,
+    "ClothingParts": [
+      11,
+      4
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "A robust metal pendant symbolizing the triumph of crossing the Continental Divide at Logan Pass, featuring mountain peaks and a compass motif."
+  },
+  {
+    "ID": 29,
+    "CollectionName": "Logan Pass Simple Carabiner",
+    "Weight": 500,
+    "Image": 29,
+    "ClothingParts": [
+      11,
+      5
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "A practical carabiner engraved with Logan Pass - Continental Divide, serving as a straightforward memento of reaching the summit."
+  },
+  {
+    "ID": 30,
+    "CollectionName": "Summit Road Tag",
+    "Weight": 2000,
+    "Image": 30,
+    "ClothingParts": [
+      11,
+      6
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "An elegant etched metal tag illustrating the challenging yet scenic ascent of the Going-to-the-Sun Road to its highest points."
+  },
+  {
+    "ID": 31,
+    "CollectionName": "Winding Going-to-the-Sun Road",
+    "Weight": 6000,
+    "Image": 31,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A stunning aerial view of the road's intricate curves through the mountains."
+  },
+  {
+    "ID": 32,
+    "CollectionName": "Steep Cliffs by Mountain Road",
+    "Weight": 6000,
+    "Image": 32,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Captures the dramatic, sheer rock faces encountered along the route."
+  },
+  {
+    "ID": 33,
+    "CollectionName": "Cascading Waterfall",
+    "Weight": 6000,
+    "Image": 33,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A detailed shot of one of the many powerful waterfalls tumbling down the cliffs."
+  },
+  {
+    "ID": 34,
+    "CollectionName": "Tunnel Entrance View",
+    "Weight": 6000,
+    "Image": 34,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "The unique perspective of entering or exiting one of the road's tunnels."
+  },
+  {
+    "ID": 35,
+    "CollectionName": "Cloud-Shrouded Valley",
+    "Weight": 6000,
+    "Image": 35,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A mystical view of valleys enveloped in swirling clouds."
+  },
+  {
+    "ID": 36,
+    "CollectionName": "Distant Glacier View",
+    "Weight": 6000,
+    "Image": 36,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A glimpse of the ancient glaciers from afar, hinting at their grandeur."
+  },
+  {
+    "ID": 37,
+    "CollectionName": "Rock Piles on Alpine Meadow",
+    "Weight": 6000,
+    "Image": 37,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Images of small, often human-made, rock cairns on the high-altitude meadows."
+  },
+  {
+    "ID": 38,
+    "CollectionName": "Logan Pass Distant View",
+    "Weight": 6000,
+    "Image": 38,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A wide shot of the iconic Logan Pass from a scenic viewpoint."
+  },
+  {
+    "ID": 39,
+    "CollectionName": "Winding Road Badge",
+    "Weight": 6000,
+    "Image": 39,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge featuring the serpentine path of the mountain road."
+  },
+  {
+    "ID": 40,
+    "CollectionName": "Mountain Silhouette Badge",
+    "Weight": 6000,
+    "Image": 40,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A simple badge with the majestic outline of a mountain peak."
+  },
+  {
+    "ID": 41,
+    "CollectionName": "Waterfall Icon Badge",
+    "Weight": 6000,
+    "Image": 41,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "An emblem representing the numerous waterfalls along the route."
+  },
+  {
+    "ID": 42,
+    "CollectionName": "Continental Divide Badge",
+    "Weight": 6000,
+    "Image": 42,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge marking the significant geological feature of the Continental Divide."
+  },
+  {
+    "ID": 43,
+    "CollectionName": "Antler Badge",
+    "Weight": 6000,
+    "Image": 43,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Represents the wildlife, like mountain goats or bighorn sheep, found at higher elevations."
+  },
+  {
+    "ID": 44,
+    "CollectionName": "Conquer the Road Badge",
+    "Weight": 6000,
+    "Image": 44,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Celebrates the achievement of navigating the challenging mountain road."
+  },
+  {
+    "ID": 45,
+    "CollectionName": "Above the Clouds Badge",
+    "Weight": 6000,
+    "Image": 45,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Symbolizes the feeling of being high above the cloud line."
+  },
+  {
+    "ID": 46,
+    "CollectionName": "Engineering Marvel Badge",
+    "Weight": 6000,
+    "Image": 46,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Honors the incredible human effort in constructing the Going-to-the-Sun Road."
+  },
+  {
+    "ID": 47,
+    "CollectionName": "A Piece of Weathered Rock",
+    "Weight": 6000,
+    "Image": 47,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual fragment of rock, shaped by the harsh alpine elements."
+  },
+  {
+    "ID": 48,
+    "CollectionName": "A Drop of Glacier Meltwater",
+    "Weight": 6000,
+    "Image": 48,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A pure drop of water, originating from the melting glaciers."
+  },
+  {
+    "ID": 49,
+    "CollectionName": "Miniature Road Milestone",
+    "Weight": 6000,
+    "Image": 49,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A tiny replica of a milestone marker from the scenic highway."
+  },
+  {
+    "ID": 50,
+    "CollectionName": "Alpine Plant Seed",
+    "Weight": 6000,
+    "Image": 50,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A seed from a resilient plant that thrives in the high-altitude environment."
+  },
+  {
+    "ID": 51,
+    "CollectionName": "Crisp Mountain Air",
+    "Weight": 6000,
+    "Image": 51,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual sample of the invigorating, clean air at the summit."
+  },
+  {
+    "ID": 52,
+    "CollectionName": "Wind-Blown Grass Blade",
+    "Weight": 6000,
+    "Image": 52,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A single blade of grass, bent by the strong mountain winds."
+  },
+  {
+    "ID": 53,
+    "CollectionName": "Summit Silence",
+    "Weight": 6000,
+    "Image": 53,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A representation of the profound quietness experienced at the mountain top."
+  },
+  {
+    "ID": 54,
+    "CollectionName": "A Tiny Cloud",
+    "Weight": 6000,
+    "Image": 54,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A whimsical, miniature cloud, symbolizing the high elevation."
+  },
+  {
+    "ID": 55,
+    "CollectionName": "Glacier Secret Tag",
+    "Weight": 100,
+    "Image": 55,
+    "ClothingParts": [
+      11,
+      7
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "A translucent resin tag embedding real alpine wildflowers, symbolizing the delicate beauty and purity of the glacier ecosystem."
+  },
+  {
+    "ID": 57,
+    "CollectionName": "Glacier Petal Ornament",
+    "Weight": 500,
+    "Image": 57,
+    "ClothingParts": [
+      11,
+      8
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "A lightweight acrylic ornament with embedded floral designs, capturing the essence of alpine blooms and the clarity of glacial ice."
+  },
+  {
+    "ID": 58,
+    "CollectionName": "Glacier Flower Simple Badge",
+    "Weight": 2000,
+    "Image": 58,
+    "ClothingParts": [
+      11,
+      9
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "A straightforward badge featuring a stylized alpine flower, a common emblem of the park's natural beauty."
+  },
+  {
+    "ID": 59,
+    "CollectionName": "Logan Pass Panorama",
+    "Weight": 6000,
+    "Image": 59,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A wide view of the expansive, flower-dotted meadows surrounding Logan Pass."
+  },
+  {
+    "ID": 60,
+    "CollectionName": "Glacier Lily Close-up",
+    "Weight": 6000,
+    "Image": 60,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A detailed photograph of the iconic Glacier Lily in full bloom."
+  },
+  {
+    "ID": 61,
+    "CollectionName": "Beargrass Cluster Close-up",
+    "Weight": 6000,
+    "Image": 61,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A close-up of the distinctive white Beargrass flowers."
+  },
+  {
+    "ID": 62,
+    "CollectionName": "Distant Glacier Close-up",
+    "Weight": 6000,
+    "Image": 62,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A nearer perspective of the park's receding glaciers."
+  },
+  {
+    "ID": 63,
+    "CollectionName": "Small Lake from Glacier Meltwater",
+    "Weight": 6000,
+    "Image": 63,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A serene image of a small, pristine lake formed by melting glaciers."
+  },
+  {
+    "ID": 64,
+    "CollectionName": "Alpine Tundra Plants",
+    "Weight": 6000,
+    "Image": 64,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A close-up of the hardy, low-lying plant life found in the tundra."
+  },
+  {
+    "ID": 65,
+    "CollectionName": "St. Mary Lake Distant View",
+    "Weight": 6000,
+    "Image": 65,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A sweeping view of St. Mary Lake as seen from the higher elevations."
+  },
+  {
+    "ID": 66,
+    "CollectionName": "Glacier-Carved U-Shaped Valley",
+    "Weight": 6000,
+    "Image": 66,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "An illustrative photo of the classic U-shaped valleys formed by ancient glaciers."
+  },
+  {
+    "ID": 67,
+    "CollectionName": "Glacier Lily Badge",
+    "Weight": 6000,
+    "Image": 67,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge dedicated to the beautiful and resilient Glacier Lily."
+  },
+  {
+    "ID": 68,
+    "CollectionName": "Mini Glacier Badge",
+    "Weight": 6000,
+    "Image": 68,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge featuring a miniature representation of a glacier."
+  },
+  {
+    "ID": 69,
+    "CollectionName": "Antler Badge",
+    "Weight": 6000,
+    "Image": 69,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Represents the wildlife often seen in the alpine and subalpine zones."
+  },
+  {
+    "ID": 70,
+    "CollectionName": "Alpine Plant Badge",
+    "Weight": 6000,
+    "Image": 70,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge celebrating the diverse and unique flora of the high mountains."
+  },
+  {
+    "ID": 71,
+    "CollectionName": "Flowers on Ice Badge",
+    "Weight": 6000,
+    "Image": 71,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Symbolizes the vibrant life thriving amidst the icy remnants of glaciers."
+  },
+  {
+    "ID": 72,
+    "CollectionName": "Glacier Footprint Badge",
+    "Weight": 6000,
+    "Image": 72,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Represents the lasting impact and beauty of the glaciers."
+  },
+  {
+    "ID": 73,
+    "CollectionName": "Ecosystem Guardian Badge",
+    "Weight": 6000,
+    "Image": 73,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge for those who appreciate and protect the delicate alpine ecosystem."
+  },
+  {
+    "ID": 74,
+    "CollectionName": "Source of Purity Badge",
+    "Weight": 6000,
+    "Image": 74,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Signifies the pure, untouched nature of the park's high-altitude waters."
+  },
+  {
+    "ID": 75,
+    "CollectionName": "A Pressed Glacier Lily",
+    "Weight": 6000,
+    "Image": 75,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual, perfectly preserved Glacier Lily, as if pressed in a book."
+  },
+  {
+    "ID": 76,
+    "CollectionName": "A Snowflake Crystal",
+    "Weight": 6000,
+    "Image": 76,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A delicate, intricate virtual snowflake."
+  },
+  {
+    "ID": 77,
+    "CollectionName": "Alpine Meadow Soil Sample",
+    "Weight": 6000,
+    "Image": 77,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A small sample of the rich, dark soil from the high meadows."
+  },
+  {
+    "ID": 78,
+    "CollectionName": "A Blade of Beargrass",
+    "Weight": 6000,
+    "Image": 78,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A single, distinctive blade of Beargrass."
+  },
+  {
+    "ID": 79,
+    "CollectionName": "Alpine Spring Water",
+    "Weight": 6000,
+    "Image": 79,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual vial of pure, cold water from an alpine spring."
+  },
+  {
+    "ID": 80,
+    "CollectionName": "Glacier Wind Sound",
+    "Weight": 6000,
+    "Image": 80,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A recording of the distinct, whistling sound of wind over glaciers."
+  },
+  {
+    "ID": 81,
+    "CollectionName": "A Small Piece of Melted Snow",
+    "Weight": 6000,
+    "Image": 81,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A tiny, ephemeral piece of melting snow."
+  },
+  {
+    "ID": 82,
+    "CollectionName": "Alpine Insect Specimen",
+    "Weight": 6000,
+    "Image": 82,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual specimen of a unique insect found in the alpine environment."
+  },
+  {
+    "ID": 83,
+    "CollectionName": "Bison Silhouette Metal Keychain",
+    "Weight": 100,
+    "Image": 83,
+    "ClothingParts": [
+      11,
+      10
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "A powerful, multi-material totem ornament featuring bison and eagle motifs, representing the spirit animals and rich cultural heritage of the Blackfeet Nation in the eastern valley."
+  },
+  {
+    "ID": 84,
+    "CollectionName": "East Valley Ornament",
+    "Weight": 500,
+    "Image": 84,
+    "ClothingParts": [
+      11,
+      11
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "A simple yet iconic metal keychain featuring the silhouette of a bison, a prominent symbol of the eastern plains and its wildlife."
+  },
+  {
+    "ID": 85,
+    "CollectionName": "East Valley Tag",
+    "Weight": 2000,
+    "Image": 85,
+    "ClothingParts": [
+      11,
+      12
+    ],
+    "LimitedEditionCollectibles": 0,
+    "Description": "A rugged leather tag embossed with an eagle soaring over simplified prairie and mountain lines, embodying the watchful spirit of the eastern valley."
+  },
+  {
+    "ID": 86,
+    "CollectionName": "St. Mary Lake Panorama",
+    "Weight": 6000,
+    "Image": 86,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A wide, sweeping view of St. Mary Lake from its eastern side, showcasing its unique blue hues."
+  },
+  {
+    "ID": 87,
+    "CollectionName": "Blackfeet Cultural Center",
+    "Weight": 6000,
+    "Image": 87,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A photo of the cultural center, highlighting the rich heritage of the local Blackfeet Nation."
+  },
+  {
+    "ID": 88,
+    "CollectionName": "Bison Herd on Prairie",
+    "Weight": 6000,
+    "Image": 88,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A majestic view of a bison herd grazing on the expansive eastern prairies."
+  },
+  {
+    "ID": 89,
+    "CollectionName": "Eagle Soaring in Sky",
+    "Weight": 6000,
+    "Image": 89,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A captivating image of an eagle gracefully soaring above the valley."
+  },
+  {
+    "ID": 90,
+    "CollectionName": "East Entrance Welcome Sign",
+    "Weight": 6000,
+    "Image": 90,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "The official welcome sign at the eastern gateway to Glacier National Park."
+  },
+  {
+    "ID": 91,
+    "CollectionName": "Sunset over Open Valley",
+    "Weight": 6000,
+    "Image": 91,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A vibrant photo of the sun setting over the vast, open eastern valley."
+  },
+  {
+    "ID": 92,
+    "CollectionName": "Unique Blue of St. Mary Lake",
+    "Weight": 6000,
+    "Image": 92,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A close-up emphasizing the distinct, deep blue color of St. Mary Lake's waters."
+  },
+  {
+    "ID": 93,
+    "CollectionName": "Native American Style Totem Pole",
+    "Weight": 6000,
+    "Image": 93,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A photo of an intricately carved totem pole, reflecting local indigenous art."
+  },
+  {
+    "ID": 94,
+    "CollectionName": "St. Mary Lake Badge",
+    "Weight": 6000,
+    "Image": 94,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge featuring the serene waters and surrounding landscape of St. Mary Lake."
+  },
+  {
+    "ID": 95,
+    "CollectionName": "Bison Silhouette Badge",
+    "Weight": 6000,
+    "Image": 95,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge with the powerful silhouette of a bison, a symbol of the plains."
+  },
+  {
+    "ID": 96,
+    "CollectionName": "Eagle Badge",
+    "Weight": 6000,
+    "Image": 96,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "An emblem representing the majestic eagle, a common sight in the park."
+  },
+  {
+    "ID": 97,
+    "CollectionName": "East Gate Badge",
+    "Weight": 6000,
+    "Image": 97,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A badge signifying passage through the eastern entrance of the park."
+  },
+  {
+    "ID": 98,
+    "CollectionName": "Heart of the Prairie Badge",
+    "Weight": 6000,
+    "Image": 98,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Symbolizes the vast and vital prairie ecosystem of the eastern valley."
+  },
+  {
+    "ID": 99,
+    "CollectionName": "Cultural Heritage Badge",
+    "Weight": 6000,
+    "Image": 99,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Honors the enduring cultural traditions of the indigenous people connected to this land."
+  },
+  {
+    "ID": 100,
+    "CollectionName": "Journey's End Badge",
+    "Weight": 6000,
+    "Image": 100,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Marks the completion of the Going-to-the-Sun Road journey."
+  },
+  {
+    "ID": 101,
+    "CollectionName": "Broad Horizon Badge",
+    "Weight": 6000,
+    "Image": 101,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "Represents the expansive views and sense of freedom in the eastern valley."
+  },
+  {
+    "ID": 102,
+    "CollectionName": "A Strand of Bison Hair",
+    "Weight": 6000,
+    "Image": 102,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual strand of hair from a wild bison, symbolizing its presence."
+  },
+  {
+    "ID": 103,
+    "CollectionName": "An Eagle Feather",
+    "Weight": 6000,
+    "Image": 103,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual, perfectly preserved eagle feather."
+  },
+  {
+    "ID": 104,
+    "CollectionName": "A Bundle of Prairie Grass",
+    "Weight": 6000,
+    "Image": 104,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A small collection of the native grasses from the eastern plains."
+  },
+  {
+    "ID": 105,
+    "CollectionName": "Miniature Tipi Model",
+    "Weight": 6000,
+    "Image": 105,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A tiny replica of a traditional Native American tipi."
+  },
+  {
+    "ID": 106,
+    "CollectionName": "St. Mary Lake Water Sample",
+    "Weight": 6000,
+    "Image": 106,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A pure sample of water from the iconic St. Mary Lake."
+  },
+  {
+    "ID": 107,
+    "CollectionName": "East Valley Wind",
+    "Weight": 6000,
+    "Image": 107,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual representation of the distinct winds blowing across the valley."
+  },
+  {
+    "ID": 108,
+    "CollectionName": "Native American Music Snippet",
+    "Weight": 6000,
+    "Image": 108,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A short audio clip of traditional indigenous music."
+  },
+  {
+    "ID": 109,
+    "CollectionName": "Sunset Glow",
+    "Weight": 6000,
+    "Image": 109,
+    "ClothingParts": null,
+    "LimitedEditionCollectibles": 0,
+    "Description": "A virtual capture of the warm, golden light of a valley sunset."
+  }
+]
