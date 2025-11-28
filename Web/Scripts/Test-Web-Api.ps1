@@ -69,9 +69,9 @@ function Run-Tests($token) {
     Step "3) Testing Map System..."
     $mapState1 = Api-Call -Uri "$BaseUrl/api/map/player-state" -Auth $auth -Method 'Post' -Body @{}
     Info ("   Visited: $($mapState1.visitedLocationIds.Count), Completed: $($mapState1.completedLocationIds.Count)")
-    $progress = @{ startLocationId=10011; endLocationId=10012; distanceMeters=500 }
+    $progress = @{ startLocationId=100101; endLocationId=100102; distanceMeters=200 }
     Api-Call -Uri "$BaseUrl/api/map/save-progress" -Auth $auth -Method 'Post' -Body $progress
-    $visit = @{ locationId=10011; isCompleted=$true }
+    $visit = @{ locationId=100101; isCompleted=$true }
     Api-Call -Uri "$BaseUrl/api/map/visit-location" -Auth $auth -Method 'Post' -Body $visit
     $mapState2 = Api-Call -Uri "$BaseUrl/api/map/player-state" -Auth $auth -Method 'Post' -Body @{}
     Ok ("   Saved progress & visited location. Visited: $($mapState2.visitedLocationIds.Count), Completed: $($mapState2.completedLocationIds.Count)")

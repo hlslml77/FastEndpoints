@@ -139,12 +139,12 @@ public class MapLocationInfo
     /// <summary>
     /// 描述
     /// </summary>
-    public string? Description { get; set; }
+    public int Description { get; set; }
 
     /// <summary>
     /// 景点描述
     /// </summary>
-    public string? ScenicSpot { get; set; }
+    public int ScenicSpot { get; set; }
 
     /// <summary>
     /// 层级

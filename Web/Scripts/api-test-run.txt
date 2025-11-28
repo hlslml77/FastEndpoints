@@ -1,4 +1,4 @@
-==== Test started at 2025-11-28 07:49:32Z ====
+==== Test started at 2025-11-28 08:04:01Z ====
 
 [36m1) Exchanging token...[0m
 
@@ -6,20 +6,17 @@
 
 [36m2) Testing Role System...[0m
 
-   Player Lv 2, Exp 17/20
-   Completed sport. Player is now Lv 2, Exp 18/20
+   Player Lv 2, Exp 19/20
+   Completed sport. Player is now Lv 3, Exp 0/30
 
 [36m3) Testing Map System...[0m
 
    Visited: 1, Completed: 2
-
-   HTTP Error: 404 (NotFound) on http://localhost:9005/api/map/visit-location
-   Response: {"statusCode":404,"code":5001,"message":"µØµã²»´æÔÚ"}
-   Saved progress & visited location. Visited: 1, Completed: 2
+   Saved progress & visited location. Visited: 2, Completed: 3
 
 [36m4) Testing Inventory System...[0m
 
-   Player has 2 types of items.
+   Player has 3 types of items.
    Player has 3 pieces of equipment.
    Successfully equipped and unequipped item ID 2
 
@@ -30,11 +27,11 @@
 
 [36m6) Testing Collection System...[0m
 
-   Collections (before): 14
-   [1] Obtained ID: 12
-   [2] Obtained ID: 19
-   [3] Obtained ID: 61
-   Collections (after): 16
+   Collections (before): 18
+   [1] Obtained ID: 17
+   [2] Obtained ID: 75
+   [3] Obtained ID: 25
+   Collections (after): 21
    Claim combo failed: Î´Âú×ãÁìÈ¡Ìõ¼þ
 
 Script finished.
