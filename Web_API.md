@@ -76,6 +76,7 @@ curl -X POST https://host/api/auth/exchange \
 POST /api/role/get-player
 
 - 认证：需要 Bearer Token（权限 web_access）
+- 
 - 请求体：空对象 {} 或不传（从 JWT 的 sub 解析用户ID）
 
 响应示例
