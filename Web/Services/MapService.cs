@@ -134,6 +134,27 @@ public class MapService : IMapService
             throw new ArgumentException($"Location {locationId} not found in map configuration");
         }
 
+        // Diagnostic log
+        Log.Information("Visiting location {LocationId}, configured consumption: [{Consumption}]", locationId, mapConfig.Consumption != null ? string.Join(", ", mapConfig.Consumption) : "null");
+
+        // 检查并消耗物品
+        if (mapConfig.Consumption is { Count: 2 } consumption && consumption[1] > 0)
+        {
+            var itemId = consumption[0];
+            var amount = consumption[1];
+            try
+            {
+                await _inventoryService.ConsumeItemAsync(userId, itemId, amount, ct: default);
+                Log.Information("User {UserId} consumed item {ItemId} x{Amount} for location {LocationId}", userId, itemId, amount, locationId);
+            }
+            catch (ArgumentException ex)
+            {
+                // 物品不足
+                Log.Warning("User {UserId} has insufficient items ({ItemId} x{Amount}) for location {LocationId}: {Message}", userId, itemId, amount, locationId, ex.Message);
+                throw new InvalidOperationException("物品不足");
+            }
+        }
+
         // 查找是否已访问过
         var existingVisit = await _dbContext.PlayerMapLocationVisit
             .FirstOrDefaultAsync(v => v.UserId == userId && v.LocationId == locationId);

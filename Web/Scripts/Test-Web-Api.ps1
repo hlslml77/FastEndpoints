@@ -67,11 +67,21 @@ function Run-Tests($token) {
 
     # Map System
     Step "3) Testing Map System..."
+    Info "   Testing consumption failure (expected)..."
+    $visitWithCost = @{ locationId=100101; isCompleted=$true }
+    $visitCostResult = Api-Call -Uri "$BaseUrl/api/map/visit-location" -Auth $auth -Method 'Post' -Body $visitWithCost
+    if ($visitCostResult -and $visitCostResult.message -eq '物品不足') {
+        Ok "   Correctly failed with '物品不足' as expected."
+    } else {
+        Warn "   Did not fail as expected for item consumption."
+    }
+
+    Info "`n   Testing standard map progression..."
     $mapState1 = Api-Call -Uri "$BaseUrl/api/map/player-state" -Auth $auth -Method 'Post' -Body @{}
     Info ("   Visited: $($mapState1.visitedLocationIds.Count), Completed: $($mapState1.completedLocationIds.Count)")
-    $progress = @{ startLocationId=100101; endLocationId=100102; distanceMeters=200 }
+    $progress = @{ startLocationId=100102; endLocationId=100103; distanceMeters=300 }
     Api-Call -Uri "$BaseUrl/api/map/save-progress" -Auth $auth -Method 'Post' -Body $progress
-    $visit = @{ locationId=100101; isCompleted=$true }
+    $visit = @{ locationId=100102; isCompleted=$true }
     Api-Call -Uri "$BaseUrl/api/map/visit-location" -Auth $auth -Method 'Post' -Body $visit
     $mapState2 = Api-Call -Uri "$BaseUrl/api/map/player-state" -Auth $auth -Method 'Post' -Body @{}
     Ok ("   Saved progress & visited location. Visited: $($mapState2.visitedLocationIds.Count), Completed: $($mapState2.completedLocationIds.Count)")

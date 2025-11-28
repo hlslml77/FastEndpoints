@@ -1,4 +1,4 @@
-==== Test started at 2025-11-28 08:04:01Z ====
+==== Test started at 2025-11-28 08:12:25Z ====
 
 [36m1) Exchanging token...[0m
 
@@ -6,13 +6,17 @@
 
 [36m2) Testing Role System...[0m
 
-   Player Lv 2, Exp 19/20
-   Completed sport. Player is now Lv 3, Exp 0/30
+   Player Lv 3, Exp 1/30
+   Completed sport. Player is now Lv 3, Exp 2/30
 
 [36m3) Testing Map System...[0m
 
-   Visited: 1, Completed: 2
-   Saved progress & visited location. Visited: 2, Completed: 3
+   Testing consumption failure (expected)...
+   Did not fail as expected for item consumption.
+
+   Testing standard map progression...
+   Visited: 3, Completed: 4
+   Saved progress & visited location. Visited: 3, Completed: 4
 
 [36m4) Testing Inventory System...[0m
 
@@ -22,16 +26,16 @@
 
 [36m5) Testing Travel System...[0m
 
-   Event reward: Item 1002 x 6
+   Event reward: Item 1002 x 7
    Drop reward: 1 items.
 
 [36m6) Testing Collection System...[0m
 
-   Collections (before): 18
-   [1] Obtained ID: 17
-   [2] Obtained ID: 75
-   [3] Obtained ID: 25
-   Collections (after): 21
+   Collections (before): 24
+   [1] Obtained ID: 18
+   [2] Obtained ID: 16
+   [3] Obtained ID: 34
+   Collections (after): 27
    Claim combo failed: Î´Âú×ãÁìÈ¡Ìõ¼þ
 
 Script finished.

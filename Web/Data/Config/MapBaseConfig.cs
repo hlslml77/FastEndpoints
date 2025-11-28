@@ -11,5 +11,6 @@ public class MapBaseConfig
     public int ScenicSpot { get; set; }
     public List<List<int>>? FirstReward { get; set; }
     public List<List<int>>? FixedReward { get; set; }
+    public List<int>? Consumption { get; set; }
 }
 

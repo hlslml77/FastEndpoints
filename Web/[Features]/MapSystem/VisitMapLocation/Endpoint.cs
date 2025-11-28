@@ -73,6 +73,11 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
 
             await HttpContext.Response.SendAsync(response, 200, cancellation: ct);
         }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("物品不足"))
+        {
+            var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.Unprocessable, message = ex.Message };
+            await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
+        }
         catch (ArgumentException ex)
         {
             Log.Warning(ex, "VisitMapLocation argument error. locationId={LocationId}, isCompleted={IsCompleted}", req.LocationId, req.IsCompleted);
