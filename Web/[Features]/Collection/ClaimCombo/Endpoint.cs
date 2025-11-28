@@ -24,7 +24,6 @@ public class Endpoint : Endpoint<Request, Response>
     {
         Post("/collection/claim-combo");
         Permissions("web_access");
-        AllowFileUploads(false);
         Description(x => x.WithTags("Collection").WithSummary("领取组合奖励"));
     }
 
