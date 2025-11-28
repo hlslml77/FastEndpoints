@@ -27,33 +27,81 @@ public interface IRoleConfigService
     SportDistributionResult? GetSportDistribution(int deviceType, decimal distance);
 }
 
-public class RoleConfigService : IRoleConfigService
+public class RoleConfigService : IRoleConfigService, IReloadableConfig, IDisposable
 {
-    private readonly RoleConfig _roleConfig = new();
-    private readonly List<RoleAttributeDef> _attributes = new();
-    private readonly List<RoleUpgradeConfig> _upgradeConfigs = new();
-    private readonly List<RoleSportEntry> _sportEntries = new();
-    private readonly List<RoleExperienceConfig> _experienceConfigs = new();
+    private volatile RoleConfig _roleConfig = new();
+    private volatile List<RoleAttributeDef> _attributes = new();
+    private volatile List<RoleUpgradeConfig> _upgradeConfigs = new();
+    private volatile List<RoleSportEntry> _sportEntries = new();
+    private volatile List<RoleExperienceConfig> _experienceConfigs = new();
+
+    private readonly string _dir;
+    private readonly JsonConfigWatcher _watcher;
+    public string Name => "role";
+    public DateTime LastReloadTime { get; private set; }
 
     public RoleConfigService()
     {
-        var jsonPath = Path.Combine(AppContext.BaseDirectory, "Json");
-
+        _dir = Path.Combine(AppContext.BaseDirectory, "Json");
         try
         {
-            LoadFromJson(jsonPath);
-            Log.Information("Role configuration loaded successfully from {Path}", jsonPath);
+            Reload();
+            _watcher = new JsonConfigWatcher(_dir, "Role_*.json", () => Reload());
+            Log.Information("Role configuration loaded successfully from {Path}", _dir);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to load role configuration from {Path}", jsonPath);
+            Log.Error(ex, "Failed to load role configuration from {Path}", _dir);
             throw;
         }
     }
 
-    private void LoadFromJson(string path)
+    public void Reload()
+    {
+        try
+        {
+            LoadFromJson(_dir, out var roleCfg, out var attributes, out var upgrades, out var sports, out var exps);
+            _roleConfig = roleCfg;
+            _attributes = attributes;
+            _upgradeConfigs = upgrades;
+            _sportEntries = sports;
+            _experienceConfigs = exps;
+            LastReloadTime = DateTime.UtcNow;
+            Log.Information("Role configs reloaded. Attributes={Attr}, Upgrades={Upg}, Sports={Sport}, Exps={Exp}",
+                _attributes.Count, _upgradeConfigs.Count, _sportEntries.Count, _experienceConfigs.Count);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Reload role configs failed. Keep previous snapshot.");
+        }
+    }
+
+    public object GetStatus() => new
+    {
+        Name,
+        LastReloadTime,
+        Attributes = _attributes.Count,
+        Upgrades = _upgradeConfigs.Count,
+        Sports = _sportEntries.Count,
+        Experiences = _experienceConfigs.Count,
+        Dir = _dir
+    };
+
+    public void Dispose()
+    {
+        _watcher.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    private static void LoadFromJson(string path, out RoleConfig roleCfg, out List<RoleAttributeDef> attributes,
+        out List<RoleUpgradeConfig> upgradeConfigs, out List<RoleSportEntry> sportEntries, out List<RoleExperienceConfig> experience)
     {
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        roleCfg = new RoleConfig();
+        attributes = new List<RoleAttributeDef>();
+        upgradeConfigs = new List<RoleUpgradeConfig>();
+        sportEntries = new List<RoleSportEntry>();
+        experience = new List<RoleExperienceConfig>();
 
         // 1) Role_Config.json（每日属性点上限等）
         var cfgPath = Path.Combine(path, "Role_Config.json");
@@ -81,8 +129,8 @@ public class RoleConfigService : IRoleConfigService
                     {
                         if (item.TryGetProperty("Value1", out var v))
                         {
-                            if (v.ValueKind == JsonValueKind.Number) _roleConfig.DailyAttributePointsLimit = v.GetInt32();
-                            else if (v.ValueKind == JsonValueKind.String && int.TryParse(v.GetString(), out var lim)) _roleConfig.DailyAttributePointsLimit = lim;
+                            if (v.ValueKind == JsonValueKind.Number) roleCfg.DailyAttributePointsLimit = v.GetInt32();
+                            else if (v.ValueKind == JsonValueKind.String && int.TryParse(v.GetString(), out var lim)) roleCfg.DailyAttributePointsLimit = lim;
                         }
                         break;
                     }
@@ -96,7 +144,7 @@ public class RoleConfigService : IRoleConfigService
         {
             var attrs = JsonSerializer.Deserialize<List<RoleAttributeDef>>(File.ReadAllText(attrPath), options);
             if (attrs != null)
-                _attributes.AddRange(attrs.OrderBy(a => a.Id));
+                attributes.AddRange(attrs.OrderBy(a => a.Id));
         }
 
         // 3) Role_Upgrade.json（等级=Rank）
@@ -105,7 +153,7 @@ public class RoleConfigService : IRoleConfigService
         {
             var ups = JsonSerializer.Deserialize<List<RoleUpgradeConfig>>(File.ReadAllText(upPath), options);
             if (ups != null)
-                _upgradeConfigs.AddRange(ups.OrderBy(u => u.Rank));
+                upgradeConfigs.AddRange(ups.OrderBy(u => u.Rank));
         }
 
         // 4) Role_Sport.json（距离与分配）
@@ -135,9 +183,9 @@ public class RoleConfigService : IRoleConfigService
                     entry.Core = TryToMatrix(item, "Core");
                     entry.HeartLungs = TryToMatrix(item, "HeartLungs");
 
-                    _sportEntries.Add(entry);
+                    sportEntries.Add(entry);
                 }
-                _sportEntries.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+                sportEntries.Sort((a, b) => a.Distance.CompareTo(b.Distance));
             }
         }
 
@@ -147,7 +195,7 @@ public class RoleConfigService : IRoleConfigService
         {
             var exps = JsonSerializer.Deserialize<List<RoleExperienceConfig>>(File.ReadAllText(expPath), options);
             if (exps != null)
-                _experienceConfigs.AddRange(exps.OrderBy(e => e.Joule));
+                experience.AddRange(exps.OrderBy(e => e.Joule));
         }
     }
 

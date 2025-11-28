@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Web.Data.Config;
 using Serilog;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Web.Services;
 
@@ -8,45 +9,68 @@ public interface IItemConfigService
 {
     ItemConfig? GetItem(int id);
     EquipmentConfig? GetEquipmentByEquipId(int equipId);
-    List<ItemConfig> GetAllItems();
+    IReadOnlyList<ItemConfig> GetAllItems();
 }
 
-public class ItemConfigService : IItemConfigService
+public class ItemConfigService : IItemConfigService, IReloadableConfig, IDisposable
 {
-    private readonly List<ItemConfig> _items = new();
-    private readonly List<EquipmentConfig> _equipments = new();
+    private readonly string _dir;
+    private readonly JsonSerializerOptions _opts = new() { PropertyNameCaseInsensitive = true };
+    private readonly JsonConfigWatcher _watcher;
+
+    private volatile List<ItemConfig> _items = new();
+    private volatile List<EquipmentConfig> _equipments = new();
+
+    public string Name => "item";
+    public DateTime LastReloadTime { get; private set; }
 
     public ItemConfigService()
     {
-        var basePath = Path.Combine(AppContext.BaseDirectory, "Json");
-        Load(basePath);
+        _dir = Path.Combine(AppContext.BaseDirectory, "Json");
+        Reload();
+        _watcher = new JsonConfigWatcher(_dir, "*.json", () => Reload());
     }
 
-    private void Load(string path)
+    public void Reload()
     {
-        var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
-        var itemPath = Path.Combine(path, "Item.json");
-        if (File.Exists(itemPath))
+        var newItems = new List<ItemConfig>();
+        var newEquips = new List<EquipmentConfig>();
+        try
         {
-            var items = JsonSerializer.Deserialize<List<ItemConfig>>(File.ReadAllText(itemPath), opts);
-            if (items != null) _items.AddRange(items);
-        }
+            var itemPath = Path.Combine(_dir, "Item.json");
+            if (File.Exists(itemPath))
+            {
+                var items = JsonSerializer.Deserialize<List<ItemConfig>>(File.ReadAllText(itemPath), _opts);
+                if (items != null) newItems.AddRange(items);
+            }
 
-        var equipPath = Path.Combine(path, "Equipment.json");
-        if (File.Exists(equipPath))
-        {
-            var equips = JsonSerializer.Deserialize<List<EquipmentConfig>>(File.ReadAllText(equipPath), opts);
-            if (equips != null) _equipments.AddRange(equips);
+            var equipPath = Path.Combine(_dir, "Equipment.json");
+            if (File.Exists(equipPath))
+            {
+                var equips = JsonSerializer.Deserialize<List<EquipmentConfig>>(File.ReadAllText(equipPath), _opts);
+                if (equips != null) newEquips.AddRange(equips);
+            }
+
+            _items = newItems;
+            _equipments = newEquips;
+            LastReloadTime = DateTime.UtcNow;
+            Log.Information("Item configs reloaded. Items={ItemCount}, Equipments={EquipCount}", _items.Count, _equipments.Count);
         }
-        Log.Information("Loaded {ItemCount} items and {EquipCount} equipment entries", _items.Count, _equipments.Count);
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Reload Item/Equipment config failed. Keep previous snapshot.");
+        }
     }
+
+    public object GetStatus() => new { Name, LastReloadTime, Items = _items.Count, Equipments = _equipments.Count, Dir = _dir };
 
     public ItemConfig? GetItem(int id) => _items.FirstOrDefault(i => i.ID == id);
+    public EquipmentConfig? GetEquipmentByEquipId(int equipId) => _equipments.FirstOrDefault(e => e.EquipID == equipId);
+    public IReadOnlyList<ItemConfig> GetAllItems() => _items;
 
-    public EquipmentConfig? GetEquipmentByEquipId(int equipId)
-        => _equipments.FirstOrDefault(e => e.EquipID == equipId);
-
-    public List<ItemConfig> GetAllItems() => _items;
+    public void Dispose()
+    {
+        _watcher.Dispose();
+        GC.SuppressFinalize(this);
+    }
 }
-

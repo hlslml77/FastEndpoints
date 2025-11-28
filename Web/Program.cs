@@ -67,14 +67,30 @@ bld.Services.AddHttpClient("AppService", client =>
 });
 
 bld.Services
-   .AddSingleton<IRoleConfigService, RoleConfigService>()
+   // Register concrete singletons once, then map to multiple interfaces to share the same instance
+   .AddSingleton<RoleConfigService>()
+   .AddSingleton<IRoleConfigService>(sp => sp.GetRequiredService<RoleConfigService>())
+   .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<RoleConfigService>())
+
+   .AddSingleton<MapConfigService>()
+   .AddSingleton<IMapConfigService>(sp => sp.GetRequiredService<MapConfigService>())
+   .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<MapConfigService>())
+
+   .AddSingleton<ItemConfigService>()
+   .AddSingleton<IItemConfigService>(sp => sp.GetRequiredService<ItemConfigService>())
+   .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<ItemConfigService>())
+
+   .AddSingleton<TravelEventConfigService>()
+   .AddSingleton<ITravelEventConfigService>(sp => sp.GetRequiredService<TravelEventConfigService>())
+   .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<TravelEventConfigService>())
+
+   .AddSingleton<TravelDropPointConfigService>()
+   .AddSingleton<ITravelDropPointConfigService>(sp => sp.GetRequiredService<TravelDropPointConfigService>())
+   .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<TravelDropPointConfigService>())
+
    .AddScoped<IPlayerRoleService, PlayerRoleService>()
-   .AddSingleton<IMapConfigService, MapConfigService>()
    .AddScoped<IMapService, MapService>()
-   .AddSingleton<IItemConfigService, ItemConfigService>()
    .AddScoped<IInventoryService, InventoryService>()
-   .AddSingleton<ITravelEventConfigService, TravelEventConfigService>()
-   .AddSingleton<ITravelDropPointConfigService, TravelDropPointConfigService>()
    .AddSingleton(new SingltonSVC(0))
    .AddJobQueues<Job, JobStorage>()
    .RegisterServicesFromWeb()
@@ -259,6 +275,34 @@ app.UseRequestLocalization(
            c.MapGet("test", () => "hello world!").WithTags("map-get");
            c.MapGet("test/{testId:int?}", (int? testId) => $"hello {testId}").WithTags("map-get");
        });
+app.MapGet("api/admin/config/reload2/{type?}", (HttpContext ctx, string? type) =>
+{
+    var configs = ctx.RequestServices.GetRequiredService<IEnumerable<Web.Services.IReloadableConfig>>();
+    if (!(ctx.User?.IsInRole("admin") ?? false))
+        return Results.Json(new { statusCode = 403, message = "forbidden" }, statusCode: 403);
+
+    var t = (type ?? ctx.Request.Query["type"].ToString() ?? "").Trim();
+    t = string.IsNullOrWhiteSpace(t) ? "all" : t.ToLowerInvariant();
+    IEnumerable<Web.Services.IReloadableConfig> targets = configs;
+    if (t != "all")
+    {
+        var set = new HashSet<string>(new[] { "role", "item", "map", "event", "drop" });
+        if (!set.Contains(t))
+            return Results.Json(new { statusCode = 400, message = $"不支持的类型: {t}" }, statusCode: 400);
+        targets = configs.Where(c => string.Equals(c.Name, t, StringComparison.OrdinalIgnoreCase));
+    }
+
+    int ok = 0, fail = 0;
+    var results = new List<object>();
+    foreach (var c2 in targets)
+    {
+        try { c2.Reload(); ok++; results.Add(new { name = c2.Name, status = "ok", c2.LastReloadTime }); }
+        catch (Exception ex) { fail++; results.Add(new { name = c2.Name, status = "error", error = ex.Message }); }
+    }
+
+    return Results.Json(new { requested = t, ok, fail, results });
+}).WithTags("Admin", "Config");
+
 
 if (!app.Environment.IsProduction())
     app.UseSwaggerGen();

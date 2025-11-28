@@ -9,63 +9,61 @@ namespace Web.Services;
 /// </summary>
 public interface IMapConfigService
 {
-    /// <summary>
-    /// 根据位置ID获取地图配置
-    /// </summary>
     MapBaseConfig? GetMapConfigByLocationId(int locationId);
-
-    /// <summary>
-    /// 获取所有地图配置
-    /// </summary>
-    List<MapBaseConfig> GetAllMapConfigs();
+    IReadOnlyList<MapBaseConfig> GetAllMapConfigs();
 }
 
-public class MapConfigService : IMapConfigService
+public class MapConfigService : IMapConfigService, IReloadableConfig, IDisposable
 {
-    private readonly List<MapBaseConfig> _mapConfigs;
+    private readonly string _dir;
+    private readonly JsonConfigWatcher _watcher;
+    private volatile List<MapBaseConfig> _mapConfigs = new();
+
+    public string Name => "map";
+    public DateTime LastReloadTime { get; private set; }
 
     public MapConfigService()
     {
-        _mapConfigs = new List<MapBaseConfig>();
-
+        _dir = Path.Combine(AppContext.BaseDirectory, "Json");
         try
         {
-            var jsonPath = Path.Combine(AppContext.BaseDirectory, "Json", "WorldUiMap_MapBase.json");
-            LoadFromJson(jsonPath);
-            Log.Information("Map configuration loaded successfully from {Path}. Total configs: {Count}",
-                jsonPath, _mapConfigs.Count);
+            Reload();
+            _watcher = new JsonConfigWatcher(_dir, "WorldUiMap_MapBase.json", () => Reload());
+            Log.Information("Map configuration initialized from {Dir}", _dir);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to load map configuration");
+            Log.Error(ex, "Failed to initialize map configuration");
             throw;
         }
     }
 
-    private void LoadFromJson(string path)
+    public void Reload()
     {
-        var options = new JsonSerializerOptions 
-        { 
-            PropertyNameCaseInsensitive = true 
-        };
-
-        var content = File.ReadAllText(path);
-        var configs = JsonSerializer.Deserialize<List<MapBaseConfig>>(content, options);
-        
-        if (configs != null)
+        try
         {
-            _mapConfigs.AddRange(configs);
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var path = Path.Combine(_dir, "WorldUiMap_MapBase.json");
+            var content = File.ReadAllText(path);
+            var configs = JsonSerializer.Deserialize<List<MapBaseConfig>>(content, options) ?? new List<MapBaseConfig>();
+            _mapConfigs = configs;
+            LastReloadTime = DateTime.UtcNow;
+            Log.Information("Map configs reloaded. Count={Count}", _mapConfigs.Count);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Reload map configs failed. Keep previous snapshot.");
         }
     }
 
-    public MapBaseConfig? GetMapConfigByLocationId(int locationId)
-    {
-        return _mapConfigs.FirstOrDefault(c => c.LocationID == locationId);
-    }
+    public object GetStatus() => new { Name, LastReloadTime, Count = _mapConfigs.Count, Dir = _dir };
 
-    public List<MapBaseConfig> GetAllMapConfigs()
+    public MapBaseConfig? GetMapConfigByLocationId(int locationId) => _mapConfigs.FirstOrDefault(c => c.LocationID == locationId);
+    public IReadOnlyList<MapBaseConfig> GetAllMapConfigs() => _mapConfigs;
+
+    public void Dispose()
     {
-        return _mapConfigs;
+        _watcher.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
-
