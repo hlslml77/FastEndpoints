@@ -368,6 +368,81 @@ curl -X POST https://host/api/travel/drop-point/reward \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
   -d '{"levelId":101, "distance":600}'
 
+
+---
+
+6. 配置热更新（Admin）
+
+6.1 查看配置状态（不需要 admin 角色）
+GET /api/admin/config/status
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：返回所有可热重载配置的状态（名称、上次重载时间、数量、目录等）
+
+响应示例
+[
+  { "name": "item", "lastReloadTime": "2025-11-28T02:48:44.8626246Z", "items": 54, "equipments": 48, "dir": "E:/FastEndpoints/Web/bin/Debug/net9.0/Json" },
+  { "name": "role", "lastReloadTime": "..." },
+  { "name": "map",  "lastReloadTime": "..." },
+  { "name": "event","lastReloadTime": "..." },
+  { "name": "drop", "lastReloadTime": "..." }
+]
+
+示例（curl）
+curl -X GET https://host/api/admin/config/status \
+  -H "Authorization: Bearer <webToken>" -H "Accept: application/json"
+
+6.2 手动重载配置（按文件名；不传则全量）
+GET /api/admin/config/reload
+POST /api/admin/config/reload
+
+- 认证：需要 Bearer Token（admin 角色）
+- 说明：
+  - 通过文件名决定要重载的配置服务；支持 query 或 JSON body 两种形式；
+  - 不传文件名时，重载全部配置；
+  - 文件名大小写不敏感，仅需传文件名本身（无需路径）。
+- 支持的映射（文件名 → 服务）：
+  - item：item.json、equipment.json
+  - role：role_config.json、role_attribute.json、role_upgrade.json、role_sport.json、role_experience.json
+  - map：worlduimap_mapbase.json
+  - event：travel_eventlist.json
+  - drop：travel_droppoint.json
+
+请求方式 A（query，多值或逗号分隔）
+GET /api/admin/config/reload?file=Item.json&file=Role_Upgrade.json
+GET /api/admin/config/reload?file=Item.json,Role_Upgrade.json
+
+请求方式 B（JSON body）
+{
+  "files": ["Item.json", "Role_Upgrade.json"]
+}
+
+响应示例
+{
+  "requestedFiles": ["item.json"],
+  "services": ["item"],
+  "ok": 1,
+  "fail": 0,
+  "results": [
+    { "name": "item", "status": "ok", "lastReloadTime": "2025-11-28T02:48:44.8626246Z" },
+    { "name": null,   "status": "ignored", "file": "unknown.json" }
+  ]
+}
+
+示例（curl）
+# GET + query（推荐，无需 Content-Type）
+curl -X GET "https://host/api/admin/config/reload?file=Item.json" \
+  -H "Authorization: Bearer <adminToken>" -H "Accept: application/json"
+
+# POST + JSON（明确 Content-Type）
+curl -X POST https://host/api/admin/config/reload \
+  -H "Authorization: Bearer <adminToken>" -H "Content-Type: application/json" \
+  -d '{"files":["Item.json","Role_Upgrade.json"]}'
+
+备注
+- 管理员 Token 获取方式：在“获取访问令牌”接口中，受控环境可额外携带头 X-Admin: 1 以获得 admin 角色（仅限内网/运维场景）。
+- 若返回包含 status=ignored 的文件，表示该文件名未匹配到任何已注册的配置服务（请核对文件名）。
+
 -------------------------------------------------------------------------------------------------------
 统一错误返回与错误码
 
