@@ -170,11 +170,20 @@ public class PlayerRoleService : IPlayerRoleService
     public async Task<PlayerRole> CompleteSportAsync(long userId, int deviceType, decimal distance, int calorie)
     {
         var player = await GetOrCreatePlayerAsync(userId);
-        var dist = _configService.GetSportDistribution(deviceType, distance);
+
+        // 客户端 deviceType: 0=跑步, 1=划船, 2=单车, 3=手环
+        // 配置表 sport_type: 1=跑步, 2=划船, 3=单车, 4=手环
+        // 这里将客户端类型 +1 映射到配置表类型
+        var sportTypeForConfig = deviceType + 1;
+
+        // 距离单位从米转换为公里，以匹配配置表
+        var distanceInKm = distance / 1000.0m;
+
+        var dist = _configService.GetSportDistribution(sportTypeForConfig, distanceInKm);
 
         if (dist == null)
         {
-            throw new ArgumentException($"Invalid sport distribution: deviceType={deviceType} at {distance}km");
+            throw new ArgumentException($"Invalid sport distribution: deviceType={deviceType} at {distance}m");
         }
 
         // 1. 根据分配表增加对应主属性，并累计今日属性点（按总和限制）
@@ -210,7 +219,7 @@ public class PlayerRoleService : IPlayerRoleService
         await _dbContext.SaveChangesAsync();
 
         Log.Information(
-            "User {UserId} completed sport with device {DeviceType} for {Distance}km. Current level: {Level}, Experience: {CurrentExp}",
+            "User {UserId} completed sport with device {DeviceType} for {Distance}m. Current level: {Level}, Experience: {CurrentExp}",
             userId, deviceType, distance, player.CurrentLevel, player.CurrentExperience);
 
         return player;

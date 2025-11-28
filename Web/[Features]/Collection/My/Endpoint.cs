@@ -16,7 +16,7 @@ public class Endpoint : EndpointWithoutRequest<Response>
 
     public override void Configure()
     {
-        Get("/collection/my");
+        Post("/collection/my"); // Use POST method
         Permissions("web_access");
         Description(x => x.WithTags("Collection").WithSummary("获取玩家已拥有的藏品ID列表"));
     }

@@ -112,13 +112,13 @@ POST /api/role/complete-sport
 
 - 认证：需要 Bearer Token（权限 web_access）
 - 说明：按设备类型与距离，根据策划表对四个主属性进行加点（UpperLimb/LowerLimb/Core/HeartLungs）
-- 设备类型：0=跑步机，1=单车，2=划船机，3=手环
-- 注意：distance 单位为“公里”
+- 设备类型：0=跑步, 1=划船, 2=单车, 3=手环
+- 注意：distance 单位为“米”
 
 请求体
 {
-  "deviceType": 1,   // int (0=跑步机, 1=单车, 2=划船机, 3=手环)
-  "distance": 2.5,   // double, 单位: 公里
+  "deviceType": 0,   // int (0=跑步, 1=划船, 2=单车, 3=手环)
+  "distance": 2500,  // double, 单位: 米
   "calorie": 180     // int
 }
 
@@ -371,7 +371,65 @@ curl -X POST https://host/api/travel/drop-point/reward \
 
 ---
 
-6. 配置热更新（Admin）
+6. 藏品系统（Collection）
+
+6.1 获取玩家已拥有的藏品ID列表
+POST /api/collection/my
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 请求体：空对象 {} 或不传
+
+响应体
+{
+  "collectionIds": [ 1, 21, 31 ] // int[]
+}
+
+示例（curl）
+curl -X POST https://host/api/collection/my \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" -d '{}'
+
+6.2 随机获取藏品
+POST /api/collection/obtain
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：根据权重和全局限量随机获取一个藏品。如果藏品配置了装备，会自动发放到玩家背包。
+
+响应体
+{
+  "success": true,        // bool
+  "message": "ok",        // string
+  "collectionId": 5       // int? 成功时返回获取到的藏品ID
+}
+- 失败时 `success` 为 `false`，`message` 会包含原因（如“藏品数量不足”）。
+
+示例（curl）
+curl -X POST https://host/api/collection/obtain \
+  -H "Authorization: Bearer <webToken>"
+
+6.3 领取组合奖励
+POST /api/collection/claim-combo
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：当玩家集齐指定组合的藏品后，可领取一次性奖励。
+
+请求体
+{ "comboId": 1 } // comboId: int, 对应 CollectionList_Combination.json 中的 ID
+
+响应体
+{
+  "success": true,    // bool
+  "message": "ok"     // string
+}
+- 失败时 `success` 为 `false`，`message` 会包含原因（如“已领取”、“未满足领取条件”）。
+
+示例（curl）
+curl -X POST https://host/api/collection/claim-combo \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"comboId":1}'
+
+---
+
+7. 配置热更新（Admin）
 
 6.1 查看配置状态（不需要 admin 角色）
 GET /api/admin/config/status

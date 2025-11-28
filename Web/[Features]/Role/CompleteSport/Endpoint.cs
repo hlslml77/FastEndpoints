@@ -28,7 +28,7 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
         Description(x => x
             .WithTags("Role")
             .WithSummary("完成运动")
-            .WithDescription("记录玩家完成的运动，根据运动类型和距离增加对应属性。运动类型: Bicycle, Run, Rowing。需要JWT token验证。"));
+            .WithDescription("记录玩家完成的运动，根据运动类型和距离增加对应属性。设备类型: 0=跑步, 1=划船, 2=单车, 3=手环。距离单位: 米。需要JWT token验证。"));
     }
 
     public override async Task HandleAsync(CompleteSportRequest req, CancellationToken ct)
@@ -47,7 +47,7 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
             }
 
             // 记录用户运动信息
-            Log.Information("玩家 {UserId} 完成运动: 类型={DeviceType}, 距离={Distance}km", userId, req.DeviceType, req.Distance);
+            Log.Information("玩家 {UserId} 完成运动: 类型={DeviceType}, 距离={Distance}m", userId, req.DeviceType, req.Distance);
 
             var player = await _roleGrowthService.CompleteSportAsync(userId, req.DeviceType, req.Distance, req.Calorie);
             var config = _configService.GetRoleConfig();
