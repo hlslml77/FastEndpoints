@@ -216,6 +216,41 @@ public class PlayerProgressDto
 }
 
 /// <summary>
+/// 每日随机事件 DTO
+/// </summary>
+public class DailyRandomEventDto
+{
+    public int LocationId { get; set; }
+    public int EventId { get; set; }
+    public int EventType { get; set; }
+    public string? Dialogue { get; set; }
+    public bool IsCompleted { get; set; }
+}
+
+/// <summary>
+/// 完成每日随机事件请求
+/// </summary>
+public class CompleteRandomEventRequest
+{
+    /// <summary>
+    /// 事件所在点位ID（PositioningPoint）
+    /// </summary>
+    public int LocationId { get; set; }
+
+    /// <summary>
+    /// 可选：事件ID（用于校验与客户端一致）
+    /// </summary>
+    public int? EventId { get; set; }
+}
+
+public class CompleteRandomEventResponse
+{
+    public bool Success { get; set; }
+    public List<RewardItem>? Rewards { get; set; }
+}
+
+
+/// <summary>
 /// 获取玩家地图状态响应
 /// </summary>
 public class GetPlayerMapStateResponse
@@ -239,5 +274,10 @@ public class GetPlayerMapStateResponse
     /// 玩家当前存储能量总值（米）
     /// </summary>
     public decimal StoredEnergyMeters { get; set; }
+
+    /// <summary>
+    /// 今日随机事件列表
+    /// </summary>
+    public List<DailyRandomEventDto> DailyRandomEvents { get; set; } = new();
 }
 

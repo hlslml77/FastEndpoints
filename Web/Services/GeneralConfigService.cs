@@ -12,6 +12,12 @@ public interface IGeneralConfigService : IReloadableConfig, IDisposable
     int GetInitialGoldAmount();
     int GetInitialStaminaAmount();
     decimal GetStoredEnergyMaxMeters();
+
+    /// <summary>
+    /// 每日随机事件点位生成数量（大地图）。来自 Config.json 中描述包含“每日随机事件点位生成数量”的配置（ID 6）。
+    /// 若未配置则默认 1。
+    /// </summary>
+    int GetDailyRandomEventCount();
 }
 
 public class GeneralConfigService : IGeneralConfigService
@@ -99,10 +105,16 @@ public class GeneralConfigService : IGeneralConfigService
         return km * 1000m;
     }
 
+    public int GetDailyRandomEventCount()
+    {
+        var e = FindByIdOrDesc(6, "每日随机事件点位生成数量");
+        var count = e?.Value1 ?? 1;
+        return count <= 0 ? 1 : count;
+    }
+
     public void Dispose()
     {
         _watcher.Dispose();
         GC.SuppressFinalize(this);
     }
 }
-

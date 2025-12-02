@@ -11,10 +11,12 @@ namespace MapSystem.GetPlayerMapState;
 public class Endpoint : Endpoint<EmptyRequest, GetPlayerMapStateResponse>
 {
     private readonly IMapService _mapService;
+    private readonly IRandomWorldEventConfigService _randomCfg;
 
-    public Endpoint(IMapService mapService)
+    public Endpoint(IMapService mapService, IRandomWorldEventConfigService randomCfg)
     {
         _mapService = mapService;
+        _randomCfg = randomCfg;
     }
 
     public override void Configure()
@@ -44,6 +46,9 @@ public class Endpoint : Endpoint<EmptyRequest, GetPlayerMapStateResponse>
             var completed = await _mapService.GetPlayerCompletedLocationsAsync(userId);
             var progress = await _mapService.GetPlayerProgressAsync(userId);
             var storedEnergy = await _mapService.GetPlayerStoredEnergyMetersAsync(userId);
+            var dailyEvents = await _mapService.GetOrGenerateTodayRandomEventsAsync(userId);
+
+            var eventCfgs = dailyEvents.Select(e => _randomCfg.GetEventById(e.EventId)).ToList();
 
             var resp = new GetPlayerMapStateResponse
             {
@@ -56,7 +61,15 @@ public class Endpoint : Endpoint<EmptyRequest, GetPlayerMapStateResponse>
                     DistanceMeters = p.DistanceMeters,
                     CreatedAt = p.CreatedAt
                 }).ToList(),
-                StoredEnergyMeters = storedEnergy
+                StoredEnergyMeters = storedEnergy,
+                DailyRandomEvents = dailyEvents.Select((e, idx) => new DailyRandomEventDto
+                {
+                    LocationId = e.LocationId,
+                    EventId = e.EventId,
+                    EventType = eventCfgs[idx]?.EventType ?? 0,
+                    Dialogue = eventCfgs[idx]?.Dialogue,
+                    IsCompleted = e.IsCompleted
+                }).ToList()
             };
 
             await HttpContext.Response.SendAsync(resp, 200, cancellation: ct);

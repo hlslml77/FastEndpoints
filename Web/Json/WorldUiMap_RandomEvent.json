@@ -1,0 +1,62 @@
+[
+  {
+    "ID": 1,
+    "EventType": 1,
+    "Dialogue": "1.abdadaidawdawfiawfawfawf\n2.fnaiosoagoaosf2fasf\n3fadwffafwafwafa",
+    "FixedReward": [
+      [
+        1001,
+        10
+      ],
+      [
+        1002,
+        100
+      ]
+    ],
+    "Consumption": null,
+    "Probability": 200
+  },
+  {
+    "ID": 2,
+    "EventType": 2,
+    "Dialogue": null,
+    "FixedReward": [
+      [
+        20001,
+        1
+      ],
+      [
+        1002,
+        10
+      ]
+    ],
+    "Consumption": [
+      [
+        1004,
+        100
+      ],
+      [
+        1005,
+        1000
+      ]
+    ],
+    "Probability": 200
+  },
+  {
+    "ID": 3,
+    "EventType": 3,
+    "Dialogue": null,
+    "FixedReward": [
+      [
+        1002,
+        10
+      ],
+      [
+        1003,
+        100
+      ]
+    ],
+    "Consumption": null,
+    "Probability": 600
+  }
+]

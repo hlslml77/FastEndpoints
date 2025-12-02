@@ -45,6 +45,16 @@ public interface IMapService
     /// 获取玩家存储能量（米）
     /// </summary>
     Task<decimal> GetPlayerStoredEnergyMetersAsync(long userId);
+
+    /// <summary>
+    /// 获取或生成今日随机事件
+    /// </summary>
+    Task<List<PlayerDailyRandomEvent>> GetOrGenerateTodayRandomEventsAsync(long userId);
+
+    /// <summary>
+    /// 完成某个随机事件，发放奖励并处理消耗
+    /// </summary>
+    Task<(bool Success, List<List<int>>? Rewards)> CompleteRandomEventAsync(long userId, int locationId, int? eventId);
 }
 
 /// <summary>
@@ -86,18 +96,23 @@ public class MapService : IMapService
     private readonly IPlayerRoleService _playerRoleService;
     private readonly IGeneralConfigService _generalConfigService;
 
+    private readonly IRandomWorldEventConfigService _randomCfg;
+    private readonly Random _rand = new();
+
     public MapService(
         AppDbContext dbContext,
         IMapConfigService mapConfigService,
         IInventoryService inventoryService,
         IPlayerRoleService playerRoleService,
-        IGeneralConfigService generalConfigService)
+        IGeneralConfigService generalConfigService,
+        IRandomWorldEventConfigService randomCfg)
     {
         _dbContext = dbContext;
         _mapConfigService = mapConfigService;
         _inventoryService = inventoryService;
         _playerRoleService = playerRoleService;
         _generalConfigService = generalConfigService;
+        _randomCfg = randomCfg;
     }
 
     public async Task<(PlayerMapProgress Progress, bool IsUnlock, decimal StoredEnergyMeters)> SaveMapProgressAsync(
@@ -391,6 +406,147 @@ public class MapService : IMapService
         // 能量不足，返回未解锁
         Log.Information("User {UserId} insufficient stored energy to unlock {LocationId}. Need {Need}m, have {Have}m", userId, endLocationId, need, player.StoredEnergyMeters);
         return (false, 0m, player.StoredEnergyMeters);
+    }
+
+
+    public async Task<List<PlayerDailyRandomEvent>> GetOrGenerateTodayRandomEventsAsync(long userId)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var existing = await _dbContext.PlayerDailyRandomEvent
+            .Where(e => e.UserId == userId && e.Date == today)
+            .ToListAsync();
+
+        var desired = _generalConfigService.GetDailyRandomEventCount();
+        if (desired <= 0) desired = 1;
+        if (existing.Count >= desired)
+            return existing.OrderBy(e => e.Id).ToList();
+
+        // 需要生成补齐
+        var unlocked = await GetPlayerUnlockedLocationsAsync(userId);
+        var unlockedSet = new HashSet<int>(unlocked.Select(u => u.LocationId));
+        var points = _randomCfg.GetRandomPointConfigs();
+        var candidates = points
+            .Where(p => unlockedSet.Contains(p.PositioningPoint))
+            .Select(p => p.PositioningPoint)
+            .Distinct()
+            .ToList();
+
+        var existingLocs = new HashSet<int>(existing.Select(e => e.LocationId));
+        var availableLocs = candidates.Where(c => !existingLocs.Contains(c)).ToList();
+
+        // 若可用点位不足，按可用数量为准
+        var toCreateCount = Math.Min(desired - existing.Count, Math.Max(0, availableLocs.Count));
+        if (toCreateCount <= 0)
+            return existing.OrderBy(e => e.Id).ToList();
+
+        var eventsCfg = _randomCfg.GetEventConfigs();
+        if (eventsCfg.Count == 0)
+            return existing.OrderBy(e => e.Id).ToList();
+
+        RandomEventConfigEntry PickWeighted()
+        {
+            var total = Math.Max(1, eventsCfg.Sum(e => Math.Max(0, e.Probability)));
+            var roll = _rand.Next(1, total + 1);
+            var acc = 0;
+            foreach (var e in eventsCfg)
+            {
+                acc += Math.Max(0, e.Probability);
+                if (roll <= acc) return e;
+            }
+            return eventsCfg[^1];
+        }
+
+        var newRecords = new List<PlayerDailyRandomEvent>();
+        for (int i = 0; i < toCreateCount; i++)
+        {
+            if (availableLocs.Count == 0) break;
+            var idx = _rand.Next(availableLocs.Count);
+            var loc = availableLocs[idx];
+            availableLocs.RemoveAt(idx);
+            var ev = PickWeighted();
+            var rec = new PlayerDailyRandomEvent
+            {
+                UserId = userId,
+                Date = today,
+                LocationId = loc,
+                EventId = ev.ID,
+                IsCompleted = false,
+                CreatedAt = DateTime.UtcNow
+            };
+            _dbContext.PlayerDailyRandomEvent.Add(rec);
+            newRecords.Add(rec);
+        }
+
+        if (newRecords.Count > 0)
+        {
+            await _dbContext.SaveChangesAsync();
+            existing.AddRange(newRecords);
+        }
+
+        return existing.OrderBy(e => e.Id).ToList();
+    }
+
+    public async Task<(bool Success, List<List<int>>? Rewards)> CompleteRandomEventAsync(long userId, int locationId, int? eventId)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var rec = await _dbContext.PlayerDailyRandomEvent
+            .FirstOrDefaultAsync(r => r.UserId == userId && r.Date == today && r.LocationId == locationId);
+        if (rec == null) return (false, null);
+        if (eventId.HasValue && rec.EventId != eventId.Value) return (false, null);
+        if (rec.IsCompleted) return (true, null);
+
+        var ev = _randomCfg.GetEventById(rec.EventId);
+        if (ev == null) return (false, null);
+
+        // 检查并扣除消耗（先校验再扣除，避免部分扣除）
+        if (ev.Consumption is { Count: > 0 })
+        {
+            // 聚合所需数量
+            var need = new Dictionary<int, int>();
+            foreach (var c in ev.Consumption)
+            {
+                if (c.Count >= 2 && c[1] > 0)
+                {
+                    var itemId = c[0];
+                    var amount = c[1];
+                    if (need.ContainsKey(itemId)) need[itemId] += amount; else need[itemId] = amount;
+                }
+            }
+            if (need.Count > 0)
+            {
+                // 查询库存
+                var items = await _dbContext.PlayerItem.Where(x => x.UserId == userId).ToListAsync();
+                foreach (var kv in need)
+                {
+                    var have = items.FirstOrDefault(i => i.ItemId == kv.Key)?.Amount ?? 0;
+                    if (have < kv.Value)
+                        return (false, null);
+                }
+                // 扣除
+                foreach (var kv in need)
+                {
+                    await _inventoryService.ConsumeItemAsync(userId, kv.Key, kv.Value);
+                }
+            }
+        }
+
+        // 发放奖励
+        var rewards = ev.FixedReward != null ? new List<List<int>>(ev.FixedReward) : null;
+        if (rewards != null)
+        {
+            foreach (var r in rewards)
+            {
+                if (r.Count >= 2 && r[1] > 0)
+                {
+                    await _inventoryService.GrantItemAsync(userId, r[0], r[1]);
+                }
+            }
+        }
+
+        rec.IsCompleted = true;
+        rec.CompletedAt = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
+        return (true, rewards);
     }
 
     public async Task<decimal> GetPlayerStoredEnergyMetersAsync(long userId)

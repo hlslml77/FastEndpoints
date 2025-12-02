@@ -1,0 +1,27 @@
+[
+  {
+    "ID": 90001,
+    "PositioningPoint": 100105,
+    "UnlockMap": "1"
+  },
+  {
+    "ID": 90002,
+    "PositioningPoint": 100109,
+    "UnlockMap": "1"
+  },
+  {
+    "ID": 90003,
+    "PositioningPoint": 1001013,
+    "UnlockMap": "1"
+  },
+  {
+    "ID": 90004,
+    "PositioningPoint": 1001015,
+    "UnlockMap": "2"
+  },
+  {
+    "ID": 90005,
+    "PositioningPoint": 1001017,
+    "UnlockMap": "2"
+  }
+]

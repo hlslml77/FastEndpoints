@@ -43,3 +43,18 @@ CREATE TABLE IF NOT EXISTS `player_unlocked_location` (
   PRIMARY KEY (`user_id`, `location_id`),
   INDEX `idx_unlocked_time` (`unlocked_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家已解锁点位表';
+
+-- 玩家每日随机事件表
+CREATE TABLE IF NOT EXISTS `player_daily_random_event` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `date` DATE NOT NULL COMMENT '日期(UTC)',
+  `location_id` INT NOT NULL COMMENT '点位ID(PositioningPoint)',
+  `event_id` INT NOT NULL COMMENT '事件配置ID',
+  `is_completed` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否已完成',
+  `created_at` DATETIME NOT NULL COMMENT '创建时间',
+  `completed_at` DATETIME NULL COMMENT '完成时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_user_date_location` (`user_id`, `date`, `location_id`),
+  INDEX `idx_user_date` (`user_id`, `date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家每日随机事件表';

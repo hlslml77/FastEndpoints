@@ -210,3 +210,46 @@ public class PlayerUnlockedLocation
     [Column("unlocked_time")]
     public DateTime UnlockedTime { get; set; }
 }
+
+
+/// <summary>
+/// 玩家每日随机事件
+/// </summary>
+[Table("player_daily_random_event")]
+public class PlayerDailyRandomEvent
+{
+    [Key]
+    [Column("id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+
+    [Column("user_id")]
+    public long UserId { get; set; }
+
+    /// <summary>
+    /// 日期（UTC，yyyy-MM-dd）
+    /// </summary>
+    [Column("date")]
+    public DateOnly Date { get; set; }
+
+    /// <summary>
+    /// 所在点位（PositioningPoint）
+    /// </summary>
+    [Column("location_id")]
+    public int LocationId { get; set; }
+
+    /// <summary>
+    /// 事件配置ID（WorldUiMap_RandomEvent.json 的 ID）
+    /// </summary>
+    [Column("event_id")]
+    public int EventId { get; set; }
+
+    [Column("is_completed")]
+    public bool IsCompleted { get; set; }
+
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; }
+
+    [Column("completed_at")]
+    public DateTime? CompletedAt { get; set; }
+}

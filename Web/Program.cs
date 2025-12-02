@@ -92,6 +92,11 @@ bld.Services
    .AddSingleton<ITravelDropPointConfigService>(sp => sp.GetRequiredService<TravelDropPointConfigService>())
    .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<TravelDropPointConfigService>())
 
+   // Random world event config
+   .AddSingleton<RandomWorldEventConfigService>()
+   .AddSingleton<IRandomWorldEventConfigService>(sp => sp.GetRequiredService<RandomWorldEventConfigService>())
+   .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<RandomWorldEventConfigService>())
+
    // General config (Config.json/config.json)
    .AddSingleton<GeneralConfigService>()
    .AddSingleton<IGeneralConfigService>(sp => sp.GetRequiredService<GeneralConfigService>())
