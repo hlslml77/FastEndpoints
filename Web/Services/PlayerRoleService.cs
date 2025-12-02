@@ -178,15 +178,11 @@ public class PlayerRoleService : IPlayerRoleService
     {
         var player = await GetOrCreatePlayerAsync(userId);
 
-        // 客户端 deviceType: 0=跑步, 1=划船, 2=单车, 3=手环
-        // 配置表 sport_type: 1=跑步, 2=划船, 3=单车, 4=手环
-        // 这里将客户端类型 +1 映射到配置表类型
-        var sportTypeForConfig = deviceType + 1;
-
+        // 配置表、客户端 deviceType: 0=跑步, 1=划船, 2=单车, 3=手环
         // 距离单位从米转换为公里，以匹配配置表
         var distanceInKm = distance / 1000.0m;
 
-        var dist = _configService.GetSportDistribution(sportTypeForConfig, distanceInKm);
+        var dist = _configService.GetSportDistribution(deviceType, distanceInKm);
 
         if (dist == null)
         {
