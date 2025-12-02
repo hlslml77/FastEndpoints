@@ -3,12 +3,12 @@ using FastEndpoints;
 using System.Security.Claims;
 using Serilog;
 
-namespace MapSystem.SaveMapProgress;
+namespace MapSystem.UnlockWithEnergy;
 
 /// <summary>
-/// 保存地图进度端点
+/// 使用存储能量解锁终点端点
 /// </summary>
-public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse>
+public class Endpoint : Endpoint<UnlockWithEnergyRequest, UnlockWithEnergyResponse>
 {
     private readonly IMapService _mapService;
 
@@ -19,15 +19,15 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
 
     public override void Configure()
     {
-        Post("/map/save-progress");
+        Post("/map/unlock-with-energy");
         Permissions("web_access");
         Description(x => x
             .WithTags("MapSystem")
-            .WithSummary("保存地图进度")
-            .WithDescription("保存玩家从起点到终点的跑步进度，记录跑步距离。当距离超过配置的解锁距离时，自动解锁终点位置。需要JWT token验证。"));
+            .WithSummary("使用存储能量解锁终点")
+            .WithDescription("客户端传起点与终点，消耗玩家存储能量（上限10000米）来解锁终点。需要JWT token验证。"));
     }
 
-    public override async Task HandleAsync(SaveMapProgressRequest req, CancellationToken ct)
+    public override async Task HandleAsync(UnlockWithEnergyRequest req, CancellationToken ct)
     {
         try
         {
@@ -40,42 +40,33 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
                 return;
             }
 
-            if (req.DistanceMeters <= 0)
+            if (req.StartLocationId <= 0 || req.EndLocationId <= 0)
             {
-                var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "距离必须大于0" };
+                var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "起点或终点不合法" };
                 await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
                 return;
             }
 
-            var (progress, isUnlock, storedEnergy) = await _mapService.SaveMapProgressAsync(
-                userId,
-                req.StartLocationId,
-                req.EndLocationId,
-                req.DistanceMeters);
+            var (ok, used, remain) = await _mapService.UnlockWithEnergyAsync(userId, req.StartLocationId, req.EndLocationId);
 
-            var response = new SaveMapProgressResponse
+            var resp = new UnlockWithEnergyResponse
             {
-                Id = progress.Id,
-                UserId = progress.UserId,
-                StartLocationId = progress.StartLocationId,
-                EndLocationId = progress.EndLocationId,
-                DistanceMeters = progress.DistanceMeters,
-                CreatedAt = progress.CreatedAt,
-                IsUnlock = isUnlock,
-                StoredEnergyMeters = storedEnergy
+                IsUnlocked = ok,
+                UsedEnergyMeters = used,
+                StoredEnergyMeters = remain
             };
 
-            await HttpContext.Response.SendAsync(response, 200, cancellation: ct);
+            await HttpContext.Response.SendAsync(resp, 200, cancellation: ct);
         }
         catch (ArgumentException ex)
         {
-            Log.Warning(ex, "SaveMapProgress argument error. start={Start}, end={End}, dist={Dist}", req.StartLocationId, req.EndLocationId, req.DistanceMeters);
+            Log.Warning(ex, "UnlockWithEnergy argument error. start={Start}, end={End}", req.StartLocationId, req.EndLocationId);
             var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = ex.Message };
             await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "SaveMapProgress failed");
+            Log.Error(ex, "UnlockWithEnergy failed");
             var errorBody = new { statusCode = 500, code = Web.Data.ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }

@@ -55,6 +55,7 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
             var response = new VisitMapLocationResponse
             {
                 IsFirstVisit = result.IsFirstVisit,
+                DidConsumeItem = result.DidConsumeItem,
                 Rewards = rewards,
                 VisitCount = result.VisitRecord?.VisitCount ?? 0,
                 FirstVisitTime = result.VisitRecord?.FirstVisitTime ?? DateTime.UtcNow,

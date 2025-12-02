@@ -43,6 +43,7 @@ public class Endpoint : Endpoint<EmptyRequest, GetPlayerMapStateResponse>
             var unlocked = await _mapService.GetPlayerUnlockedLocationsAsync(userId);
             var completed = await _mapService.GetPlayerCompletedLocationsAsync(userId);
             var progress = await _mapService.GetPlayerProgressAsync(userId);
+            var storedEnergy = await _mapService.GetPlayerStoredEnergyMetersAsync(userId);
 
             var resp = new GetPlayerMapStateResponse
             {
@@ -54,7 +55,8 @@ public class Endpoint : Endpoint<EmptyRequest, GetPlayerMapStateResponse>
                     EndLocationId = p.EndLocationId,
                     DistanceMeters = p.DistanceMeters,
                     CreatedAt = p.CreatedAt
-                }).ToList()
+                }).ToList(),
+                StoredEnergyMeters = storedEnergy
             };
 
             await HttpContext.Response.SendAsync(resp, 200, cancellation: ct);

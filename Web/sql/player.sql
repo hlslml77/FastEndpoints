@@ -10,6 +10,11 @@ CREATE TABLE IF NOT EXISTS `player_role` (
   `attr_core` INT NOT NULL DEFAULT 10 COMMENT '核心属性值',
   `attr_heart_lungs` INT NOT NULL DEFAULT 10 COMMENT '心肺属性值',
   `today_attribute_points` INT NOT NULL DEFAULT 0 COMMENT '今日获得的属性点',
+  `stored_energy_meters` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '存储的能量（米），最大10000',
   `last_update_time` DATETIME NOT NULL COMMENT '最后更新时间',
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家角色数据表';
+
+-- 兼容已有库：增加列（如果不存在）
+ALTER TABLE `player_role`
+  ADD COLUMN IF NOT EXISTS `stored_energy_meters` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '存储的能量（米），最大10000';

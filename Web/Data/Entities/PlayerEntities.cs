@@ -58,6 +58,11 @@ public class PlayerRole
     [Column("today_attribute_points")]
     public int TodayAttributePoints { get; set; } = 0;
 
+    /// <summary>
+    /// 存储的能量（米），用于地图解锁；最大值：10000
+    /// </summary>
+    [Column("stored_energy_meters")]
+    public decimal StoredEnergyMeters { get; set; } = 0;
 
     /// <summary>
     /// 最后更新时间

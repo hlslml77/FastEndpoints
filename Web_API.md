@@ -136,7 +136,7 @@ POST /api/map/save-progress
 - 注意：distanceMeters 单位为“米”
 - 仅保存进度，不会自动标记点位为完成
 - 若需标记完成，请在“访问地图点位”接口上报 isCompleted=true
-- 当 distanceMeters 超过终点位置配置的 UnlockDistance 时，自动解锁该位置，返回 isUnlock=true
+- 当 distanceMeters 超过终点位置配置的 UnlockDistance 时，自动解锁该位置，返回 isUnlock=true；超出部分（distanceMeters - UnlockDistance）的增量会累加到“存储能量”（上限 10000 米）
 - 解锁的位置会被添加到 /api/map/player-state 接口的 unlockedLocationIds 列表中
 
 请求体
@@ -154,17 +154,20 @@ POST /api/map/save-progress
   "endLocationId": 10012,         // int
   "distanceMeters": 850.5,        // double, 单位: 米
   "createdAt": "2025-01-01T00:00:00Z", // DateTime (ISO 8601)
-  "isUnlock": false              // bool, 是否解锁了终点位置
+  "isUnlock": false,              // bool, 是否解锁了终点位置
+  "storedEnergyMeters": 120.0     // double, 当前玩家“存储能量”（米），最大 10000
 }
 
 3.2 访问地图点位
 POST /api/map/visit-location
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：客户端上报是否完成该点位（isCompleted）。奖励规则：
-  - 首次访问发放“首次奖励”（FirstReward）
-  - 完成发放“完成奖励”（使用 FixedReward 字段）
-  - 若同时满足，两个奖励会合并返回
+- 说明：客户端上报是否完成该点位（isCompleted）。
+  - 消耗道具规则：当 isCompleted=false 且该点在配置中存在 Consumption=[itemId, amount] 时，将消耗对应道具；当 isCompleted=true 时不消耗道具。
+  - 奖励规则：
+    - 首次访问发放“首次奖励”（FirstReward）
+    - 完成发放“完成奖励”（使用 FixedReward 字段）
+    - 若同时满足，两个奖励会合并返回
 
 请求体
 {
@@ -175,6 +178,7 @@ POST /api/map/visit-location
 响应体
 {
   "isFirstVisit": true,                                        // bool
+  "didConsumeItem": false,                                     // bool, 当 isCompleted=false 且配置 Consumption 时为 true
   "rewards": [{ "itemId": 8000, "amount": 20 }],            // List<Reward>
   "visitCount": 1,                                             // int
   "firstVisitTime": "2025-01-01T00:00:00Z",                   // DateTime (ISO 8601)
@@ -206,7 +210,28 @@ POST /api/map/player-state
       "distanceMeters": 10.0,            // double, 单位: 米
       "createdAt": "2025-01-01T00:00:00Z" // DateTime (ISO 8601)
     }
-  ]
+
+3.4 使用存储能量解锁终点
+POST /api/map/unlock-with-energy
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：当某条路线的当前 distanceMeters 未达到终点的 UnlockDistance 时，可消耗玩家的“存储能量”（上限 10000 米）来直接解锁终点。仅消耗差额部分。
+
+请求体
+{
+  "startLocationId": 10011, // int
+  "endLocationId": 10012    // int
+}
+
+响应体
+{
+  "isUnlocked": true,          // bool, 本次是否成功解锁
+  "usedEnergyMeters": 240.0,   // double, 本次消耗的能量（米），不足则为 0
+  "storedEnergyMeters": 760.0  // double, 玩家当前剩余“存储能量”（米）
+}
+
+  ],
+  "storedEnergyMeters": 240.0             // double, 玩家当前“存储能量”（米），最大 10000
 }
 
 ---

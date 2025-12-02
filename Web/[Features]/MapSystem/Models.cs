@@ -60,6 +60,49 @@ public class SaveMapProgressResponse
     /// 是否解锁了终点位置（当距离超过配置的解锁距离时为true）
     /// </summary>
     public bool IsUnlock { get; set; } = false;
+
+    /// <summary>
+    /// 玩家当前存储能量总值（米）
+    /// </summary>
+    public decimal StoredEnergyMeters { get; set; }
+}
+
+
+/// <summary>
+/// 使用存储能量解锁终点请求
+/// </summary>
+public class UnlockWithEnergyRequest
+{
+    /// <summary>
+    /// 起点位置ID
+    /// </summary>
+    public int StartLocationId { get; set; }
+
+    /// <summary>
+    /// 终点位置ID
+    /// </summary>
+    public int EndLocationId { get; set; }
+}
+
+/// <summary>
+/// 使用存储能量解锁终点响应
+/// </summary>
+public class UnlockWithEnergyResponse
+{
+    /// <summary>
+    /// 是否已解锁
+    /// </summary>
+    public bool IsUnlocked { get; set; }
+
+    /// <summary>
+    /// 本次消耗的能量（米）
+    /// </summary>
+    public decimal UsedEnergyMeters { get; set; }
+
+    /// <summary>
+    /// 当前存储能量（米）
+    /// </summary>
+    public decimal StoredEnergyMeters { get; set; }
 }
 
 /// <summary>
@@ -103,6 +146,11 @@ public class VisitMapLocationResponse
     /// 是否首次访问
     /// </summary>
     public bool IsFirstVisit { get; set; }
+
+    /// <summary>
+    /// 本次是否消耗了道具（当 isCompleted=false 且配置有 Consumption 时为 true）
+    /// </summary>
+    public bool DidConsumeItem { get; set; }
 
     /// <summary>
     /// 奖励列表
@@ -186,5 +234,10 @@ public class GetPlayerMapStateResponse
     /// 所有路线进度记录
     /// </summary>
     public List<PlayerProgressDto> ProgressRecords { get; set; } = new();
+
+    /// <summary>
+    /// 玩家当前存储能量总值（米）
+    /// </summary>
+    public decimal StoredEnergyMeters { get; set; }
 }
 
