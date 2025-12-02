@@ -5,7 +5,6 @@ namespace MapSystem;
 /// </summary>
 public class SaveMapProgressRequest
 {
-
     /// <summary>
     /// 起点位置ID
     /// </summary>
@@ -56,6 +55,11 @@ public class SaveMapProgressResponse
     /// 创建时间
     /// </summary>
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// 是否解锁了终点位置（当距离超过配置的解锁距离时为true）
+    /// </summary>
+    public bool IsUnlock { get; set; } = false;
 }
 
 /// <summary>
@@ -152,8 +156,6 @@ public class MapLocationInfo
     public int Hierarchy { get; set; }
 }
 
-
-
 /// <summary>
 /// 进度记录DTO
 /// </summary>
@@ -171,9 +173,9 @@ public class PlayerProgressDto
 public class GetPlayerMapStateResponse
 {
     /// <summary>
-    /// 已访问点位ID列表
+    /// 已解锁点位ID列表（通过save-progress接口当距离超过配置时解锁）
     /// </summary>
-    public List<int> VisitedLocationIds { get; set; } = new();
+    public List<int> UnlockedLocationIds { get; set; } = new();
 
     /// <summary>
     /// 已完成点位ID列表
@@ -185,3 +187,4 @@ public class GetPlayerMapStateResponse
     /// </summary>
     public List<PlayerProgressDto> ProgressRecords { get; set; } = new();
 }
+

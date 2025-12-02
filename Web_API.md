@@ -76,7 +76,7 @@ curl -X POST https://host/api/auth/exchange \
 POST /api/role/get-player
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 
+-
 - 请求体：空对象 {} 或不传（从 JWT 的 sub 解析用户ID）
 
 响应示例
@@ -136,6 +136,8 @@ POST /api/map/save-progress
 - 注意：distanceMeters 单位为“米”
 - 仅保存进度，不会自动标记点位为完成
 - 若需标记完成，请在“访问地图点位”接口上报 isCompleted=true
+- 当 distanceMeters 超过终点位置配置的 UnlockDistance 时，自动解锁该位置，返回 isUnlock=true
+- 解锁的位置会被添加到 /api/map/player-state 接口的 unlockedLocationIds 列表中
 
 请求体
 {
@@ -151,7 +153,8 @@ POST /api/map/save-progress
   "startLocationId": 10011,       // int
   "endLocationId": 10012,         // int
   "distanceMeters": 850.5,        // double, 单位: 米
-  "createdAt": "2025-01-01T00:00:00Z" // DateTime (ISO 8601)
+  "createdAt": "2025-01-01T00:00:00Z", // DateTime (ISO 8601)
+  "isUnlock": false              // bool, 是否解锁了终点位置
 }
 
 3.2 访问地图点位
@@ -194,7 +197,7 @@ POST /api/map/player-state
 
 响应体
 {
-  "visitedLocationIds": [10011, 10012],   // int[]
+  "unlockedLocationIds": [10011, 10012],  // int[], 已解锁点位ID列表
   "completedLocationIds": [10011, 10012], // int[]
   "progressRecords": [                    // List<ProgressRecord>
     {

@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<PlayerMapProgress> PlayerMapProgress { get; set; }
     public DbSet<PlayerMapLocationVisit> PlayerMapLocationVisit { get; set; }
     public DbSet<PlayerCompletedLocation> PlayerCompletedLocation { get; set; }
+    public DbSet<PlayerUnlockedLocation> PlayerUnlockedLocation { get; set; }
 
     // Inventory/Equipment
     public DbSet<PlayerItem> PlayerItem { get; set; }
@@ -32,6 +33,9 @@ public class AppDbContext : DbContext
             .HasKey(e => new { e.UserId, e.LocationId });
 
         modelBuilder.Entity<PlayerCompletedLocation>()
+            .HasKey(e => new { e.UserId, e.LocationId });
+
+        modelBuilder.Entity<PlayerUnlockedLocation>()
             .HasKey(e => new { e.UserId, e.LocationId });
 
         modelBuilder.Entity<PlayerItem>()

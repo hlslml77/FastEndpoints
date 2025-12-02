@@ -12,9 +12,9 @@ namespace Web.Services;
 public interface IMapService
 {
     /// <summary>
-    /// 保存地图进度
+    /// 保存地图进度，返回进度记录和是否解锁的信�?
     /// </summary>
-    Task<PlayerMapProgress> SaveMapProgressAsync(long userId, int startLocationId, int endLocationId, decimal distanceMeters);
+    Task<(PlayerMapProgress Progress, bool IsUnlock)> SaveMapProgressAsync(long userId, int startLocationId, int endLocationId, decimal distanceMeters);
 
     /// <summary>
     /// 访问地图点位，返回是否首次访问和奖励信息
@@ -22,9 +22,9 @@ public interface IMapService
     Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId, bool isCompleted);
 
     /// <summary>
-    /// 获取玩家的地图访问记录
+    /// 获取玩家已解锁的点位列表
     /// </summary>
-    Task<List<PlayerMapLocationVisit>> GetPlayerVisitedLocationsAsync(long userId);
+    Task<List<PlayerUnlockedLocation>> GetPlayerUnlockedLocationsAsync(long userId);
 
     /// <summary>
     /// 获取玩家已完成的点位列表
@@ -32,10 +32,9 @@ public interface IMapService
     Task<List<PlayerCompletedLocation>> GetPlayerCompletedLocationsAsync(long userId);
 
     /// <summary>
-    /// 获取玩家的所有路线进度记录
+    /// 获取玩家的所有路线进度记�?
     /// </summary>
     Task<List<PlayerMapProgress>> GetPlayerProgressAsync(long userId);
-
 }
 
 /// <summary>
@@ -80,7 +79,7 @@ public class MapService : IMapService
         _inventoryService = inventoryService;
     }
 
-    public async Task<PlayerMapProgress> SaveMapProgressAsync(
+    public async Task<(PlayerMapProgress Progress, bool IsUnlock)> SaveMapProgressAsync(
         long userId,
         int startLocationId,
         int endLocationId,
@@ -93,16 +92,14 @@ public class MapService : IMapService
 
         if (progress != null)
         {
-            // 更新现有进度
             progress.DistanceMeters = distanceMeters;
-            progress.CreatedAt = DateTime.UtcNow; // 更新时间
+            progress.CreatedAt = DateTime.UtcNow;
             Log.Information(
                 "Updated map progress for user {UserId}: {Start} -> {End}, Distance: {Distance}m",
                 userId, startLocationId, endLocationId, distanceMeters);
         }
         else
         {
-            // 插入新进度
             progress = new PlayerMapProgress
             {
                 UserId = userId,
@@ -117,27 +114,48 @@ public class MapService : IMapService
                 userId, startLocationId, endLocationId, distanceMeters);
         }
 
-        // 不再由服务器根据距离自动判定完成。是否完成由客户端在 /map/visit-location 上报。
-        // 因此此处仅保存进度，不写入 PlayerCompletedLocation。
+        // 检查是否需要解锁终点位�?
+        var isUnlock = false;
+        var endLocationConfig = _mapConfigService.GetMapConfigByLocationId(endLocationId);
+        if (endLocationConfig != null && endLocationConfig.UnlockDistance.HasValue && endLocationConfig.UnlockDistance > 0)
+        {
+            if (distanceMeters >= endLocationConfig.UnlockDistance.Value)
+            {
+                // 检查是否已经解锁过
+                var alreadyUnlocked = await _dbContext.PlayerUnlockedLocation
+                    .AnyAsync(u => u.UserId == userId && u.LocationId == endLocationId);
+
+                if (!alreadyUnlocked)
+                {
+                    _dbContext.PlayerUnlockedLocation.Add(new PlayerUnlockedLocation
+                    {
+                        UserId = userId,
+                        LocationId = endLocationId,
+                        UnlockedTime = DateTime.UtcNow
+                    });
+                    isUnlock = true;
+                    Log.Information(
+                        "User {UserId} unlocked location {LocationId} by reaching distance {Distance}m",
+                        userId, endLocationId, distanceMeters);
+                }
+            }
+        }
 
         await _dbContext.SaveChangesAsync();
 
-        return progress;
+        return (progress, isUnlock);
     }
 
     public async Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId, bool isCompleted)
     {
-        // 获取地图配置
         var mapConfig = _mapConfigService.GetMapConfigByLocationId(locationId);
         if (mapConfig == null)
         {
             throw new ArgumentException($"Location {locationId} not found in map configuration");
         }
 
-        // Diagnostic log
         Log.Information("Visiting location {LocationId}, configured consumption: [{Consumption}]", locationId, mapConfig.Consumption != null ? string.Join(", ", mapConfig.Consumption) : "null");
 
-        // 检查并消耗物品
         if (mapConfig.Consumption is { Count: 2 } consumption && consumption[1] > 0)
         {
             var itemId = consumption[0];
@@ -149,13 +167,11 @@ public class MapService : IMapService
             }
             catch (ArgumentException ex)
             {
-                // 物品不足
                 Log.Warning("User {UserId} has insufficient items ({ItemId} x{Amount}) for location {LocationId}: {Message}", userId, itemId, amount, locationId, ex.Message);
                 throw new InvalidOperationException("物品不足");
             }
         }
 
-        // 查找是否已访问过
         var existingVisit = await _dbContext.PlayerMapLocationVisit
             .FirstOrDefaultAsync(v => v.UserId == userId && v.LocationId == locationId);
 
@@ -163,7 +179,6 @@ public class MapService : IMapService
 
         if (existingVisit == null)
         {
-            // 首次访问
             visitRecord = new PlayerMapLocationVisit
             {
                 UserId = userId,
@@ -178,7 +193,6 @@ public class MapService : IMapService
         }
         else
         {
-            // 非首次访问
             existingVisit.VisitCount++;
             existingVisit.LastVisitTime = DateTime.UtcNow;
             visitRecord = existingVisit;
@@ -188,7 +202,6 @@ public class MapService : IMapService
 
         var isFirstVisit = existingVisit == null;
 
-        // 如果客户端上报完成，则记录到完成点位表
         if (isCompleted)
         {
             var hasCompleted = await _dbContext.PlayerCompletedLocation
@@ -206,10 +219,6 @@ public class MapService : IMapService
 
         await _dbContext.SaveChangesAsync();
 
-        // 奖励规则：
-        // - 首次访问发首次奖励
-        // - 完成发完成奖励（目前使用 FixedReward 作为完成奖励）
-        // 两者可以同时发放，奖励合并返回
         List<List<int>>? rewards = null;
         if (isFirstVisit && mapConfig.FirstReward != null)
         {
@@ -222,7 +231,6 @@ public class MapService : IMapService
             rewards.AddRange(mapConfig.FixedReward);
         }
 
-        // 发放奖励到背包与装备表（依据物品配置由 InventoryService 判定）
         if (rewards != null && rewards.Count > 0)
         {
             foreach (var r in rewards)
@@ -246,11 +254,11 @@ public class MapService : IMapService
         };
     }
 
-    public async Task<List<PlayerMapLocationVisit>> GetPlayerVisitedLocationsAsync(long userId)
+    public async Task<List<PlayerUnlockedLocation>> GetPlayerUnlockedLocationsAsync(long userId)
     {
-        return await _dbContext.PlayerMapLocationVisit
-            .Where(v => v.UserId == userId)
-            .OrderByDescending(v => v.LastVisitTime)
+        return await _dbContext.PlayerUnlockedLocation
+            .Where(u => u.UserId == userId)
+            .OrderByDescending(u => u.UnlockedTime)
             .ToListAsync();
     }
 

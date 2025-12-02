@@ -33,3 +33,13 @@ CREATE TABLE IF NOT EXISTS `player_completed_location` (
   PRIMARY KEY (`user_id`, `location_id`),
   INDEX `idx_completed_time` (`completed_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家已完成点位表';
+
+
+-- 创建玩家已解锁点位表
+CREATE TABLE IF NOT EXISTS `player_unlocked_location` (
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `location_id` INT NOT NULL COMMENT '地图点位ID',
+  `unlocked_time` DATETIME NOT NULL COMMENT '解锁时间',
+  PRIMARY KEY (`user_id`, `location_id`),
+  INDEX `idx_unlocked_time` (`unlocked_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家已解锁点位表';

@@ -178,3 +178,30 @@ public class PlayerCompletedLocation
     [Column("completed_time")]
     public DateTime CompletedTime { get; set; }
 }
+
+/// <summary>
+/// 玩家已解锁点位表
+/// </summary>
+[Table("player_unlocked_location")]
+public class PlayerUnlockedLocation
+{
+    /// <summary>
+    /// 用户ID（复合主键之一）
+    /// </summary>
+    [Key]
+    [Column("user_id", Order = 0)]
+    public long UserId { get; set; }
+
+    /// <summary>
+    /// 地图点位ID（复合主键之一）
+    /// </summary>
+    [Key]
+    [Column("location_id", Order = 1)]
+    public int LocationId { get; set; }
+
+    /// <summary>
+    /// 解锁时间
+    /// </summary>
+    [Column("unlocked_time")]
+    public DateTime UnlockedTime { get; set; }
+}

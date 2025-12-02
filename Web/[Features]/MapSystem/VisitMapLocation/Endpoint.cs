@@ -20,19 +20,17 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
     public override void Configure()
     {
         Post("/map/visit-location");
-        // 需要JWT token验证，要求web_access权限
         Permissions("web_access");
         Description(x => x
             .WithTags("MapSystem")
             .WithSummary("访问地图点位")
-            .WithDescription("记录玩家访问地图点位。客户端上报是否完成：首次访问发放首次奖励；完成则发放完成奖励（使用固定奖励字段）。需要JWT token验证。"));
+            .WithDescription("记录玩家访问地图点位。客户端上报是否完成：首次访问发放首次奖励；完成则发放完成奖励（使用固定奖励字段）。注意：点位解锁通过/map/save-progress接口实现，此接口不再添加到解锁列表。需要JWT token验证。"));
     }
 
     public override async Task HandleAsync(VisitMapLocationRequest req, CancellationToken ct)
     {
         try
         {
-            // 从JWT解析用户ID（优先 sub，其次 userId/NameIdentifier）
             var userIdStr = User?.Claims?.FirstOrDefault(c =>
                 c.Type == "sub" || c.Type == "userId" || c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var userId))
@@ -44,7 +42,6 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
 
             var result = await _mapService.VisitMapLocationAsync(userId, req.LocationId, req.IsCompleted);
 
-            // 转换奖励格式
             List<RewardItem>? rewards = null;
             if (result.Rewards != null && result.Rewards.Count > 0)
             {
@@ -95,4 +92,3 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
         }
     }
 }
-
