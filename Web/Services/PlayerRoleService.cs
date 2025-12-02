@@ -35,15 +35,18 @@ public class PlayerRoleService : IPlayerRoleService
     private readonly AppDbContext _dbContext;
     private readonly IRoleConfigService _configService;
     private readonly IInventoryService _inventoryService;
+    private readonly IGeneralConfigService _generalConfigService;
 
     public PlayerRoleService(
         AppDbContext dbContext,
         IRoleConfigService configService,
-        IInventoryService inventoryService)
+        IInventoryService inventoryService,
+        IGeneralConfigService generalConfigService)
     {
         _dbContext = dbContext;
         _configService = configService;
         _inventoryService = inventoryService;
+        _generalConfigService = generalConfigService;
     }
 
     /// <summary>
@@ -77,12 +80,20 @@ public class PlayerRoleService : IPlayerRoleService
 
             _dbContext.PlayerRole.Add(player);
 
-            // Grant initial items
-            await _inventoryService.GrantItemAsync(userId, 1002, 100);
+            // 按配置发放初始金币与体力道具
+            var goldItemId = _generalConfigService.InitialGoldItemId;     // 默认1000
+            var staminaItemId = _generalConfigService.InitialStaminaItemId; // 默认1002
+            var goldAmount = Math.Max(0, _generalConfigService.GetInitialGoldAmount());
+            var staminaAmount = Math.Max(0, _generalConfigService.GetInitialStaminaAmount());
+
+            if (goldAmount > 0)
+                await _inventoryService.GrantItemAsync(userId, goldItemId, goldAmount);
+            if (staminaAmount > 0)
+                await _inventoryService.GrantItemAsync(userId, staminaItemId, staminaAmount);
 
             await _dbContext.SaveChangesAsync();
 
-            Log.Information("Created new player role for user {UserId}", userId);
+            Log.Information("Created new player role for user {UserId}. init gold:{GoldId} x{GoldAmt}, stamina:{StaId} x{StaAmt}", userId, goldItemId, goldAmount, staminaItemId, staminaAmount);
         }
 
         return player;

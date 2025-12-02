@@ -92,6 +92,11 @@ bld.Services
    .AddSingleton<ITravelDropPointConfigService>(sp => sp.GetRequiredService<TravelDropPointConfigService>())
    .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<TravelDropPointConfigService>())
 
+   // General config (Config.json/config.json)
+   .AddSingleton<GeneralConfigService>()
+   .AddSingleton<IGeneralConfigService>(sp => sp.GetRequiredService<GeneralConfigService>())
+   .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<GeneralConfigService>())
+
    .AddScoped<IPlayerRoleService, PlayerRoleService>()
    .AddScoped<IMapService, MapService>()
    .AddScoped<IInventoryService, InventoryService>()

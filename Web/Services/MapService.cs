@@ -80,23 +80,24 @@ public class MapLocationVisitResult
 
 public class MapService : IMapService
 {
-    private const decimal MaxStoredEnergyMeters = 10000m;
-
     private readonly AppDbContext _dbContext;
     private readonly IMapConfigService _mapConfigService;
     private readonly IInventoryService _inventoryService;
     private readonly IPlayerRoleService _playerRoleService;
+    private readonly IGeneralConfigService _generalConfigService;
 
     public MapService(
         AppDbContext dbContext,
         IMapConfigService mapConfigService,
         IInventoryService inventoryService,
-        IPlayerRoleService playerRoleService)
+        IPlayerRoleService playerRoleService,
+        IGeneralConfigService generalConfigService)
     {
         _dbContext = dbContext;
         _mapConfigService = mapConfigService;
         _inventoryService = inventoryService;
         _playerRoleService = playerRoleService;
+        _generalConfigService = generalConfigService;
     }
 
     public async Task<(PlayerMapProgress Progress, bool IsUnlock, decimal StoredEnergyMeters)> SaveMapProgressAsync(
@@ -174,10 +175,11 @@ public class MapService : IMapService
         if (addEnergy > 0)
         {
             var before = player.StoredEnergyMeters;
-            player.StoredEnergyMeters = Math.Min(MaxStoredEnergyMeters, before + addEnergy);
+            var cap = _generalConfigService.GetStoredEnergyMaxMeters();
+            player.StoredEnergyMeters = Math.Min(cap, before + addEnergy);
             if (player.StoredEnergyMeters != before)
             {
-                Log.Information("User {UserId} gained stored energy: +{Add}m -> {Total}m", userId, addEnergy, player.StoredEnergyMeters);
+                Log.Information("User {UserId} gained stored energy: +{Add}m -> {Total}m (cap={Cap}m)", userId, addEnergy, player.StoredEnergyMeters, cap);
             }
         }
 

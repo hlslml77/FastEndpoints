@@ -1,0 +1,71 @@
+[
+  {
+    "ID": 1,
+    "Desc": "初始金币",
+    "Value1": 99,
+    "Value2": 0.0,
+    "Value3": null,
+    "Value4": null,
+    "Value5": null,
+    "Value6": null,
+    "Value7": null
+  },
+  {
+    "ID": 2,
+    "Desc": "初始体力",
+    "Value1": 9,
+    "Value2": 0.0,
+    "Value3": null,
+    "Value4": null,
+    "Value5": null,
+    "Value6": null,
+    "Value7": null
+  },
+  {
+    "ID": 3,
+    "Desc": "初始背包格数",
+    "Value1": 99,
+    "Value2": 0.0,
+    "Value3": null,
+    "Value4": null,
+    "Value5": null,
+    "Value6": null,
+    "Value7": null
+  },
+  {
+    "ID": 4,
+    "Desc": "初始能量槽上限（km）",
+    "Value1": 10,
+    "Value2": 0.0,
+    "Value3": null,
+    "Value4": null,
+    "Value5": null,
+    "Value6": null,
+    "Value7": null
+  },
+  {
+    "ID": 5,
+    "Desc": "玩家选择大地图点位时机器人数量显示",
+    "Value1": 0,
+    "Value2": 0.0,
+    "Value3": null,
+    "Value4": [
+      5,
+      10
+    ],
+    "Value5": null,
+    "Value6": null,
+    "Value7": null
+  },
+  {
+    "ID": 6,
+    "Desc": "每日随机事件点位生成数量（大地图）",
+    "Value1": 1,
+    "Value2": 0.0,
+    "Value3": null,
+    "Value4": null,
+    "Value5": null,
+    "Value6": null,
+    "Value7": null
+  }
+]
