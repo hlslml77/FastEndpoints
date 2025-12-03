@@ -136,6 +136,17 @@ function Test-MapSystem($auth) {
                 Info ("     - Item $($_.itemId): x$($_.amount)")
             }
         }
+        if ($visitResult.consumedItems) {
+            Info ("   Consumed: $($visitResult.consumedItems.Count) items")
+            $visitResult.consumedItems | ForEach-Object {
+                $rem = $_.remaining
+                if ($null -ne $rem) {
+                    Info ("     - Item $($_.itemId): x$($_.amount), remaining $rem")
+                } else {
+                    Info ("     - Item $($_.itemId): x$($_.amount)")
+                }
+            }
+        }
         if ($visitResult.locationInfo) {
             Info ("   Location: $($visitResult.locationInfo.description)")
         }
