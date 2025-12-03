@@ -24,8 +24,13 @@ public class MapBaseConfig
     public decimal? UnlockDistance { get; set; }
 
     /// <summary>
-    /// 资源ID（对应WorldUiMap_Resources.json的Resources字段），0表示无倒计时
+    /// 资源ID，0表示无倒计时
     /// </summary>
     public int Resources { get; set; } = 0;
+
+    /// <summary>
+    /// 刷新时间（小时）。当 Resources>0 时有效
+    /// </summary>
+    public int? RefreshTime { get; set; }
 }
 

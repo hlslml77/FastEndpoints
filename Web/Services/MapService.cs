@@ -105,7 +105,6 @@ public class MapService : IMapService
     private readonly IInventoryService _inventoryService;
     private readonly IPlayerRoleService _playerRoleService;
     private readonly IGeneralConfigService _generalConfigService;
-    private readonly IResourceConfigService _resourceConfigService;
 
     private readonly IRandomWorldEventConfigService _randomCfg;
     private readonly Random _rand = new();
@@ -116,7 +115,6 @@ public class MapService : IMapService
         IInventoryService inventoryService,
         IPlayerRoleService playerRoleService,
         IGeneralConfigService generalConfigService,
-        IResourceConfigService resourceConfigService,
         IRandomWorldEventConfigService randomCfg)
     {
         _dbContext = dbContext;
@@ -124,7 +122,6 @@ public class MapService : IMapService
         _inventoryService = inventoryService;
         _playerRoleService = playerRoleService;
         _generalConfigService = generalConfigService;
-        _resourceConfigService = resourceConfigService;
         _randomCfg = randomCfg;
     }
 
@@ -346,10 +343,10 @@ public class MapService : IMapService
 
             DateTime? nextChallengeTime = null;
 
-            // 如果该点位有资源倒计时，计算下次可挑战时间
+            // 如果该点位有资源倒计时，计算下次可挑战时间（直接从 MapBaseConfig 读取 RefreshTime）
             if (mapConfig.Resources > 0)
             {
-                var refreshTimeHours = _resourceConfigService.GetRefreshTimeByResourceId(mapConfig.Resources);
+                var refreshTimeHours = mapConfig.RefreshTime;
                 if (refreshTimeHours.HasValue && refreshTimeHours.Value > 0)
                 {
                     nextChallengeTime = DateTime.UtcNow.AddHours(refreshTimeHours.Value);
