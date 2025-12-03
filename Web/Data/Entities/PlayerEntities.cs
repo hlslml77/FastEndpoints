@@ -65,6 +65,12 @@ public class PlayerRole
     public decimal StoredEnergyMeters { get; set; } = 0;
 
     /// <summary>
+    /// 玩家当前所在地图点位（大地图）
+    /// </summary>
+    [Column("current_location_id")]
+    public int? CurrentLocationId { get; set; }
+
+    /// <summary>
     /// 最后更新时间
     /// </summary>
     [Column("last_update_time")]
@@ -253,3 +259,4 @@ public class PlayerDailyRandomEvent
     [Column("completed_at")]
     public DateTime? CompletedAt { get; set; }
 }
+

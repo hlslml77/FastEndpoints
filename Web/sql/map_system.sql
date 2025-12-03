@@ -58,3 +58,5 @@ CREATE TABLE IF NOT EXISTS `player_daily_random_event` (
   UNIQUE KEY `uniq_user_date_location` (`user_id`, `date`, `location_id`),
   INDEX `idx_user_date` (`user_id`, `date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家每日随机事件表';
+
+

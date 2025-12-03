@@ -55,6 +55,11 @@ public interface IMapService
     /// 完成某个随机事件，发放奖励并处理消耗
     /// </summary>
     Task<(bool Success, List<List<int>>? Rewards)> CompleteRandomEventAsync(long userId, int locationId, int? eventId);
+
+    /// <summary>
+    /// 获取玩家当前所在点位
+    /// </summary>
+    Task<int?> GetCurrentLocationIdAsync(long userId);
 }
 
 /// <summary>
@@ -115,6 +120,33 @@ public class MapService : IMapService
         _randomCfg = randomCfg;
     }
 
+    private int? GetRequiredDistanceFromStartToEnd(int startLocationId, int endLocationId)
+    {
+        var startCfg = _mapConfigService.GetMapConfigByLocationId(startLocationId);
+        var list = startCfg?.TheNextPointDistance;
+        if (list == null) return null;
+        foreach (var pair in list)
+        {
+            if (pair.Count >= 2 && pair[0] == endLocationId)
+                return pair[1];
+        }
+        return null;
+    }
+
+    private async Task SetCurrentLocationAsync(long userId, int locationId)
+    {
+        var player = await _playerRoleService.GetOrCreatePlayerAsync(userId);
+        if (player.CurrentLocationId != locationId)
+        {
+            player.CurrentLocationId = locationId;
+            player.LastUpdateTime = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
+        }
+    }
+
+
+
+
     public async Task<(PlayerMapProgress Progress, bool IsUnlock, decimal StoredEnergyMeters)> SaveMapProgressAsync(
         long userId,
         int startLocationId,
@@ -150,6 +182,13 @@ public class MapService : IMapService
             Log.Information(
                 "Saved new map progress for user {UserId}: {Start} -> {End}, Distance: {Distance}m",
                 userId, startLocationId, endLocationId, distanceMeters);
+        }
+
+        // 若跑步距离达到起点->终点所需距离，则更新当前点位为终点
+        var required = GetRequiredDistanceFromStartToEnd(startLocationId, endLocationId);
+        if (required.HasValue && distanceMeters >= required.Value)
+        {
+            await SetCurrentLocationAsync(userId, endLocationId);
         }
 
         // 处理解锁与存储能量
@@ -262,6 +301,9 @@ public class MapService : IMapService
         }
 
         var isFirstVisit = existingVisit == null;
+
+        // 更新玩家当前所在点位为本次访问的点位
+        await SetCurrentLocationAsync(userId, locationId);
 
         if (isCompleted)
         {
@@ -553,5 +595,11 @@ public class MapService : IMapService
     {
         var player = await _playerRoleService.GetOrCreatePlayerAsync(userId);
         return player.StoredEnergyMeters;
+    }
+
+    public async Task<int?> GetCurrentLocationIdAsync(long userId)
+    {
+        var player = await _playerRoleService.GetOrCreatePlayerAsync(userId);
+        return player.CurrentLocationId;
     }
 }

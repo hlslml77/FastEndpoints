@@ -279,5 +279,10 @@ public class GetPlayerMapStateResponse
     /// 今日随机事件列表
     /// </summary>
     public List<DailyRandomEventDto> DailyRandomEvents { get; set; } = new();
+
+    /// <summary>
+    /// 玩家当前所在点位ID（根据进度/访问设置）
+    /// </summary>
+    public int? CurrentLocationId { get; set; }
 }
 

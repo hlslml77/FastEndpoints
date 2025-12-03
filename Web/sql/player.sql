@@ -18,3 +18,8 @@ CREATE TABLE IF NOT EXISTS `player_role` (
 -- 兼容已有库：增加列（如果不存在）
 ALTER TABLE `player_role`
   ADD COLUMN IF NOT EXISTS `stored_energy_meters` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '存储的能量（米），最大10000';
+
+
+-- 兼容已有库：增加当前所在点位列（如果不存在）
+ALTER TABLE `player_role`
+  ADD COLUMN IF NOT EXISTS `current_location_id` INT NULL COMMENT '当前所在点位ID';
