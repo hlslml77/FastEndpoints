@@ -47,7 +47,7 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
                 return;
             }
 
-            var (progress, isUnlock, storedEnergy) = await _mapService.SaveMapProgressAsync(
+            var (progress, unlockedIds, storedEnergy) = await _mapService.SaveMapProgressAsync(
                 userId,
                 req.StartLocationId,
                 req.EndLocationId,
@@ -61,7 +61,7 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
                 EndLocationId = progress.EndLocationId,
                 DistanceMeters = progress.DistanceMeters,
                 CreatedAt = progress.CreatedAt,
-                IsUnlock = isUnlock,
+                UnlockedLocationIds = unlockedIds ?? new List<int>(),
                 StoredEnergyMeters = storedEnergy
             };
 

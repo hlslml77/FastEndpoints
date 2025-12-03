@@ -115,8 +115,10 @@ function Test-MapSystem($auth) {
     $saveResult = Invoke-ApiCall -Uri "$BaseUrl/api/map/save-progress" -Auth $auth -Method 'Post' -Body $progress
     if ($saveResult) {
         Ok ("   ✓ Saved progress: ID $($saveResult.id), Distance $($saveResult.distanceMeters)m")
-        if ($saveResult.isUnlock) {
-            Info ("   Location unlocked! Stored energy: $($saveResult.storedEnergyMeters)m")
+        $unlocked = if ($saveResult.unlockedLocationIds) { $saveResult.unlockedLocationIds } else { @() }
+        if ($unlocked.Count -gt 0) {
+            Info ("   Unlocked IDs this run: $($unlocked -join ', ')")
+            Info ("   Stored energy: $($saveResult.storedEnergyMeters)m")
         }
     } else {
         Err "   ✗ Save progress failed"

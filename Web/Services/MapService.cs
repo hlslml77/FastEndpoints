@@ -12,9 +12,9 @@ namespace Web.Services;
 public interface IMapService
 {
     /// <summary>
-    /// 保存地图进度，返回进度记录、是否解锁以及最新存储能量（米）
+    /// 保存地图进度，返回进度记录、本次解锁的点位ID列表以及最新存储能量（米）
     /// </summary>
-    Task<(PlayerMapProgress Progress, bool IsUnlock, decimal StoredEnergyMeters)> SaveMapProgressAsync(long userId, int startLocationId, int endLocationId, decimal distanceMeters);
+    Task<(PlayerMapProgress Progress, List<int> UnlockedLocationIds, decimal StoredEnergyMeters)> SaveMapProgressAsync(long userId, int startLocationId, int endLocationId, decimal distanceMeters);
 
     /// <summary>
     /// 访问地图点位，返回是否首次访问和奖励信息以及是否消耗了道具
@@ -175,7 +175,7 @@ public class MapService : IMapService
 
 
 
-    public async Task<(PlayerMapProgress Progress, bool IsUnlock, decimal StoredEnergyMeters)> SaveMapProgressAsync(
+    public async Task<(PlayerMapProgress Progress, List<int> UnlockedLocationIds, decimal StoredEnergyMeters)> SaveMapProgressAsync(
         long userId,
         int startLocationId,
         int endLocationId,
@@ -222,7 +222,7 @@ public class MapService : IMapService
         }
 
         // 处理解锁与存储能量
-        var isUnlock = false;
+        var unlockedList = new List<int>();
         var endLocationConfig = _mapConfigService.GetMapConfigByLocationId(endLocationId);
         decimal addEnergy = 0m;
         if (endLocationConfig != null && endLocationConfig.UnlockDistance.HasValue && endLocationConfig.UnlockDistance > 0)
@@ -246,7 +246,31 @@ public class MapService : IMapService
                         LocationId = endLocationId,
                         UnlockedTime = DateTime.UtcNow
                     });
-                    isUnlock = true;
+
+                    // 记录返回列表：终点 + 周边点位（仅返回给客户端，不写入解锁表）
+                    unlockedList.Add(endLocationId);
+                    var sp = endLocationConfig?.SurroundingPoints;
+                    if (sp != null && sp.Count > 0)
+                    {
+                        foreach (var pid in sp)
+                        {
+                            if (!unlockedList.Contains(pid)) unlockedList.Add(pid);
+
+                            // 将周边点位也写入已解锁表（若尚未解锁）
+                            var spAlready = await _dbContext.PlayerUnlockedLocation
+                                .AnyAsync(u => u.UserId == userId && u.LocationId == pid);
+                            if (!spAlready)
+                            {
+                                _dbContext.PlayerUnlockedLocation.Add(new PlayerUnlockedLocation
+                                {
+                                    UserId = userId,
+                                    LocationId = pid,
+                                    UnlockedTime = DateTime.UtcNow
+                                });
+                            }
+                        }
+                    }
+
                     Log.Information(
                         "User {UserId} unlocked location {LocationId} by reaching distance {Distance}m",
                         userId, endLocationId, distanceMeters);
@@ -269,7 +293,7 @@ public class MapService : IMapService
 
         await _dbContext.SaveChangesAsync();
 
-        return (progress, isUnlock, player.StoredEnergyMeters);
+        return (progress, unlockedList, player.StoredEnergyMeters);
     }
 
     public async Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId, bool isCompleted, bool needConsume)

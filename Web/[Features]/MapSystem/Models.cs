@@ -57,9 +57,9 @@ public class SaveMapProgressResponse
     public DateTime CreatedAt { get; set; }
 
     /// <summary>
-    /// 是否解锁了终点位置（当距离超过配置的解锁距离时为true）
+    /// 本次解锁的点位ID列表（若无解锁则为空）。当解锁终点时包含终点；若终点配置了 SurroundingPoints，则一并包含其周边点位。
     /// </summary>
-    public bool IsUnlock { get; set; } = false;
+    public List<int> UnlockedLocationIds { get; set; } = new();
 
     /// <summary>
     /// 玩家当前存储能量总值（米）

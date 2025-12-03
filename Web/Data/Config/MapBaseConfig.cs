@@ -18,6 +18,12 @@ public class MapBaseConfig
     /// </summary>
     public List<List<int>>? TheNextPointDistance { get; set; }
 
+
+    /// <summary>
+    /// 终点周边点位（解锁终点时可一并返回给客户端展示）
+    /// </summary>
+    public List<int>? SurroundingPoints { get; set; }
+
     /// <summary>
     /// 解锁该点位所需的最小距离（米），为null或0表示无需距离解锁
     /// </summary>
