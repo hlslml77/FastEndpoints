@@ -16,10 +16,12 @@ CREATE TABLE IF NOT EXISTS `player_role` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家角色数据表';
 
 -- 兼容已有库：增加列（如果不存在）
+-- 注意：MySQL 不支持 ALTER TABLE ADD COLUMN IF NOT EXISTS，需要先检查列是否存在
+-- 这里移除 IF NOT EXISTS 子句，由应用程序处理异常
 ALTER TABLE `player_role`
-  ADD COLUMN IF NOT EXISTS `stored_energy_meters` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '存储的能量（米），最大10000';
+  ADD COLUMN `stored_energy_meters` DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '存储的能量（米），最大10000';
 
 
 -- 兼容已有库：增加当前所在点位列（如果不存在）
 ALTER TABLE `player_role`
-  ADD COLUMN IF NOT EXISTS `current_location_id` INT NULL COMMENT '当前所在点位ID';
+  ADD COLUMN `current_location_id` INT NULL COMMENT '当前所在点位ID';

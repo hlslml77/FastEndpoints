@@ -71,6 +71,8 @@ CREATE TABLE IF NOT EXISTS `location_people_count` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='地图点位人数统计表';
 
 -- 为现有的player_completed_location表添加next_challenge_time列（如果不存在）
-ALTER TABLE `player_completed_location` ADD COLUMN IF NOT EXISTS `next_challenge_time` DATETIME NULL COMMENT '下次可挑战时间（当该点位有资源倒计时时设置）';
-ALTER TABLE `player_completed_location` ADD INDEX IF NOT EXISTS `idx_next_challenge_time` (`next_challenge_time`);
+-- 注意：MySQL 不支持 ALTER TABLE ADD COLUMN IF NOT EXISTS，需要先检查列是否存在
+-- 这里使用条件语句来处理
+ALTER TABLE `player_completed_location` ADD COLUMN `next_challenge_time` DATETIME NULL COMMENT '下次可挑战时间（当该点位有资源倒计时时设置）';
+ALTER TABLE `player_completed_location` ADD INDEX `idx_next_challenge_time` (`next_challenge_time`);
 

@@ -33,20 +33,11 @@ public class GeneralConfigService : IGeneralConfigService
 
     private volatile List<GeneralConfigEntry> _entries = new();
 
-    private class GeneralSimpleConfig
-    {
-        public int InitialStaminaItemId { get; set; } = 1002;
-        public int InitialGoldItemId { get; set; } = 1000;
-        public decimal StoredEnergyMeters { get; set; } = 10000m;
-    }
-
-    private volatile GeneralSimpleConfig _simple = new();
-
     public string Name => "general";
     public DateTime LastReloadTime { get; private set; }
 
-    public int InitialGoldItemId => _simple.InitialGoldItemId;
-    public int InitialStaminaItemId => _simple.InitialStaminaItemId;
+    public int InitialGoldItemId => 1000;  // 默认金币物品ID
+    public int InitialStaminaItemId => 1002;  // 默认体力物品ID
 
     public GeneralConfigService()
     {
@@ -60,24 +51,23 @@ public class GeneralConfigService : IGeneralConfigService
     {
         try
         {
-            // 1) 读取简单对象 config.json（若存在）
-            var simplePath = Path.Combine(_dir, "config.json");
-            if (File.Exists(simplePath))
-            {
-                var simple = JsonSerializer.Deserialize<GeneralSimpleConfig>(File.ReadAllText(simplePath), _opts);
-                if (simple != null) _simple = simple;
-            }
-
-            // 2) 读取数组 Config.json（若存在）
+            // 读取数组 Config.json（若存在）
             var arrayPath = Path.Combine(_dir, "Config.json");
             if (File.Exists(arrayPath))
             {
-                var entries = JsonSerializer.Deserialize<List<GeneralConfigEntry>>(File.ReadAllText(arrayPath), _opts) ?? new List<GeneralConfigEntry>();
-                _entries = entries;
+                try
+                {
+                    var entries = JsonSerializer.Deserialize<List<GeneralConfigEntry>>(File.ReadAllText(arrayPath), _opts) ?? new List<GeneralConfigEntry>();
+                    _entries = entries;
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Failed to load Config.json, keeping previous entries");
+                }
             }
 
             LastReloadTime = DateTime.UtcNow;
-            Log.Information("General config reloaded. Simple:{HasSimple} Entries:{Count}", File.Exists(simplePath), _entries.Count);
+            Log.Information("General config reloaded. Entries:{Count}", _entries.Count);
         }
         catch (Exception ex)
         {
@@ -85,7 +75,7 @@ public class GeneralConfigService : IGeneralConfigService
         }
     }
 
-    public object GetStatus() => new { Name, LastReloadTime, Count = _entries.Count, Dir = _dir, Simple = _simple };
+    public object GetStatus() => new { Name, LastReloadTime, Count = _entries.Count, Dir = _dir };
 
     private GeneralConfigEntry? FindByIdOrDesc(int id, string descContains)
         => _entries.FirstOrDefault(e => e.ID == id) ?? _entries.FirstOrDefault(e => (e.Desc ?? string.Empty).Contains(descContains, StringComparison.OrdinalIgnoreCase));
@@ -104,7 +94,6 @@ public class GeneralConfigService : IGeneralConfigService
 
     public decimal GetStoredEnergyMaxMeters()
     {
-        if (_simple.StoredEnergyMeters > 0) return _simple.StoredEnergyMeters;
         var e = FindByIdOrDesc(4, "能量槽");
         var km = (decimal)(e?.Value1 ?? 10); // 默认10km
         return km * 1000m;
