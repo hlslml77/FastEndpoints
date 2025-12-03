@@ -115,18 +115,27 @@ function Test-MapSystem($auth) {
     $saveResult = Invoke-ApiCall -Uri "$BaseUrl/api/map/save-progress" -Auth $auth -Method 'Post' -Body $progress
     if ($saveResult) {
         Ok ("   ✓ Saved progress: ID $($saveResult.id), Distance $($saveResult.distanceMeters)m")
+        if ($saveResult.isUnlock) {
+            Info ("   Location unlocked! Stored energy: $($saveResult.storedEnergyMeters)m")
+        }
     } else {
         Err "   ✗ Save progress failed"
     }
 
     # 3.2 Visit location
     Info "   [3.2] POST /api/map/visit-location"
-    $visit = @{ locationId=100102; isCompleted=$true }
+    $visit = @{ locationId=100102; isCompleted=$true; needConsume=$false }
     $visitResult = Invoke-ApiCall -Uri "$BaseUrl/api/map/visit-location" -Auth $auth -Method 'Post' -Body $visit
     if ($visitResult) {
         Info ("   First visit: $($visitResult.isFirstVisit), Visit count: $($visitResult.visitCount)")
         if ($visitResult.rewards) {
             Info ("   Rewards: $($visitResult.rewards.Count) items")
+            $visitResult.rewards | ForEach-Object {
+                Info ("     - Item $($_.itemId): x$($_.amount)")
+            }
+        }
+        if ($visitResult.locationInfo) {
+            Info ("   Location: $($visitResult.locationInfo.description)")
         }
         Ok "   ✓ Visit location successful"
     } else {
@@ -137,13 +146,49 @@ function Test-MapSystem($auth) {
     Info "   [3.3] POST /api/map/player-state"
     $mapState = Invoke-ApiCall -Uri "$BaseUrl/api/map/player-state" -Auth $auth -Method 'Post' -Body @{}
     if ($mapState) {
-        Info ("   Visited: $($mapState.visitedLocationIds.Count), Completed: $($mapState.completedLocationIds.Count)")
+        $unlockedCount = if ($mapState.unlockedLocationIds) { $mapState.unlockedLocationIds.Count } else { 0 }
+        $completedCount = if ($mapState.completedLocationIds) { $mapState.completedLocationIds.Count } else { 0 }
+        Info ("   Unlocked: $unlockedCount, Completed: $completedCount")
         if ($mapState.progressRecords) {
             Info ("   Progress records: $($mapState.progressRecords.Count)")
+        }
+        if ($mapState.storedEnergyMeters) {
+            Info ("   Stored energy: $($mapState.storedEnergyMeters) meters")
+        }
+        if ($mapState.currentLocationId) {
+            Info ("   Current location: $($mapState.currentLocationId)")
+        }
+        if ($mapState.dailyRandomEvents) {
+            Info ("   Daily random events: $($mapState.dailyRandomEvents.Count)")
         }
         Ok "   ✓ Get player map state successful"
     } else {
         Err "   ✗ Get player map state failed"
+    }
+
+    # 3.4 Query location people count
+    Info "   [3.4] POST /api/map/location-people-count"
+    $peopleCount = Invoke-ApiCall -Uri "$BaseUrl/api/map/location-people-count" -Auth $auth -Method 'Post' -Body @{ locationId=100102 }
+    if ($peopleCount) {
+        Info ("   People count: $($peopleCount.peopleCount)")
+        if ($peopleCount.nextChallengeTime) {
+            Info ("   Next challenge time: $($peopleCount.nextChallengeTime)")
+        }
+        Ok "   ✓ Query location people count successful"
+    } else {
+        Err "   ✗ Query location people count failed"
+    }
+
+    # 3.5 Unlock with energy (optional, only if we have stored energy)
+    if ($mapState -and $mapState.storedEnergyMeters -gt 0) {
+        Info "   [3.5] POST /api/map/unlock-with-energy"
+        $unlockEnergy = Invoke-ApiCall -Uri "$BaseUrl/api/map/unlock-with-energy" -Auth $auth -Method 'Post' -Body @{ startLocationId=100102; endLocationId=100104 }
+        if ($unlockEnergy) {
+            Info ("   Unlocked: $($unlockEnergy.isUnlocked), Used energy: $($unlockEnergy.usedEnergyMeters)m, Remaining: $($unlockEnergy.storedEnergyMeters)m")
+            Ok "   ✓ Unlock with energy successful"
+        } else {
+            Warn "   ⚠ Unlock with energy failed or not applicable"
+        }
     }
 }
 
