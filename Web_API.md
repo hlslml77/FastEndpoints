@@ -212,6 +212,19 @@ POST /api/map/player-state
       "distanceMeters": 10.0,            // double, 单位: 米
       "createdAt": "2025-01-01T00:00:00Z" // DateTime (ISO 8601)
     }
+  ],
+  "storedEnergyMeters": 240.0,            // double, 玩家当前“存储能量”（米），最大 10000
+  "dailyRandomEvents": [                   // List<DailyRandomEventDto>
+    {
+      "locationId": 10011,                // int, 事件所在点位（PositioningPoint）
+      "eventId": 1001,                    // int, 事件配置ID（WorldUiMap_RandomEvent.json 的 ID）
+      "eventType": 1,                     // int, 事件类型（来自配置）
+      "dialogue": "事件对话展示",         // string?, 事件对话（来自配置）
+      "isCompleted": false                // bool, 今日是否已完成
+    }
+  ],
+  "currentLocationId": 10011              // int?, 玩家当前所在点位ID（根据进度/访问设置）
+}
 
 3.4 使用存储能量解锁终点
 POST /api/map/unlock-with-energy
