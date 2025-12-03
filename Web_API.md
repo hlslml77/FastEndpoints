@@ -1,4 +1,4 @@
-Web API 文档（客户端版）
+﻿Web API 文档（客户端版）
 
 本项目为纯 API 服务（无静态站点）。所有业务接口均使用 JWT Bearer 认证，并要求权限 web_access（除换取 Token 的接口外）。
 
@@ -138,6 +138,7 @@ POST /api/map/save-progress
 - 若需标记完成，请在“访问地图点位”接口上报 isCompleted=true
 - 当 distanceMeters 超过终点位置配置的 UnlockDistance 时，自动解锁该位置，返回 isUnlock=true；超出部分（distanceMeters - UnlockDistance）的增量会累加到“存储能量”（上限 10000 米）
 - 解锁的位置会被添加到 /api/map/player-state 接口的 unlockedLocationIds 列表中
+- 人数统计：当本次 distanceMeters 达到/超过起点->终点的配置距离时，才会将玩家"当前所在点位"更新为 endLocationId，同时该点位的人数计数会自动增加 1
 
 请求体
 {
@@ -162,12 +163,13 @@ POST /api/map/save-progress
 POST /api/map/visit-location
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：客户端上报是否完成该点位（isCompleted）。
+- 说明：客户端上报是否完成该点位（isCompleted）。每次调用此接口时，该点位的人数计数会自动增加 1。
   - 消耗道具规则：当 isCompleted=false 且该点在配置中存在 Consumption=[itemId, amount] 时，将消耗对应道具；当 isCompleted=true 时不消耗道具。
   - 奖励规则：
     - 首次访问发放“首次奖励”（FirstReward）
     - 完成发放“完成奖励”（使用 FixedReward 字段）
     - 若同时满足，两个奖励会合并返回
+  - 人数统计：每次访问该点位时，该点位的人数计数会自动增加 1
 
 请求体
 {
@@ -233,6 +235,27 @@ POST /api/map/unlock-with-energy
   ],
   "storedEnergyMeters": 240.0             // double, 玩家当前“存储能量”（米），最大 10000
 }
+
+3.5 查询指定点位当前人数
+POST /api/map/location-people-count
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：返回指定点位的当前人数统计。当玩家调用 /api/map/visit-location 或 /api/map/save-progress 接口时，该点位的人数会自动增加。若统计人数为0，则按 Config.json 中的玩家选择大地图点位时机器人数量显示的 Value4 区间生成随机展示人数。
+
+请求体
+{
+  "locationId": 10011  // int, 地图点位ID
+}
+
+响应体
+{
+  "peopleCount": 8  // int, 该点位的当前人数（包括真实玩家和机器人显示数）
+}
+
+示例（curl）
+curl -X POST https://host/api/map/location-people-count \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"locationId":10011}'
 
 ---
 

@@ -60,6 +60,11 @@ public interface IMapService
     /// 获取玩家当前所在点位
     /// </summary>
     Task<int?> GetCurrentLocationIdAsync(long userId);
+
+    /// <summary>
+    /// 统计在指定点位的玩家人数（基于当前所在点位）
+    /// </summary>
+    Task<int> CountPlayersAtLocationAsync(int locationId);
 }
 
 /// <summary>
@@ -144,6 +149,29 @@ public class MapService : IMapService
         }
     }
 
+    /// <summary>
+    /// 增加指定点位的人数统计
+    /// </summary>
+    private async Task IncrementLocationPeopleCountAsync(int locationId)
+    {
+        var record = await _dbContext.LocationPeopleCount.FirstOrDefaultAsync(p => p.LocationId == locationId);
+        if (record != null)
+        {
+            record.PeopleCount++;
+            record.LastUpdateTime = DateTime.UtcNow;
+        }
+        else
+        {
+            _dbContext.LocationPeopleCount.Add(new LocationPeopleCount
+            {
+                LocationId = locationId,
+                PeopleCount = 1,
+                LastUpdateTime = DateTime.UtcNow
+            });
+        }
+        Log.Information("Incremented people count for location {LocationId}", locationId);
+    }
+
 
 
 
@@ -184,11 +212,13 @@ public class MapService : IMapService
                 userId, startLocationId, endLocationId, distanceMeters);
         }
 
-        // 若跑步距离达到起点->终点所需距离，则更新当前点位为终点
+        // 若跑步距离达到起点->终点所需距离，则更新当前点位为终点，并增加该点位人数
         var required = GetRequiredDistanceFromStartToEnd(startLocationId, endLocationId);
         if (required.HasValue && distanceMeters >= required.Value)
         {
             await SetCurrentLocationAsync(userId, endLocationId);
+            // 增加终点位置的人数统计
+            await IncrementLocationPeopleCountAsync(endLocationId);
         }
 
         // 处理解锁与存储能量
@@ -302,8 +332,9 @@ public class MapService : IMapService
 
         var isFirstVisit = existingVisit == null;
 
-        // 更新玩家当前所在点位为本次访问的点位
+        // 更新玩家当前所在点位为本次访问的点位，并增加该点位人数
         await SetCurrentLocationAsync(userId, locationId);
+        await IncrementLocationPeopleCountAsync(locationId);
 
         if (isCompleted)
         {
@@ -601,5 +632,26 @@ public class MapService : IMapService
     {
         var player = await _playerRoleService.GetOrCreatePlayerAsync(userId);
         return player.CurrentLocationId;
+    }
+
+    public async Task<int> CountPlayersAtLocationAsync(int locationId)
+    {
+        // 获取该点位的人数统计记录
+        var record = await _dbContext.LocationPeopleCount.FirstOrDefaultAsync(p => p.LocationId == locationId);
+        var count = record?.PeopleCount ?? 0;
+
+        if (count > 0)
+        {
+            return count;
+        }
+
+        // 当人数为0时，返回配置的机器人显示数量范围内的随机数
+        var range = _generalConfigService.GetRobotDisplayRange();
+        var min = range.min;
+        var max = range.max;
+        if (max <= 0) return 0;
+        if (min < 0) min = 0;
+        if (max < min) (min, max) = (max, min);
+        return _rand.Next(min, max + 1);
     }
 }

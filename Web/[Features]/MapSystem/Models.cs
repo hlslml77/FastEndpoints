@@ -286,3 +286,19 @@ public class GetPlayerMapStateResponse
     public int? CurrentLocationId { get; set; }
 }
 
+/// <summary>
+/// 查询某点位当前人数 请求
+/// </summary>
+public class GetLocationPeopleCountRequest
+{
+    public int LocationId { get; set; }
+}
+
+/// <summary>
+/// 查询某点位当前人数 响应
+/// </summary>
+public class GetLocationPeopleCountResponse
+{
+    public int PeopleCount { get; set; }
+}
+

@@ -260,3 +260,28 @@ public class PlayerDailyRandomEvent
     public DateTime? CompletedAt { get; set; }
 }
 
+/// <summary>
+/// 地图点位人数统计表
+/// </summary>
+[Table("location_people_count")]
+public class LocationPeopleCount
+{
+    /// <summary>
+    /// 地图点位ID（主键）
+    /// </summary>
+    [Key]
+    [Column("location_id")]
+    public int LocationId { get; set; }
+
+    /// <summary>
+    /// 当前在该点位的玩家人数
+    /// </summary>
+    [Column("people_count")]
+    public int PeopleCount { get; set; } = 0;
+
+    /// <summary>
+    /// 最后更新时间
+    /// </summary>
+    [Column("last_update_time")]
+    public DateTime LastUpdateTime { get; set; } = DateTime.UtcNow;
+}

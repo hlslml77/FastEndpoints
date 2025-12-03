@@ -18,6 +18,11 @@ public interface IGeneralConfigService : IReloadableConfig, IDisposable
     /// 若未配置则默认 1。
     /// </summary>
     int GetDailyRandomEventCount();
+
+    /// <summary>
+    /// 读取“玩家选择大地图点位时机器人数量显示”的范围（Value4：[min,max]）。若未配置返回 (0,0)。
+    /// </summary>
+    (int min, int max) GetRobotDisplayRange();
 }
 
 public class GeneralConfigService : IGeneralConfigService
@@ -110,6 +115,20 @@ public class GeneralConfigService : IGeneralConfigService
         var e = FindByIdOrDesc(6, "每日随机事件点位生成数量");
         var count = e?.Value1 ?? 1;
         return count <= 0 ? 1 : count;
+    }
+
+    public (int min, int max) GetRobotDisplayRange()
+    {
+        var e = FindByIdOrDesc(5, "机器人数量显示");
+        var arr = e?.Value4;
+        if (arr is { Count: 2 })
+        {
+            var min = arr[0];
+            var max = arr[1];
+            if (max < min) (min, max) = (max, min);
+            return (min, max);
+        }
+        return (0, 0);
     }
 
     public void Dispose()

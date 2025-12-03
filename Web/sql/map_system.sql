@@ -59,4 +59,13 @@ CREATE TABLE IF NOT EXISTS `player_daily_random_event` (
   INDEX `idx_user_date` (`user_id`, `date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家每日随机事件表';
 
+-- 地图点位人数统计表
+CREATE TABLE IF NOT EXISTS `location_people_count` (
+  `location_id` INT NOT NULL COMMENT '地图点位ID',
+  `people_count` INT NOT NULL DEFAULT 0 COMMENT '当前在该点位的玩家人数',
+  `last_update_time` DATETIME NOT NULL COMMENT '最后更新时间',
+  PRIMARY KEY (`location_id`),
+  INDEX `idx_last_update_time` (`last_update_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='地图点位人数统计表';
+
 
