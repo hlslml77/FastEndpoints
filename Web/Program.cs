@@ -97,6 +97,11 @@ bld.Services
    .AddSingleton<IRandomWorldEventConfigService>(sp => sp.GetRequiredService<RandomWorldEventConfigService>())
    .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<RandomWorldEventConfigService>())
 
+   // Resource config
+   .AddSingleton<ResourceConfigService>()
+   .AddSingleton<IResourceConfigService>(sp => sp.GetRequiredService<ResourceConfigService>())
+   .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<ResourceConfigService>())
+
    // General config (Config.json/config.json)
    .AddSingleton<GeneralConfigService>()
    .AddSingleton<IGeneralConfigService>(sp => sp.GetRequiredService<GeneralConfigService>())

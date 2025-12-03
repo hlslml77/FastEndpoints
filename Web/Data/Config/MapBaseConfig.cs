@@ -22,5 +22,10 @@ public class MapBaseConfig
     /// 解锁该点位所需的最小距离（米），为null或0表示无需距离解锁
     /// </summary>
     public decimal? UnlockDistance { get; set; }
+
+    /// <summary>
+    /// 资源ID（对应WorldUiMap_Resources.json的Resources字段），0表示无倒计时
+    /// </summary>
+    public int Resources { get; set; } = 0;
 }
 

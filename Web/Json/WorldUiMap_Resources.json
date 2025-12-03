@@ -1,0 +1,56 @@
+[
+  {
+    "ID": 1,
+    "Resources": 1,
+    "LevelConfig": 101,
+    "RefreshTime": 8
+  },
+  {
+    "ID": 2,
+    "Resources": 2,
+    "LevelConfig": 0,
+    "RefreshTime": 12
+  },
+  {
+    "ID": 3,
+    "Resources": 3,
+    "LevelConfig": 0,
+    "RefreshTime": 24
+  },
+  {
+    "ID": 4,
+    "Resources": 4,
+    "LevelConfig": 0,
+    "RefreshTime": 8
+  },
+  {
+    "ID": 5,
+    "Resources": 5,
+    "LevelConfig": 0,
+    "RefreshTime": 12
+  },
+  {
+    "ID": 6,
+    "Resources": 6,
+    "LevelConfig": 0,
+    "RefreshTime": 24
+  },
+  {
+    "ID": 7,
+    "Resources": 7,
+    "LevelConfig": 0,
+    "RefreshTime": 8
+  },
+  {
+    "ID": 8,
+    "Resources": 8,
+    "LevelConfig": 0,
+    "RefreshTime": 12
+  },
+  {
+    "ID": 9,
+    "Resources": 9,
+    "LevelConfig": 0,
+    "RefreshTime": 24
+  }
+]

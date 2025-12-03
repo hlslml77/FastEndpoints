@@ -8,7 +8,7 @@ namespace MapSystem.CompleteRandomEvent;
 /// <summary>
 /// 完成每日随机事件
 /// </summary>
-public class Endpoint : Endpoint<Global::MapSystem.CompleteRandomEventRequest, Global::MapSystem.CompleteRandomEventResponse>
+public class Endpoint : Endpoint<CompleteRandomEventRequest, CompleteRandomEventResponse>
 {
     private readonly IMapService _mapService;
 
@@ -27,7 +27,7 @@ public class Endpoint : Endpoint<Global::MapSystem.CompleteRandomEventRequest, G
             .WithDescription("根据 WorldUiMap_RandomEvent 的 Consumption/FixedReward 进行消耗与奖励发放"));
     }
 
-    public override async Task HandleAsync(Global::MapSystem.CompleteRandomEventRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CompleteRandomEventRequest req, CancellationToken ct)
     {
         try
         {
@@ -48,13 +48,13 @@ public class Endpoint : Endpoint<Global::MapSystem.CompleteRandomEventRequest, G
                 return;
             }
 
-            List<Global::MapSystem.RewardItem>? rewardItems = null;
+            List<RewardItem>? rewardItems = null;
             if (rewards != null && rewards.Count > 0)
             {
-                rewardItems = rewards.Select(r => new Global::MapSystem.RewardItem { ItemId = r[0], Amount = r[1] }).ToList();
+                rewardItems = rewards.Select(r => new RewardItem { ItemId = r[0], Amount = r[1] }).ToList();
             }
 
-            await HttpContext.Response.SendAsync(new Global::MapSystem.CompleteRandomEventResponse
+            await HttpContext.Response.SendAsync(new CompleteRandomEventResponse
             {
                 Success = true,
                 Rewards = rewardItems

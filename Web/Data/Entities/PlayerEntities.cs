@@ -188,6 +188,12 @@ public class PlayerCompletedLocation
     /// </summary>
     [Column("completed_time")]
     public DateTime CompletedTime { get; set; }
+
+    /// <summary>
+    /// 下次可挑战时间（当该点位有资源倒计时时设置）
+    /// </summary>
+    [Column("next_challenge_time")]
+    public DateTime? NextChallengeTime { get; set; }
 }
 
 /// <summary>

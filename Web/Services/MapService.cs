@@ -62,9 +62,9 @@ public interface IMapService
     Task<int?> GetCurrentLocationIdAsync(long userId);
 
     /// <summary>
-    /// 统计在指定点位的玩家人数（基于当前所在点位）
+    /// 统计在指定点位的玩家人数（基于当前所在点位），并返回玩家的下次挑战时间
     /// </summary>
-    Task<int> CountPlayersAtLocationAsync(int locationId);
+    Task<(int PeopleCount, DateTime? NextChallengeTime)> CountPlayersAtLocationAsync(long userId, int locationId);
 }
 
 /// <summary>
@@ -105,6 +105,7 @@ public class MapService : IMapService
     private readonly IInventoryService _inventoryService;
     private readonly IPlayerRoleService _playerRoleService;
     private readonly IGeneralConfigService _generalConfigService;
+    private readonly IResourceConfigService _resourceConfigService;
 
     private readonly IRandomWorldEventConfigService _randomCfg;
     private readonly Random _rand = new();
@@ -115,6 +116,7 @@ public class MapService : IMapService
         IInventoryService inventoryService,
         IPlayerRoleService playerRoleService,
         IGeneralConfigService generalConfigService,
+        IResourceConfigService resourceConfigService,
         IRandomWorldEventConfigService randomCfg)
     {
         _dbContext = dbContext;
@@ -122,6 +124,7 @@ public class MapService : IMapService
         _inventoryService = inventoryService;
         _playerRoleService = playerRoleService;
         _generalConfigService = generalConfigService;
+        _resourceConfigService = resourceConfigService;
         _randomCfg = randomCfg;
     }
 
@@ -339,15 +342,36 @@ public class MapService : IMapService
         if (isCompleted)
         {
             var hasCompleted = await _dbContext.PlayerCompletedLocation
-                .AnyAsync(c => c.UserId == userId && c.LocationId == locationId);
-            if (!hasCompleted)
+                .FirstOrDefaultAsync(c => c.UserId == userId && c.LocationId == locationId);
+
+            DateTime? nextChallengeTime = null;
+
+            // 如果该点位有资源倒计时，计算下次可挑战时间
+            if (mapConfig.Resources > 0)
+            {
+                var refreshTimeHours = _resourceConfigService.GetRefreshTimeByResourceId(mapConfig.Resources);
+                if (refreshTimeHours.HasValue && refreshTimeHours.Value > 0)
+                {
+                    nextChallengeTime = DateTime.UtcNow.AddHours(refreshTimeHours.Value);
+                    Log.Information("User {UserId} completed location {LocationId} with resource {ResourceId}, next challenge time: {NextChallengeTime}",
+                        userId, locationId, mapConfig.Resources, nextChallengeTime);
+                }
+            }
+
+            if (hasCompleted == null)
             {
                 _dbContext.PlayerCompletedLocation.Add(new PlayerCompletedLocation
                 {
                     UserId = userId,
                     LocationId = locationId,
-                    CompletedTime = DateTime.UtcNow
+                    CompletedTime = DateTime.UtcNow,
+                    NextChallengeTime = nextChallengeTime
                 });
+            }
+            else
+            {
+                // 更新倒计时时间
+                hasCompleted.NextChallengeTime = nextChallengeTime;
             }
         }
 
@@ -634,24 +658,32 @@ public class MapService : IMapService
         return player.CurrentLocationId;
     }
 
-    public async Task<int> CountPlayersAtLocationAsync(int locationId)
+    public async Task<(int PeopleCount, DateTime? NextChallengeTime)> CountPlayersAtLocationAsync(long userId, int locationId)
     {
         // 获取该点位的人数统计记录
         var record = await _dbContext.LocationPeopleCount.FirstOrDefaultAsync(p => p.LocationId == locationId);
         var count = record?.PeopleCount ?? 0;
 
-        if (count > 0)
+        if (count == 0)
         {
-            return count;
+            // 当人数为0时，返回配置的机器人显示数量范围内的随机数
+            var range = _generalConfigService.GetRobotDisplayRange();
+            var min = range.min;
+            var max = range.max;
+            if (max <= 0) count = 0;
+            else
+            {
+                if (min < 0) min = 0;
+                if (max < min) (min, max) = (max, min);
+                count = _rand.Next(min, max + 1);
+            }
         }
 
-        // 当人数为0时，返回配置的机器人显示数量范围内的随机数
-        var range = _generalConfigService.GetRobotDisplayRange();
-        var min = range.min;
-        var max = range.max;
-        if (max <= 0) return 0;
-        if (min < 0) min = 0;
-        if (max < min) (min, max) = (max, min);
-        return _rand.Next(min, max + 1);
+        // 获取玩家该点位的下次挑战时间
+        var completedLocation = await _dbContext.PlayerCompletedLocation
+            .FirstOrDefaultAsync(c => c.UserId == userId && c.LocationId == locationId);
+        var nextChallengeTime = completedLocation?.NextChallengeTime;
+
+        return (count, nextChallengeTime);
     }
 }

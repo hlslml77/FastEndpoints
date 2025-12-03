@@ -30,8 +30,10 @@ CREATE TABLE IF NOT EXISTS `player_completed_location` (
   `user_id` BIGINT NOT NULL COMMENT '用户ID',
   `location_id` INT NOT NULL COMMENT '地图点位ID',
   `completed_time` DATETIME NOT NULL COMMENT '完成时间',
+  `next_challenge_time` DATETIME NULL COMMENT '下次可挑战时间（当该点位有资源倒计时时设置）',
   PRIMARY KEY (`user_id`, `location_id`),
-  INDEX `idx_completed_time` (`completed_time`)
+  INDEX `idx_completed_time` (`completed_time`),
+  INDEX `idx_next_challenge_time` (`next_challenge_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='玩家已完成点位表';
 
 
@@ -68,4 +70,7 @@ CREATE TABLE IF NOT EXISTS `location_people_count` (
   INDEX `idx_last_update_time` (`last_update_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='地图点位人数统计表';
 
+-- 为现有的player_completed_location表添加next_challenge_time列（如果不存在）
+ALTER TABLE `player_completed_location` ADD COLUMN IF NOT EXISTS `next_challenge_time` DATETIME NULL COMMENT '下次可挑战时间（当该点位有资源倒计时时设置）';
+ALTER TABLE `player_completed_location` ADD INDEX IF NOT EXISTS `idx_next_challenge_time` (`next_challenge_time`);
 

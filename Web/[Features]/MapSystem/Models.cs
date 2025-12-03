@@ -300,5 +300,10 @@ public class GetLocationPeopleCountRequest
 public class GetLocationPeopleCountResponse
 {
     public int PeopleCount { get; set; }
+
+    /// <summary>
+    /// 玩家的下次挑战时间（当该点位有资源倒计时时返回）
+    /// </summary>
+    public DateTime? NextChallengeTime { get; set; }
 }
 

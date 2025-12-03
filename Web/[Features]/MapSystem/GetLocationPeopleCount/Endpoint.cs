@@ -31,18 +31,21 @@ public class Endpoint : Endpoint<GetLocationPeopleCountRequest, GetLocationPeopl
     {
         try
         {
-            // 认证仅用于鉴权，不参与人数统计
             var userIdStr = User?.Claims?.FirstOrDefault(c =>
                 c.Type == "sub" || c.Type == "userId" || c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var _))
+            if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var userId))
             {
                 var errorBody = new { statusCode = 400, code = Web.Data.ErrorCodes.Common.BadRequest, message = "未能从令牌解析用户ID" };
                 await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
                 return;
             }
 
-            var count = await _mapService.CountPlayersAtLocationAsync(req.LocationId);
-            await HttpContext.Response.SendAsync(new GetLocationPeopleCountResponse { PeopleCount = count }, 200, cancellation: ct);
+            var (count, nextChallengeTime) = await _mapService.CountPlayersAtLocationAsync(userId, req.LocationId);
+            await HttpContext.Response.SendAsync(new GetLocationPeopleCountResponse
+            {
+                PeopleCount = count,
+                NextChallengeTime = nextChallengeTime
+            }, 200, cancellation: ct);
         }
         catch (Exception ex)
         {
