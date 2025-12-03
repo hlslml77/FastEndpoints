@@ -166,17 +166,17 @@ function Test-MapSystem($auth) {
         Err "   ✗ Get player map state failed"
     }
 
-    # 3.4 Query location people count
-    Info "   [3.4] POST /api/map/location-people-count"
-    $peopleCount = Invoke-ApiCall -Uri "$BaseUrl/api/map/location-people-count" -Auth $auth -Method 'Post' -Body @{ locationId=100102 }
-    if ($peopleCount) {
-        Info ("   People count: $($peopleCount.peopleCount)")
-        if ($peopleCount.nextChallengeTime) {
-            Info ("   Next challenge time: $($peopleCount.nextChallengeTime)")
+    # 3.4 Query location info
+    Info "   [3.4] POST /api/map/location-info"
+    $locInfo = Invoke-ApiCall -Uri "$BaseUrl/api/map/location-info" -Auth $auth -Method 'Post' -Body @{ locationId=100102 }
+    if ($locInfo) {
+        Info ("   People count: $($locInfo.peopleCount)")
+        if ($locInfo.nextChallengeTime) {
+            Info ("   Next challenge time: $($locInfo.nextChallengeTime)")
         }
-        Ok "   ✓ Query location people count successful"
+        Ok "   ✓ Query location info successful"
     } else {
-        Err "   ✗ Query location people count failed"
+        Err "   ✗ Query location info failed"
     }
 
     # 3.5 Unlock with energy (optional, only if we have stored energy)

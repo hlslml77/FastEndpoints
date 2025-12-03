@@ -181,7 +181,7 @@ POST /api/map/visit-location
 响应体
 {
   "isFirstVisit": true,                                        // bool
-  "didConsumeItem": false,                                     // bool, 当 isCompleted=false 且配置 Consumption 时为 true
+  "didConsumeItem": false,                                     // bool, 当 needConsume=true 且配置 Consumption 时为 true
   "rewards": [{ "itemId": 8000, "amount": 20 }],            // List<Reward>
   "visitCount": 1,                                             // int
   "firstVisitTime": "2025-01-01T00:00:00Z",                   // DateTime (ISO 8601)
@@ -251,10 +251,10 @@ POST /api/map/unlock-with-energy
 }
 
 3.5 查询点位信息
-POST /api/map/location-people-count
+POST /api/map/location-info
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：返回指定点位的当前人数统计和玩家的下次挑战时间。当玩家调用 /api/map/visit-location 或 /api/map/save-progress 接口时，该点位的人数会自动增加。若统计人数为0，则按 Config.json 中的玩家选择大地图点位时机器人数量显示的 Value4 区间生成随机展示人数。
+- 说明：返回指定点位的当前人数统计和玩家的下次挑战时间。当玩家调用 /api/map/visit-location 或 /api/map/save-progress 接口时，该点位的人数会自动增加。若统计人数为0，或统计为1且只有当前玩家自己，则按 Config.json 中的玩家选择大地图点位时机器人数量显示的 Value4 区间生成随机展示人数。
 - 倒计时说明：当玩家完成某个点位且该点位配置了资源ID（Resources > 0）时，系统会根据 WorldUiMap_MapBase.json 中该点位的 RefreshTime 字段计算下次可挑战时间。只有倒计时结束后才能再次挑战该点位。
 
 请求体
@@ -269,7 +269,7 @@ POST /api/map/location-people-count
 }
 
 示例（curl）
-curl -X POST https://host/api/map/location-people-count \
+curl -X POST https://host/api/map/location-info \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
   -d '{"locationId":10011}'
 

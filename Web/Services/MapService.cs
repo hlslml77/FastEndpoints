@@ -661,9 +661,11 @@ public class MapService : IMapService
         var record = await _dbContext.LocationPeopleCount.FirstOrDefaultAsync(p => p.LocationId == locationId);
         var count = record?.PeopleCount ?? 0;
 
-        if (count == 0)
+        // 当统计人数为0，或统计为1且该1人就是当前用户时，返回配置的机器人显示数量范围内的随机数
+        var player = await _playerRoleService.GetOrCreatePlayerAsync(userId);
+        var isOnlySelfHere = count == 1 && player.CurrentLocationId == locationId;
+        if (count == 0 || isOnlySelfHere)
         {
-            // 当人数为0时，返回配置的机器人显示数量范围内的随机数
             var range = _generalConfigService.GetRobotDisplayRange();
             var min = range.min;
             var max = range.max;
