@@ -136,7 +136,7 @@ POST /api/map/save-progress
 - 注意：distanceMeters 单位为“米”
 - 仅保存进度，不会自动标记点位为完成
 - 若需标记完成，请在“访问地图点位”接口上报 isCompleted=true
-- 当 distanceMeters 超过终点位置配置的 UnlockDistance 时，自动解锁该位置，返回 isUnlock=true；超出部分（distanceMeters - UnlockDistance）的增量会累加到“存储能量”（上限 10000 米）
+- 当 distanceMeters 超过终点位置配置的 UnlockDistance 时，自动解锁该位置，返回 isUnlock=true；超出部分（distanceMeters - UnlockDistance）的增量会累加到“存储能量”
 - 解锁的位置会被添加到 /api/map/player-state 接口的 unlockedLocationIds 列表中
 - 人数统计：当本次 distanceMeters 达到/超过起点->终点的配置距离时，才会将玩家"当前所在点位"更新为 endLocationId，同时该点位的人数计数会自动增加 1
 
@@ -163,8 +163,8 @@ POST /api/map/save-progress
 POST /api/map/visit-location
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：客户端上报是否完成该点位（isCompleted）。每次调用此接口时，该点位的人数计数会自动增加 1。
-  - 消耗道具规则：当 isCompleted=false 且该点在配置中存在 Consumption=[itemId, amount] 时，将消耗对应道具；当 isCompleted=true 时不消耗道具。
+- 说明：客户端上报是否完成该点位（isCompleted），以及是否需要消耗（needConsume）。每次调用此接口时，该点位的人数计数会自动增加 1。
+  - 消耗道具规则：当 needConsume=true 且该点在配置中存在 Consumption=[itemId, amount] 时，将消耗对应道具；needConsume=false 时不消耗。
   - 奖励规则：
     - 首次访问发放“首次奖励”（FirstReward）
     - 完成发放“完成奖励”（使用 FixedReward 字段）
@@ -173,8 +173,9 @@ POST /api/map/visit-location
 
 请求体
 {
-  "locationId": 10011, // int
-  "isCompleted": true  // bool
+  "locationId": 10011,  // int
+  "isCompleted": true,  // bool
+  "needConsume": false  // bool, 是否需要消耗（由客户端控制）
 }
 
 响应体

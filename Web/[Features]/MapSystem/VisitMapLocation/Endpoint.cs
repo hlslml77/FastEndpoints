@@ -24,7 +24,7 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
         Description(x => x
             .WithTags("MapSystem")
             .WithSummary("访问地图点位")
-            .WithDescription("记录玩家访问地图点位。客户端上报是否完成：首次访问发放首次奖励；完成则发放完成奖励（使用固定奖励字段）。注意：点位解锁通过/map/save-progress接口实现，此接口不再添加到解锁列表。需要JWT token验证。"));
+            .WithDescription("记录玩家访问地图点位。客户端上报是否完成(IsCompleted)，以及是否需要消耗(NeedConsume)：首次访问发放首次奖励；完成则发放完成奖励（使用固定奖励字段）。当 NeedConsume=true 且该点位配置了 Consumption=[itemId,amount] 时才会扣除道具。注意：点位解锁通过 /map/save-progress 接口实现。需要JWT token验证。"));
     }
 
     public override async Task HandleAsync(VisitMapLocationRequest req, CancellationToken ct)
@@ -40,7 +40,7 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
                 return;
             }
 
-            var result = await _mapService.VisitMapLocationAsync(userId, req.LocationId, req.IsCompleted);
+            var result = await _mapService.VisitMapLocationAsync(userId, req.LocationId, req.IsCompleted, req.NeedConsume);
 
             List<RewardItem>? rewards = null;
             if (result.Rewards != null && result.Rewards.Count > 0)

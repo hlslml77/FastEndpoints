@@ -119,6 +119,11 @@ public class VisitMapLocationRequest
     /// 是否完成该点位（由客户端上报）
     /// </summary>
     public bool IsCompleted { get; set; }
+
+    /// <summary>
+    /// 是否需要消耗（由客户端决定），为 true 时且配置存在 Consumption 才会扣除道具
+    /// </summary>
+    public bool NeedConsume { get; set; }
 }
 
 /// <summary>

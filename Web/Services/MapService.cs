@@ -19,7 +19,7 @@ public interface IMapService
     /// <summary>
     /// 访问地图点位，返回是否首次访问和奖励信息以及是否消耗了道具
     /// </summary>
-    Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId, bool isCompleted);
+    Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId, bool isCompleted, bool needConsume);
 
     /// <summary>
     /// 使用存储能量解锁终点
@@ -272,7 +272,7 @@ public class MapService : IMapService
         return (progress, isUnlock, player.StoredEnergyMeters);
     }
 
-    public async Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId, bool isCompleted)
+    public async Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId, bool isCompleted, bool needConsume)
     {
         var mapConfig = _mapConfigService.GetMapConfigByLocationId(locationId);
         if (mapConfig == null)
@@ -285,7 +285,7 @@ public class MapService : IMapService
         var didConsume = false;
 
 
-        if (!isCompleted && mapConfig.Consumption is { Count: 2 } consumption && consumption[1] > 0)
+        if (needConsume && mapConfig.Consumption is { Count: 2 } consumption && consumption[1] > 0)
         {
             var itemId = consumption[0];
             var amount = consumption[1];
