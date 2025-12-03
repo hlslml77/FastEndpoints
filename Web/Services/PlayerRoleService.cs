@@ -80,6 +80,20 @@ public class PlayerRoleService : IPlayerRoleService
 
             _dbContext.PlayerRole.Add(player);
 
+
+                // 设置玩家初始位置并默认解锁
+                var initLoc = _generalConfigService.GetInitialLocationId();
+                if (initLoc > 0)
+                {
+                    player.CurrentLocationId = initLoc;
+                    _dbContext.PlayerUnlockedLocation.Add(new Web.Data.Entities.PlayerUnlockedLocation
+                    {
+                        UserId = userId,
+                        LocationId = initLoc,
+                        UnlockedTime = DateTime.UtcNow
+                    });
+                }
+
             // 按配置发放初始金币与体力道具
             var goldItemId = _generalConfigService.InitialGoldItemId;     // 默认1000
             var staminaItemId = _generalConfigService.InitialStaminaItemId; // 默认1002

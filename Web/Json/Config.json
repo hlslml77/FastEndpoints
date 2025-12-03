@@ -67,5 +67,16 @@
     "Value5": null,
     "Value6": null,
     "Value7": null
+  },
+  {
+    "ID": 7,
+    "Desc": "玩家初始点",
+    "Value1": 100101,
+    "Value2": 0.0,
+    "Value3": null,
+    "Value4": null,
+    "Value5": null,
+    "Value6": null,
+    "Value7": null
   }
 ]

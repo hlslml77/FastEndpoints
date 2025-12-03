@@ -23,6 +23,12 @@ public interface IGeneralConfigService : IReloadableConfig, IDisposable
     /// 读取“玩家选择大地图点位时机器人数量显示”的范围（Value4：[min,max]）。若未配置返回 (0,0)。
     /// </summary>
     (int min, int max) GetRobotDisplayRange();
+
+        /// <summary>
+        /// 玩家初始点（Config.json ID=7 的 Value1）。未配置或非法时返回 0。
+        /// </summary>
+        int GetInitialLocationId();
+
 }
 
 public class GeneralConfigService : IGeneralConfigService
@@ -118,6 +124,13 @@ public class GeneralConfigService : IGeneralConfigService
             return (min, max);
         }
         return (0, 0);
+    }
+
+    public int GetInitialLocationId()
+    {
+        var e = FindByIdOrDesc(7, "玩家初始点");
+        var id = e?.Value1 ?? 0;
+        return id > 0 ? id : 0;
     }
 
     public void Dispose()
