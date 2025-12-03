@@ -140,6 +140,11 @@ public class RewardItem
     /// 数量
     /// </summary>
     public int Amount { get; set; }
+
+    /// <summary>
+    /// 可选：剩余数量（仅对消耗项有效；奖励项为空）
+    /// </summary>
+    public int? Remaining { get; set; }
 }
 
 /// <summary>
@@ -156,6 +161,11 @@ public class VisitMapLocationResponse
     /// 本次是否消耗了道具（当 isCompleted=false 且配置有 Consumption 时为 true）
     /// </summary>
     public bool DidConsumeItem { get; set; }
+
+    /// <summary>
+    /// 本次消耗的物品列表（每项：itemId, amount）。若无消耗则为 null。
+    /// </summary>
+    public List<RewardItem>? ConsumedItems { get; set; }
 
     /// <summary>
     /// 奖励列表

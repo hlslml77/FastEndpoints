@@ -52,10 +52,22 @@ public class Endpoint : Endpoint<VisitMapLocationRequest, VisitMapLocationRespon
                 }).ToList();
             }
 
+            List<RewardItem>? consumedItems = null;
+            if (result.ConsumedItems != null && result.ConsumedItems.Count > 0)
+            {
+                consumedItems = result.ConsumedItems.Select(r => new RewardItem
+                {
+                    ItemId = r[0],
+                    Amount = r[1],
+                    Remaining = (r.Count > 2 ? r[2] : null)
+                }).ToList();
+            }
+
             var response = new VisitMapLocationResponse
             {
                 IsFirstVisit = result.IsFirstVisit,
                 DidConsumeItem = result.DidConsumeItem,
+                ConsumedItems = consumedItems,
                 Rewards = rewards,
                 VisitCount = result.VisitRecord?.VisitCount ?? 0,
                 FirstVisitTime = result.VisitRecord?.FirstVisitTime ?? DateTime.UtcNow,

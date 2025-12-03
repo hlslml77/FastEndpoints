@@ -78,14 +78,27 @@ public class MapLocationVisitResult
     public bool IsFirstVisit { get; set; }
 
     /// <summary>
-    /// 是否消耗了道具（当 isCompleted=false 且配置了 Consumption 时为 true）
+    /// 是否消耗了道具（当 needConsume=true 且配置了 Consumption 时为 true）
     /// </summary>
     public bool DidConsumeItem { get; set; }
+
+    /// <summary>
+    /// 本次消耗的物品列表 [[物品ID, 数量, 剩余数量], ...]（无消耗则为 null）
+    /// </summary>
+    public List<List<int>>? ConsumedItems { get; set; }
 
     /// <summary>
     /// 奖励列表 [[物品ID, 数量], ...]
     /// </summary>
     public List<List<int>>? Rewards { get; set; }
+
+public class ConsumedItemInfo
+{
+    public int ItemId { get; set; }
+    public int Amount { get; set; }
+    public int RemainingAmount { get; set; }
+}
+
 
     /// <summary>
     /// 访问记录
@@ -307,6 +320,7 @@ public class MapService : IMapService
         Log.Information("Visiting location {LocationId}, configured consumption: [{Consumption}]", locationId, mapConfig.Consumption != null ? string.Join(", ", mapConfig.Consumption) : "null");
 
         var didConsume = false;
+        List<List<int>>? consumedItems = null;
 
 
         if (needConsume && mapConfig.Consumption is { Count: 2 } consumption && consumption[1] > 0)
@@ -317,7 +331,14 @@ public class MapService : IMapService
             {
                 await _inventoryService.ConsumeItemAsync(userId, itemId, amount, ct: default);
                 didConsume = true;
-                Log.Information("User {UserId} consumed item {ItemId} x{Amount} for location {LocationId}", userId, itemId, amount, locationId);
+                // 查询消耗后的剩余数量
+                var left = await _dbContext.PlayerItem
+                    .Where(i => i.UserId == userId && i.ItemId == itemId)
+                    .Select(i => (int?)i.Amount)
+                    .FirstOrDefaultAsync();
+                var remaining = left ?? 0;
+                consumedItems = new List<List<int>> { new List<int> { itemId, amount, remaining } };
+                Log.Information("User {UserId} consumed item {ItemId} x{Amount} for location {LocationId}, remaining={Remaining}", userId, itemId, amount, locationId, remaining);
             }
             catch (ArgumentException ex)
             {
@@ -428,6 +449,7 @@ public class MapService : IMapService
         {
             IsFirstVisit = isFirstVisit,
             DidConsumeItem = didConsume,
+            ConsumedItems = consumedItems,
             Rewards = rewards,
             VisitRecord = visitRecord,
             MapConfig = mapConfig

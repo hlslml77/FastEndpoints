@@ -204,7 +204,8 @@ POST /api/map/visit-location
 
 - 认证：需要 Bearer Token（权限 web_access）
 - 说明：客户端上报是否完成该点位（isCompleted），以及是否需要消耗（needConsume）。每次调用此接口时，该点位的人数计数会自动增加 1。
-  - 消耗道具规则：当 needConsume=true 且该点在配置中存在 Consumption=[itemId, amount] 时，将消耗对应道具；needConsume=false 时不消耗。
+  - 消耗道具规则：当 needConsume=true 且该点在配置中存在 Consumption=[itemId, amount] 时，将消耗对应道具；needConsume=false 时不消耗。若发生消耗，将在响应中返回：
+    - consumedItems: [{ itemId, amount, remaining } ...] 与 rewards 同结构（remaining 为扣减后的剩余数量）
   - 奖励规则：
     - 首次访问发放“首次奖励”（FirstReward）
     - 完成发放“完成奖励”（使用 FixedReward 字段）
@@ -222,6 +223,7 @@ POST /api/map/visit-location
 {
   "isFirstVisit": true,                                        // bool
   "didConsumeItem": false,                                     // bool, 当 needConsume=true 且配置 Consumption 时为 true
+  "consumedItems": [{ "itemId": 1002, "amount": 3, "remaining": 7 }], // List<Reward>（消耗，包含剩余数量）
   "rewards": [{ "itemId": 8000, "amount": 20 }],            // List<Reward>
   "visitCount": 1,                                             // int
   "firstVisitTime": "2025-01-01T00:00:00Z",                   // DateTime (ISO 8601)
