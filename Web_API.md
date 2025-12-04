@@ -543,6 +543,7 @@ POST /api/travel/stage/get-random-message
 {
   "success": true,                          // bool
   "messageId": 123,                         // long（无留言时为 0）
+  "userId": 987654,                         // long（留言的用户ID；无留言时为 0）
   "message": "这个关卡很有趣！",           // string（无留言时为空字符串）
   "createdAt": "2025-12-04T09:54:04Z"     // DateTime (ISO 8601)，无留言时为 0001-01-01T00:00:00Z
 }

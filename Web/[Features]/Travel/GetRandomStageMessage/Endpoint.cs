@@ -33,6 +33,11 @@ public class GetRandomStageMessageResponse
     public long MessageId { get; set; }
 
     /// <summary>
+    /// 留言用户ID
+    /// </summary>
+    public long UserId { get; set; }
+
+    /// <summary>
     /// 留言内容
     /// </summary>
     public string Message { get; set; } = string.Empty;
@@ -100,6 +105,7 @@ public class Endpoint : Endpoint<GetRandomStageMessageRequest, GetRandomStageMes
                 {
                     Success = true,
                     MessageId = 0,
+                    UserId = 0,
                     Message = string.Empty,
                     CreatedAt = DateTime.MinValue
                 }, 200, cancellation: ct);
@@ -113,6 +119,7 @@ public class Endpoint : Endpoint<GetRandomStageMessageRequest, GetRandomStageMes
             {
                 Success = true,
                 MessageId = randomMessage.Id,
+                UserId = randomMessage.UserId,
                 Message = randomMessage.MessageContent,
                 CreatedAt = randomMessage.CreatedAt
             }, 200, cancellation: ct);
