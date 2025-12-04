@@ -291,3 +291,43 @@ public class LocationPeopleCount
     [Column("last_update_time")]
     public DateTime LastUpdateTime { get; set; } = DateTime.UtcNow;
 }
+
+/// <summary>
+/// 旅行关卡留言表
+/// </summary>
+[Table("travel_stage_message")]
+public class TravelStageMessage
+{
+    /// <summary>
+    /// 自增主键
+    /// </summary>
+    [Key]
+    [Column("id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+
+    /// <summary>
+    /// 用户ID
+    /// </summary>
+    [Column("user_id")]
+    public long UserId { get; set; }
+
+    /// <summary>
+    /// 关卡ID
+    /// </summary>
+    [Column("stage_id")]
+    public int StageId { get; set; }
+
+    /// <summary>
+    /// 留言内容
+    /// </summary>
+    [Column("message_content")]
+    [StringLength(500)]
+    public string MessageContent { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}

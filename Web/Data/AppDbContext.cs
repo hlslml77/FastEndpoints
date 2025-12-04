@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<PlayerUnlockedLocation> PlayerUnlockedLocation { get; set; }
     public DbSet<PlayerDailyRandomEvent> PlayerDailyRandomEvent { get; set; }
     public DbSet<LocationPeopleCount> LocationPeopleCount { get; set; }
+    public DbSet<TravelStageMessage> TravelStageMessage { get; set; }
 
     // Inventory/Equipment
     public DbSet<PlayerItem> PlayerItem { get; set; }
