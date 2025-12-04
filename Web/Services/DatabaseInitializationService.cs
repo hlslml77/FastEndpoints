@@ -140,9 +140,17 @@ public class DatabaseInitializationService
                     {
                         await command.ExecuteNonQueryAsync();
                     }
+                    catch (MySqlException ex) when (IsBenignInitializationError(ex))
+                    {
+                        // 对于可忽略的初始化错误（如列/索引已存在等），不再以警告级别记录，避免启动时污染日志
+                        Log.Debug("跳过已存在/可忽略的初始化SQL: {Sql} | MySqlErrorNumber={ErrorNumber}",
+                                  TruncateForLog(sql),
+                                  ex.Number);
+                    }
                     catch (Exception ex)
                     {
-                        Log.Warning(ex, "执行SQL语句时出现警告（可能是表已存在等正常情况）: {Sql}", sql.Length > 100 ? sql.Substring(0, 100) + "..." : sql);
+                        // 非可忽略错误仍以警告记录，便于排查
+                        Log.Warning(ex, "执行SQL语句时出现警告: {Sql}", TruncateForLog(sql));
                     }
                 }
 
@@ -157,6 +165,27 @@ public class DatabaseInitializationService
 
         Log.Information("所有SQL文件执行完成");
     }
+
+        /// <summary>
+        /// 判断是否为可忽略的初始化阶段错误（例如列/索引已存在等）。
+        /// </summary>
+        private static bool IsBenignInitializationError(MySqlException ex)
+        {
+            // 参照 MySQL 错误码
+            // 1007: ER_DB_CREATE_EXISTS（数据库已存在）
+            // 1050: ER_TABLE_EXISTS_ERROR（表已存在）
+            // 1060: ER_DUP_FIELDNAME（重复的列名）
+            // 1061: ER_DUP_KEYNAME（重复的键/索引名）
+            // 1091: ER_CANT_DROP_FIELD_OR_KEY（删除不存在的列/键）
+            return ex.Number is 1007 or 1050 or 1060 or 1061 or 1091;
+        }
+
+        /// <summary>
+        /// 仅用于日志输出时截断较长的 SQL 片段，避免日志过长。
+        /// </summary>
+        private static string TruncateForLog(string? s, int max = 100)
+            => s is null ? string.Empty : (s.Length > max ? string.Concat(s.AsSpan(0, max), "...") : s);
+
 
     /// <summary>
     /// 分割SQL语句
