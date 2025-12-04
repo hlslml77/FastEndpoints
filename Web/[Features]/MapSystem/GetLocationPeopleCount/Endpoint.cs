@@ -44,7 +44,7 @@ public class Endpoint : Endpoint<GetLocationPeopleCountRequest, GetLocationPeopl
             await HttpContext.Response.SendAsync(new GetLocationPeopleCountResponse
             {
                 PeopleCount = count,
-                NextChallengeTime = nextChallengeTime
+                NextChallengeTime = nextChallengeTime ?? DateTime.MinValue
             }, 200, cancellation: ct);
         }
         catch (Exception ex)

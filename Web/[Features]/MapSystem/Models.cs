@@ -317,8 +317,8 @@ public class GetLocationPeopleCountResponse
     public int PeopleCount { get; set; }
 
     /// <summary>
-    /// 玩家的下次挑战时间（当该点位有资源倒计时时返回）
+    /// 玩家的下次挑战时间（当该点位有资源倒计时时返回，无倒计时返回 DateTime.MinValue）
     /// </summary>
-    public DateTime? NextChallengeTime { get; set; }
+    public DateTime NextChallengeTime { get; set; }
 }
 
