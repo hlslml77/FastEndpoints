@@ -30,13 +30,12 @@
 - [7. 配置热更新（Admin）](#toc-admin)
   - [查看配置状态（/api/admin/config/status）](#toc-admin-status)
   - [手动重载配置（/api/admin/config/reload）](#toc-admin-reload)
-
-- [调用要点](#toc-notes)
-
 - [8. 统计数据（Statistics）](#toc-stats)
   - [8.1 每日统计（/api/admin/statistics/daily）](#toc-stats-daily)
   - [8.2 小时在线快照（/api/admin/statistics/online-snapshots）](#toc-stats-snapshots)
   - [8.3 玩家活动统计（/api/admin/statistics/player-activity）](#toc-stats-activity)
+  
+- [调用要点](#toc-notes)
 - [统一错误返回与错误码](#toc-errors)
 
 
@@ -780,14 +779,7 @@ GET /api/admin/statistics/player-activity?date=2025-12-04
   -H "Authorization: Bearer <adminToken>" -H "Content-Type: application/json" \
   -d '{"files":["Item.json","Role_Upgrade.json"]}'
 
-备注
-- 管理员 Token 获取方式：在“获取访问令牌”接口中，受控环境可额外携带头 X-Admin: 1 以获得 admin 角色（仅限内网/运维场景）。
-- 若返回包含 status=ignored 的文件，表示该文件名未匹配到任何已注册的配置服务（请核对文件名）。
-
 -------------------------------------------------------------------------------------------------------
-<a id="toc-notes"></a>
-调用要点
-- 所有业务接口需携带 Authorization: Bearer <webToken>
 
 
 <a id="toc-errors"></a>
@@ -830,3 +822,7 @@ GET /api/admin/statistics/player-activity?date=2025-12-04
 <a id="toc-notes"></a>
 调用要点
 - 所有业务接口需携带 Authorization: Bearer <webToken>
+
+备注
+- 管理员 Token 获取方式：在“获取访问令牌”接口中，受控环境可额外携带头 X-Admin: 1 以获得 admin 角色（仅限内网/运维场景）。
+- 若返回包含 status=ignored 的文件，表示该文件名未匹配到任何已注册的配置服务（请核对文件名）。
