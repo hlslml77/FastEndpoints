@@ -1,6 +1,8 @@
 using FastEndpoints;
 using Serilog;
 using System.Security.Claims;
+using System.Text.Json;
+using System.Linq;
 using Web.Data;
 using Web.Data.Entities;
 
@@ -12,14 +14,14 @@ namespace Travel.SaveStageMessage;
 public class SaveStageMessageRequest
 {
     /// <summary>
-    /// 关卡ID
+    /// 关卡LevelId
     /// </summary>
-    public int StageId { get; set; }
+    public int LevelId { get; set; }
 
     /// <summary>
-    /// 留言内容
+    /// 三个整型ID的列表
     /// </summary>
-    public string Message { get; set; } = string.Empty;
+    public List<int> IdList { get; set; } = new();
 }
 
 /// <summary>
@@ -74,37 +76,31 @@ public class Endpoint : Endpoint<SaveStageMessageRequest, SaveStageMessageRespon
                 return;
             }
 
-            // 验证关卡ID
-            if (req.StageId <= 0)
+            // 验证关卡LevelId
+            if (req.LevelId <= 0)
             {
                 var errorBody = new { statusCode = 400, code = ErrorCodes.Common.BadRequest, message = "关卡ID无效" };
                 await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
                 return;
             }
 
-            // 验证留言内容
-            if (string.IsNullOrWhiteSpace(req.Message))
+            // 验证ID列表（必须是3个正整数）
+            if (req.IdList is null || req.IdList.Count != 3 || req.IdList.Any(x => x <= 0))
             {
-                var errorBody = new { statusCode = 400, code = ErrorCodes.Common.BadRequest, message = "留言内容不能为空" };
+                var errorBody = new { statusCode = 400, code = ErrorCodes.Common.BadRequest, message = "IdList必须包含3个大于0的整数" };
                 await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
                 return;
             }
 
-            // 限制留言长度
-            var message = req.Message.Trim();
-            if (message.Length > 500)
-            {
-                var errorBody = new { statusCode = 400, code = ErrorCodes.Common.BadRequest, message = "留言内容过长，最多500个字符" };
-                await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
-                return;
-            }
+            // 序列化为JSON存入MessageContent，避免改表结构
+            var json = JsonSerializer.Serialize(req.IdList);
 
-            // 创建留言记录
+            // 创建记录
             var stageMessage = new TravelStageMessage
             {
                 UserId = userId,
-                StageId = req.StageId,
-                MessageContent = message,
+                StageId = req.LevelId,
+                MessageContent = json,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -119,7 +115,7 @@ public class Endpoint : Endpoint<SaveStageMessageRequest, SaveStageMessageRespon
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Save stage message failed. stageId={StageId}", req.StageId);
+            Log.Error(ex, "Save stage message failed. levelId={LevelId}", req.LevelId);
             var errorBody = new { statusCode = 500, code = ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }

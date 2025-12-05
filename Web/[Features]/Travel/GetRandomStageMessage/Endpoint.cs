@@ -2,6 +2,7 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Security.Claims;
+using System.Text.Json;
 using Web.Data;
 
 namespace Travel.GetRandomStageMessage;
@@ -12,9 +13,9 @@ namespace Travel.GetRandomStageMessage;
 public class GetRandomStageMessageRequest
 {
     /// <summary>
-    /// 关卡ID
+    /// 关卡LevelId
     /// </summary>
-    public int StageId { get; set; }
+    public int LevelId { get; set; }
 }
 
 /// <summary>
@@ -28,22 +29,17 @@ public class GetRandomStageMessageResponse
     public bool Success { get; set; }
 
     /// <summary>
-    /// 留言ID
-    /// </summary>
-    public long MessageId { get; set; }
-
-    /// <summary>
     /// 留言用户ID
     /// </summary>
     public long UserId { get; set; }
 
     /// <summary>
-    /// 留言内容
+    /// 三个整型ID的列表（保存时的ID列表）
     /// </summary>
-    public string Message { get; set; } = string.Empty;
+    public List<int> MessageIDList { get; set; } = new();
 
     /// <summary>
-    /// 留言创建时间
+    /// 创建时间
     /// </summary>
     public DateTime CreatedAt { get; set; }
 }
@@ -86,27 +82,26 @@ public class Endpoint : Endpoint<GetRandomStageMessageRequest, GetRandomStageMes
             }
 
             // 验证关卡ID
-            if (req.StageId <= 0)
+            if (req.LevelId <= 0)
             {
-                var errorBody = new { statusCode = 400, code = ErrorCodes.Common.BadRequest, message = "关卡ID无效" };
+                var errorBody = new { statusCode = 400, code = ErrorCodes.Common.BadRequest, message = "关卡LevelId无效" };
                 await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
                 return;
             }
 
             // 获取该关卡的所有留言
             var messages = await _dbContext.TravelStageMessage
-                .Where(m => m.StageId == req.StageId)
+                .Where(m => m.StageId == req.LevelId)
                 .ToListAsync(ct);
 
             if (messages.Count == 0)
             {
-                // 没有留言时返回空结果
+                // 没有留言时返回空对象（列表为空）
                 await HttpContext.Response.SendAsync(new GetRandomStageMessageResponse
                 {
                     Success = true,
-                    MessageId = 0,
                     UserId = 0,
-                    Message = string.Empty,
+                    MessageIDList = new List<int>(),
                     CreatedAt = DateTime.MinValue
                 }, 200, cancellation: ct);
                 return;
@@ -115,18 +110,28 @@ public class Endpoint : Endpoint<GetRandomStageMessageRequest, GetRandomStageMes
             // 随机选择一条留言
             var randomMessage = messages[_rand.Next(0, messages.Count)];
 
+            // 从 MessageContent 反序列化出 IdList
+            List<int>? idList = null;
+            try
+            {
+                idList = JsonSerializer.Deserialize<List<int>>(randomMessage.MessageContent) ?? new List<int>();
+            }
+            catch
+            {
+                idList = new List<int>();
+            }
+
             await HttpContext.Response.SendAsync(new GetRandomStageMessageResponse
             {
                 Success = true,
-                MessageId = randomMessage.Id,
                 UserId = randomMessage.UserId,
-                Message = randomMessage.MessageContent,
+                MessageIDList = idList,
                 CreatedAt = randomMessage.CreatedAt
             }, 200, cancellation: ct);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Get random stage message failed. stageId={StageId}", req.StageId);
+            Log.Error(ex, "Get random stage message failed. levelId={LevelId}", req.LevelId);
             var errorBody = new { statusCode = 500, code = ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }

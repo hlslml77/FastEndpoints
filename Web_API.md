@@ -20,8 +20,8 @@
 - [5. 旅行系统（Travel）](#toc-travel)
   - [5.1 事件奖励（/api/travel/event/reward）](#toc-travel-event-reward)
   - [5.2 距离掉落奖励（/api/travel/drop-point/reward）](#toc-travel-drop-point-reward)
-  - [5.3 保存关卡留言（/api/travel/stage/save-message）](#toc-travel-stage-save-message)
-  - [5.4 获取随机关卡留言（/api/travel/stage/get-random-message）](#toc-travel-stage-get-random-message)
+  - [5.3 保存消息ID列表（/api/travel/stage/save-message）](#toc-travel-stage-save-message)
+  - [5.4 获取随机消息ID列表（/api/travel/stage/get-random-message）](#toc-travel-stage-get-random-message)
 
 - [6. 藏品系统（Collection）](#toc-collection)
   - [6.1 获取玩家已拥有的藏品ID列表（/api/collection/my）](#toc-collection-my)
@@ -493,17 +493,17 @@ curl -X POST https://host/api/travel/drop-point/reward \
   -d '{"levelId":101, "distance":600}'
 
 <a id="toc-travel-stage-save-message"></a>
-5.3 保存关卡留言
+5.3 保存消息ID列表
 POST /api/travel/stage/save-message
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：玩家完成某个关卡后，可提交一句话留言，服务端会将留言与关卡ID、用户ID一起保存。
-- 限制：留言内容最长 500 个字符，不能为空。
+- 说明：客户端提交三个整型ID的列表（IdList，长度必须为 3），服务端会将其与关卡ID、用户ID一起保存。
+- 限制：IdList 必须包含 3 个大于 0 的整数。
 
 请求体
 {
-  "stageId": 101,             // int 关卡ID
-  "message": "这个关卡很有趣！" // string 留言内容（<=500）
+  "levelId": 101,          // int 关卡LevelId
+  "idList": [101, 202, 303] // int[3] 三个整型ID
 }
 
 响应体
@@ -515,43 +515,43 @@ POST /api/travel/stage/save-message
 错误响应示例
 - 400 Bad Request（参数无效）
   { "statusCode": 400, "code": 1001, "message": "关卡ID无效" }
-  { "statusCode": 400, "code": 1001, "message": "留言内容不能为空" }
-  { "statusCode": 400, "code": 1001, "message": "留言内容过长，最多500个字符" }
+  { "statusCode": 400, "code": 1001, "message": "IdList必须包含3个大于0的整数" }
 - 500 Internal Error（服务器错误）
   { "statusCode": 500, "code": 1004, "message": "服务器内部错误" }
 
 示例（curl）
 curl -X POST https://host/api/travel/stage/save-message \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
-  -d '{"stageId":101, "message":"这个关卡很有趣！"}'
+  -d '{"levelId":101, "idList":[101,202,303]}'
 
 
 <a id="toc-travel-stage-get-random-message"></a>
-5.4 获取随机关卡留言
+5.4 获取随机消息ID列表
 POST /api/travel/stage/get-random-message
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：玩家在跑关卡过程中，客户端可请求获取该关卡所有玩家留言中的随机一条用于展示。
-- 当该关卡暂无留言时，返回空结果：messageId=0, message=""，createdAt 为 0001-01-01T00:00:00Z（DateTime.MinValue）。
+- 说明：返回该关卡保存的随机一条 ID 列表及其元信息。
+- 字段：success、userId、messageIDList（三个整型ID）、createdAt（ISO 8601）。
+- 当该关卡暂无数据时，返回 success=true，userId=0，messageIDList=[]，createdAt=0001-01-01T00:00:00Z。
 
 请求体
 {
-  "stageId": 101 // int 关卡ID
+  "levelId": 101 // int 关卡LevelId
 }
 
 响应体
 {
-  "success": true,                          // bool
-  "messageId": 123,                         // long（无留言时为 0）
-  "userId": 987654,                         // long（留言的用户ID；无留言时为 0）
-  "message": "这个关卡很有趣！",           // string（无留言时为空字符串）
-  "createdAt": "2025-12-04T09:54:04Z"     // DateTime (ISO 8601)，无留言时为 0001-01-01T00:00:00Z
+  "success": true,              // bool
+  "userId": 987654,             // long（留言用户ID；无数据时为 0）
+  "messageIDList": [101,202,303], // List<int> 三个整型ID；无数据时为空 []
+  "createdAt": "2025-12-04T09:54:04Z" // DateTime (ISO 8601)；无数据时为 0001-01-01T00:00:00Z
 }
+
 
 示例（curl）
 curl -X POST https://host/api/travel/stage/get-random-message \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
-  -d '{"stageId":101}'
+  -d '{"levelId":101}'
 
 
 
