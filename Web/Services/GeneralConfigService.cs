@@ -14,7 +14,7 @@ public interface IGeneralConfigService : IReloadableConfig, IDisposable
     decimal GetStoredEnergyMaxMeters();
 
     /// <summary>
-    /// 每日随机事件点位生成数量（大地图）。来自 Config.json 中描述包含“每日随机事件点位生成数量”的配置（ID 6）。
+    /// 每日随机事件点位生成数量（大地图）。来自 WorldConfig.json 中描述包含“每日随机事件点位生成数量”的配置（ID 6）。
     /// 若未配置则默认 1。
     /// </summary>
     int GetDailyRandomEventCount();
@@ -25,7 +25,7 @@ public interface IGeneralConfigService : IReloadableConfig, IDisposable
     (int min, int max) GetRobotDisplayRange();
 
         /// <summary>
-        /// 玩家初始点（Config.json ID=7 的 Value1）。未配置或非法时返回 0。
+        /// 玩家初始点（WorldConfig.json ID=7 的 Value1）。未配置或非法时返回 0。
         /// </summary>
         int GetInitialLocationId();
 
@@ -49,7 +49,7 @@ public class GeneralConfigService : IGeneralConfigService
     {
         _dir = Path.Combine(AppContext.BaseDirectory, "Json");
         Reload();
-        // 监听两个配置文件：Config.json（数组）与 config.json（对象）
+        // 监听 JSON 目录变更，发现变动时重载（WorldConfig.json 等）
         _watcher = new JsonConfigWatcher(_dir, "*.json", () => Reload());
     }
 
@@ -57,8 +57,8 @@ public class GeneralConfigService : IGeneralConfigService
     {
         try
         {
-            // 读取数组 Config.json（若存在）
-            var arrayPath = Path.Combine(_dir, "Config.json");
+            // 读取数组 WorldConfig.json（若存在）
+            var arrayPath = Path.Combine(_dir, "WorldConfig.json");
             if (File.Exists(arrayPath))
             {
                 try
@@ -68,7 +68,7 @@ public class GeneralConfigService : IGeneralConfigService
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning(ex, "Failed to load Config.json, keeping previous entries");
+                    Log.Warning(ex, "Failed to load WorldConfig.json, keeping previous entries");
                 }
             }
 
@@ -101,8 +101,9 @@ public class GeneralConfigService : IGeneralConfigService
     public decimal GetStoredEnergyMaxMeters()
     {
         var e = FindByIdOrDesc(4, "能量槽");
-        var km = (decimal)(e?.Value1 ?? 10); // 默认10km
-        return km * 1000m;
+        // WorldConfig.json 中 ID=4 的 Value1 单位已改为“米”（m），默认 10000 米
+        var meters = (decimal)(e?.Value1 ?? 10000);
+        return meters;
     }
 
     public int GetDailyRandomEventCount()

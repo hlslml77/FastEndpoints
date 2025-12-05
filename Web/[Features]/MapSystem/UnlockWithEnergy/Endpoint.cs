@@ -47,13 +47,14 @@ public class Endpoint : Endpoint<UnlockWithEnergyRequest, UnlockWithEnergyRespon
                 return;
             }
 
-            var (ok, used, remain) = await _mapService.UnlockWithEnergyAsync(userId, req.StartLocationId, req.EndLocationId);
+            var (ok, used, remain, unlockedIds) = await _mapService.UnlockWithEnergyAsync(userId, req.StartLocationId, req.EndLocationId);
 
             var resp = new UnlockWithEnergyResponse
             {
                 IsUnlocked = ok,
                 UsedEnergyMeters = used,
-                StoredEnergyMeters = remain
+                StoredEnergyMeters = remain,
+                UnlockedLocationIds = unlockedIds ?? new List<int>()
             };
 
             await HttpContext.Response.SendAsync(resp, 200, cancellation: ct);

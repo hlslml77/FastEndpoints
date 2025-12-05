@@ -100,9 +100,14 @@ public class UnlockWithEnergyResponse
     public decimal UsedEnergyMeters { get; set; }
 
     /// <summary>
-    /// 当前存储能量（米）
+    /// 玩家当前存储能量（米）
     /// </summary>
     public decimal StoredEnergyMeters { get; set; }
+
+    /// <summary>
+    /// 本次解锁的点位ID列表（若无解锁则为空）。当解锁终点时包含终点；若终点配置了 SurroundingPoints，则一并包含其周边点位。
+    /// </summary>
+    public List<int> UnlockedLocationIds { get; set; } = new();
 }
 
 /// <summary>

@@ -24,7 +24,7 @@ public interface IMapService
     /// <summary>
     /// 使用存储能量解锁终点
     /// </summary>
-    Task<(bool IsUnlocked, decimal UsedEnergy, decimal StoredEnergyMeters)> UnlockWithEnergyAsync(long userId, int startLocationId, int endLocationId);
+    Task<(bool IsUnlocked, decimal UsedEnergy, decimal StoredEnergyMeters, List<int> UnlockedLocationIds)> UnlockWithEnergyAsync(long userId, int startLocationId, int endLocationId);
 
     /// <summary>
     /// 获取玩家已解锁的点位列表
@@ -480,25 +480,55 @@ public class MapService : IMapService
             .ToListAsync();
     }
 
-    public async Task<(bool IsUnlocked, decimal UsedEnergy, decimal StoredEnergyMeters)> UnlockWithEnergyAsync(long userId, int startLocationId, int endLocationId)
+    public async Task<(bool IsUnlocked, decimal UsedEnergy, decimal StoredEnergyMeters, List<int> UnlockedLocationIds)> UnlockWithEnergyAsync(long userId, int startLocationId, int endLocationId)
     {
         var endConfig = _mapConfigService.GetMapConfigByLocationId(endLocationId);
+        var unlockedList = new List<int>();
+
+        async Task AddUnlockRecordsAsync()
+        {
+            // 终点本身
+            _dbContext.PlayerUnlockedLocation.Add(new PlayerUnlockedLocation
+            {
+                UserId = userId,
+                LocationId = endLocationId,
+                UnlockedTime = DateTime.UtcNow
+            });
+            if (!unlockedList.Contains(endLocationId)) unlockedList.Add(endLocationId);
+
+            // 周边点位（若配置）
+            var sp = endConfig?.SurroundingPoints;
+            if (sp != null && sp.Count > 0)
+            {
+                foreach (var pid in sp)
+                {
+                    if (!unlockedList.Contains(pid)) unlockedList.Add(pid);
+                    var spAlready = await _dbContext.PlayerUnlockedLocation
+                        .AnyAsync(u => u.UserId == userId && u.LocationId == pid);
+                    if (!spAlready)
+                    {
+                        _dbContext.PlayerUnlockedLocation.Add(new PlayerUnlockedLocation
+                        {
+                            UserId = userId,
+                            LocationId = pid,
+                            UnlockedTime = DateTime.UtcNow
+                        });
+                    }
+                }
+            }
+        }
+
         if (endConfig == null || !endConfig.UnlockDistance.HasValue || endConfig.UnlockDistance.Value <= 0)
         {
             // 没有解锁需求，视为可解锁且不消耗能量
             var already = await _dbContext.PlayerUnlockedLocation.AnyAsync(u => u.UserId == userId && u.LocationId == endLocationId);
             if (!already)
             {
-                _dbContext.PlayerUnlockedLocation.Add(new PlayerUnlockedLocation
-                {
-                    UserId = userId,
-                    LocationId = endLocationId,
-                    UnlockedTime = DateTime.UtcNow
-                });
+                await AddUnlockRecordsAsync();
                 await _dbContext.SaveChangesAsync();
             }
             var player0 = await _playerRoleService.GetOrCreatePlayerAsync(userId);
-            return (true, 0m, player0.StoredEnergyMeters);
+            return (true, 0m, player0.StoredEnergyMeters, unlockedList);
         }
 
         var unlockDist = endConfig.UnlockDistance.Value;
@@ -510,16 +540,11 @@ public class MapService : IMapService
             var already = await _dbContext.PlayerUnlockedLocation.AnyAsync(u => u.UserId == userId && u.LocationId == endLocationId);
             if (!already)
             {
-                _dbContext.PlayerUnlockedLocation.Add(new PlayerUnlockedLocation
-                {
-                    UserId = userId,
-                    LocationId = endLocationId,
-                    UnlockedTime = DateTime.UtcNow
-                });
+                await AddUnlockRecordsAsync();
                 await _dbContext.SaveChangesAsync();
             }
             var player1 = await _playerRoleService.GetOrCreatePlayerAsync(userId);
-            return (true, 0m, player1.StoredEnergyMeters);
+            return (true, 0m, player1.StoredEnergyMeters, unlockedList);
         }
 
         var need = unlockDist - current;
@@ -531,21 +556,16 @@ public class MapService : IMapService
             var already = await _dbContext.PlayerUnlockedLocation.AnyAsync(u => u.UserId == userId && u.LocationId == endLocationId);
             if (!already)
             {
-                _dbContext.PlayerUnlockedLocation.Add(new PlayerUnlockedLocation
-                {
-                    UserId = userId,
-                    LocationId = endLocationId,
-                    UnlockedTime = DateTime.UtcNow
-                });
+                await AddUnlockRecordsAsync();
             }
             await _dbContext.SaveChangesAsync();
             Log.Information("User {UserId} unlocked location {LocationId} by spending stored energy {Used}m, remain {Remain}m", userId, endLocationId, need, player.StoredEnergyMeters);
-            return (true, need, player.StoredEnergyMeters);
+            return (true, need, player.StoredEnergyMeters, unlockedList);
         }
 
         // 能量不足，返回未解锁
         Log.Information("User {UserId} insufficient stored energy to unlock {LocationId}. Need {Need}m, have {Have}m", userId, endLocationId, need, player.StoredEnergyMeters);
-        return (false, 0m, player.StoredEnergyMeters);
+        return (false, 0m, player.StoredEnergyMeters, unlockedList);
     }
 
 

@@ -295,11 +295,8 @@ POST /api/map/unlock-with-energy
 {
   "isUnlocked": true,          // bool, 本次是否成功解锁
   "usedEnergyMeters": 240.0,   // double, 本次消耗的能量（米），不足则为 0
-  "storedEnergyMeters": 760.0  // double, 玩家当前剩余“存储能量”（米）
-}
-
-  ],
-  "storedEnergyMeters": 240.0             // double, 玩家当前“存储能量”（米），最大 10000
+  "storedEnergyMeters": 760.0, // double, 玩家当前剩余“存储能量”（米）
+  "unlockedLocationIds": [10012, 10010501] // int[], 本次解锁提示列表：包含终点以及其 SurroundingPoints（若配置），未解锁则为空数组
 }
 
 <a id="toc-map-location-info"></a>
@@ -307,7 +304,7 @@ POST /api/map/unlock-with-energy
 POST /api/map/location-info
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：返回指定点位的当前人数统计和玩家的下次挑战时间。当玩家调用 /api/map/visit-location 或 /api/map/save-progress 接口时，该点位的人数会自动增加。若统计人数为0，或统计为1且只有当前玩家自己，则按 Config.json 中的玩家选择大地图点位时机器人数量显示的 Value4 区间生成随机展示人数。
+- 说明：返回指定点位的当前人数统计和玩家的下次挑战时间。当玩家调用 /api/map/visit-location 或 /api/map/save-progress 接口时，该点位的人数会自动增加。若统计人数为0，或统计为1且只有当前玩家自己，则按 WorldConfig.json 中的“玩家选择大地图点位时机器人数量显示”的 Value4 区间生成随机展示人数。
 - 倒计时说明：当玩家完成某个点位且该点位配置了资源ID（Resources > 0）时，系统会根据 WorldUiMap_MapBase.json 中该点位的 RefreshTime 字段计算下次可挑战时间。只有倒计时结束后才能再次挑战该点位。
 
 请求体
