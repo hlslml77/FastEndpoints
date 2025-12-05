@@ -106,6 +106,8 @@ bld.Services
    .AddScoped<IMapService, MapService>()
    .AddScoped<IInventoryService, InventoryService>()
    .AddScoped<ICollectionService, CollectionService>()
+   .AddScoped<IGameStatisticsService, GameStatisticsService>()
+   .AddHostedService<GameStatisticsBackgroundJob>()
    .AddSingleton(new SingltonSVC(0))
    .AddJobQueues<Job, JobStorage>()
    .RegisterServicesFromWeb()

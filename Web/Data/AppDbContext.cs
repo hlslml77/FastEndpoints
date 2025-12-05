@@ -27,6 +27,11 @@ public class AppDbContext : DbContext
     public DbSet<PlayerCollectionComboClaim> PlayerCollectionComboClaim { get; set; }
     public DbSet<CollectionGlobalCounter> CollectionGlobalCounter { get; set; }
 
+    // Game Statistics
+    public DbSet<DailyGameStatistics> DailyGameStatistics { get; set; }
+    public DbSet<OnlinePlayersSnapshot> OnlinePlayersSnapshot { get; set; }
+    public DbSet<PlayerActivityStatistics> PlayerActivityStatistics { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
