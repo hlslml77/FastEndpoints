@@ -30,8 +30,14 @@
 - [7. 配置热更新（Admin）](#toc-admin)
   - [查看配置状态（/api/admin/config/status）](#toc-admin-status)
   - [手动重载配置（/api/admin/config/reload）](#toc-admin-reload)
-- [统一错误返回与错误码](#toc-errors)
+
 - [调用要点](#toc-notes)
+
+- [8. 统计数据（Statistics）](#toc-stats)
+  - [8.1 每日统计（/api/admin/statistics/daily）](#toc-stats-daily)
+  - [8.2 小时在线快照（/api/admin/statistics/online-snapshots）](#toc-stats-snapshots)
+  - [8.3 玩家活动统计（/api/admin/statistics/player-activity）](#toc-stats-activity)
+- [统一错误返回与错误码](#toc-errors)
 
 
 
@@ -688,6 +694,89 @@ curl -X GET "https://host/api/admin/config/reload?file=Item.json" \
 
 # POST + JSON（明确 Content-Type）
 curl -X POST https://host/api/admin/config/reload \
+
+<a id="toc-stats"></a>
+8. 统计数据（Statistics）
+
+说明：以下接口用于读取 AddGameStatisticsTables.sql 创建的三张统计表的数据，均为只读查询接口。
+- 表：daily_game_statistics（每日统计）
+- 表：online_players_snapshot（在线人数小时快照）
+- 表：player_activity_statistics（玩家活动统计）
+
+<a id="toc-stats-daily"></a>
+8.1 每日统计（daily_game_statistics）
+GET /api/admin/statistics/daily
+
+- 认证：可匿名（AllowAnonymous）；若需加权限可后续开启
+- 说明：
+  - 不传 date 时，返回最近 days 天的统计（默认 7 天）
+  - 传 date（yyyy-MM-dd）时，返回该日的统计
+
+请求参数（query）
+- date: string?（yyyy-MM-dd）
+- days: int?（默认 7）
+
+响应（当按区间查询时为数组；按单日查询为单对象）
+{
+  "date": "2025-12-04",       // string yyyy-MM-dd
+  "newRegistrations": 0,       // int 当日新注册
+  "activePlayers": 0,          // int 当日活跃
+  "maxOnlinePlayers": 0,       // int 当日在线峰值
+  "avgOnlinePlayers": 0.0,     // decimal 当日平均在线
+  "totalPlayers": 0            // int 截止该日累计玩家数
+}
+
+示例
+GET /api/admin/statistics/daily            （最近7天）
+GET /api/admin/statistics/daily?days=30    （最近30天）
+GET /api/admin/statistics/daily?date=2025-12-04
+
+<a id="toc-stats-snapshots"></a>
+8.2 小时在线快照（online_players_snapshot）
+GET /api/admin/statistics/online-snapshots
+
+- 认证：可匿名（AllowAnonymous）
+- 说明：返回指定日期（默认今天）的每小时在线人数快照
+
+请求参数（query）
+- date: string?（yyyy-MM-dd；默认今天）
+
+响应（数组）
+[
+  {
+    "hour": 9,                          // int 小时 0-23
+    "onlineCount": 123,                 // int 在线人数
+    "recordedAt": "2025-12-05 09:05:00" // string 记录时间（本地时区格式化）
+  }
+]
+
+示例
+GET /api/admin/statistics/online-snapshots
+GET /api/admin/statistics/online-snapshots?date=2025-12-04
+
+<a id="toc-stats-activity"></a>
+8.3 玩家活动统计（player_activity_statistics）
+GET /api/admin/statistics/player-activity
+
+- 认证：可匿名（AllowAnonymous）
+- 说明：返回指定日期（默认今天）的活动统计汇总
+
+请求参数（query）
+- date: string?（yyyy-MM-dd；默认今天）
+
+响应
+{
+  "date": "2025-12-05",               // string yyyy-MM-dd
+  "totalLocationsCompleted": 0,       // int 当日完成的地图点位总数
+  "totalEventsCompleted": 0,          // int 当日完成的事件总数
+  "totalDistanceMeters": 0.0,         // decimal 当日总跑步距离（米）
+  "avgPlayerLevel": 0.0               // decimal 平均玩家等级
+}
+
+示例
+GET /api/admin/statistics/player-activity
+GET /api/admin/statistics/player-activity?date=2025-12-04
+
   -H "Authorization: Bearer <adminToken>" -H "Content-Type: application/json" \
   -d '{"files":["Item.json","Role_Upgrade.json"]}'
 
@@ -696,6 +785,11 @@ curl -X POST https://host/api/admin/config/reload \
 - 若返回包含 status=ignored 的文件，表示该文件名未匹配到任何已注册的配置服务（请核对文件名）。
 
 -------------------------------------------------------------------------------------------------------
+<a id="toc-notes"></a>
+调用要点
+- 所有业务接口需携带 Authorization: Bearer <webToken>
+
+
 <a id="toc-errors"></a>
 统一错误返回与错误码
 
