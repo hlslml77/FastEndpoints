@@ -389,6 +389,68 @@ function Test-AdminConfigStatus($auth) {
         Err "   ✗ Get config status failed"
     }
 }
+function Test-RankSystem($auth) {
+    Step "8) Testing Rank System..."
+
+    # 8.1 Leaderboard
+    Info "   [8.1] POST /api/rank/leaderboard"
+    $lbReq = @{ periodType = 1; deviceType = 0; top = 20 }
+    $lb = Invoke-ApiCall -Uri "$BaseUrl/api/rank/leaderboard" -Auth $auth -Method 'Post' -Body $lbReq
+    if ($lb) {
+        $topList = if ($lb.Top) { $lb.Top } else { $lb.top }
+        $me = if ($lb.Me) { $lb.Me } else { $lb.me }
+        $count = if ($topList) { $topList.Count } else { 0 }
+        Info ("   Top count: {0}, PeriodId: {1}" -f $count, $lb.PeriodId)
+        if ($topList -and $count -gt 0) {
+            $topList | Select-Object -First 3 | ForEach-Object {
+                Info ("     - Rank {0}: User {1}, Distance {2}m" -f $_.Rank, $_.UserId, $_.DistanceMeters)
+            }
+        }
+        if ($me) {
+            Info ("   Me: Rank {0}, Distance {1}m" -f $me.Rank, $me.DistanceMeters)
+        }
+        Ok "   ✓ Leaderboard query successful"
+    } else {
+        Err "   ✗ Leaderboard query failed"
+    }
+
+    # 8.2 Claim weekly reward
+    Info "   [8.2] POST /api/rank/claim-week"
+    $cw = Invoke-ApiCall -Uri "$BaseUrl/api/rank/claim-week" -Auth $auth -Method 'Post' -Body @{ deviceType = 0 }
+    if ($cw) {
+        $success = if ($cw.success) { $cw.success } else { $cw.Success }
+        $msg = if ($cw.message) { $cw.message } else { $cw.Message }
+        if ($success) {
+            Ok ("   ✓ Claim week successful: {0}" -f $msg)
+            if ($cw.rewards) {
+                $cw.rewards | ForEach-Object { Info ("     - Item {0} x {1}" -f $_.itemId, $_.amount) }
+            }
+        } else {
+            Warn ("   ⚠ Claim week: {0}" -f $msg)
+        }
+    } else {
+        Err "   ✗ Claim week failed"
+    }
+
+    # 8.3 Claim season reward
+    Info "   [8.3] POST /api/rank/claim-season"
+    $cs = Invoke-ApiCall -Uri "$BaseUrl/api/rank/claim-season" -Auth $auth -Method 'Post' -Body @{ deviceType = 0 }
+    if ($cs) {
+        $success = if ($cs.success) { $cs.success } else { $cs.Success }
+        $msg = if ($cs.message) { $cs.message } else { $cs.Message }
+        if ($success) {
+            Ok ("   ✓ Claim season successful: {0}" -f $msg)
+            if ($cs.rewards) {
+                $cs.rewards | ForEach-Object { Info ("     - Item {0} x {1}" -f $_.itemId, $_.amount) }
+            }
+        } else {
+            Warn ("   ⚠ Claim season: {0}" -f $msg)
+        }
+    } else {
+        Err "   ✗ Claim season failed"
+    }
+}
+
 
 function Invoke-AllTests($token, $adminToken) {
     $auth = @{ Authorization = "Bearer $token"; Accept = "application/json" }
@@ -400,6 +462,7 @@ function Invoke-AllTests($token, $adminToken) {
     Test-TravelSystem $auth
     Test-CollectionSystem $auth
     Test-AdminConfigStatus $auth
+    Test-RankSystem $auth
 }
 
 function Show-TestSummary {

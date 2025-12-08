@@ -66,12 +66,41 @@ bld.Services.AddHttpClient("AppService", client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
-// add redis cache
-bld.Services.AddStackExchangeRedisCache(options =>
+// add redis cache if available; else fall back to memory-only
+static bool CanConnectRedis(string? cs)
 {
-    options.Configuration = bld.Configuration.GetConnectionString("Redis");
-    options.InstanceName = "Web_";
-});
+    if (string.IsNullOrWhiteSpace(cs)) return false;
+    try
+    {
+        var hostPart = cs.Split(',')[0];
+        var host = hostPart;
+        var port = 6379;
+        if (hostPart.Contains(":"))
+        {
+            var hp = hostPart.Split(':');
+            host = hp[0];
+            if (hp.Length > 1 && int.TryParse(hp[1], out var p)) port = p;
+        }
+        using var client = new System.Net.Sockets.TcpClient();
+        var task = client.ConnectAsync(host, port);
+        return task.Wait(TimeSpan.FromMilliseconds(500));
+    }
+    catch { return false; }
+}
+var redisCs = bld.Configuration.GetConnectionString("Redis");
+if (CanConnectRedis(redisCs))
+{
+    bld.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisCs;
+        options.InstanceName = "Web_";
+    });
+    Log.Information("Redis detected at {RedisCs}. Using distributed cache.", redisCs);
+}
+else
+{
+    Log.Warning("Redis not detected. Falling back to memory cache only.");
+}
 
 bld.Services
    // Register concrete singletons once, then map to multiple interfaces to share the same instance
