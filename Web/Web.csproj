@@ -28,6 +28,7 @@
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
 
         <PackageReference Include="MySqlConnector" />
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
     </ItemGroup>
 
     <!--<PropertyGroup>

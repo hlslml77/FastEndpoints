@@ -66,6 +66,13 @@ bld.Services.AddHttpClient("AppService", client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
+// add redis cache
+bld.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = bld.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "Web_";
+});
+
 bld.Services
    // Register concrete singletons once, then map to multiple interfaces to share the same instance
    .AddSingleton<RoleConfigService>()
@@ -102,11 +109,17 @@ bld.Services
    .AddSingleton<IGeneralConfigService>(sp => sp.GetRequiredService<GeneralConfigService>())
    .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<GeneralConfigService>())
 
+   // PVE Rank
+   .AddSingleton<PveRankConfigService>()
+   .AddSingleton<IPveRankConfigService>(sp => sp.GetRequiredService<PveRankConfigService>())
+   .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<PveRankConfigService>())
+
    .AddScoped<IPlayerRoleService, PlayerRoleService>()
    .AddScoped<IMapService, MapService>()
    .AddScoped<IInventoryService, InventoryService>()
    .AddScoped<ICollectionService, CollectionService>()
    .AddScoped<IGameStatisticsService, GameStatisticsService>()
+   .AddScoped<IPveRankService, PveRankService>()
    .AddHostedService<GameStatisticsBackgroundJob>()
    .AddSingleton(new SingltonSVC(0))
    .AddJobQueues<Job, JobStorage>()

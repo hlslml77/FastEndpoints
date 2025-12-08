@@ -22,7 +22,6 @@
   - [5.2 距离掉落奖励（/api/travel/drop-point/reward）](#toc-travel-drop-point-reward)
   - [5.3 保存消息ID列表（/api/travel/stage/save-message）](#toc-travel-stage-save-message)
   - [5.4 获取随机消息ID列表（/api/travel/stage/get-random-message）](#toc-travel-stage-get-random-message)
-
 - [6. 藏品系统（Collection）](#toc-collection)
   - [6.1 获取玩家已拥有的藏品ID列表（/api/collection/my）](#toc-collection-my)
   - [6.2 随机获取藏品（/api/collection/obtain）](#toc-collection-obtain)
@@ -34,7 +33,11 @@
   - [8.1 每日统计（/api/admin/statistics/daily）](#toc-stats-daily)
   - [8.2 小时在线快照（/api/admin/statistics/online-snapshots）](#toc-stats-snapshots)
   - [8.3 玩家活动统计（/api/admin/statistics/player-activity）](#toc-stats-activity)
-  
+- [9. 排行榜（Rank）](#toc-rank)
+  - [9.1 获取排行榜（/api/rank/leaderboard）](#toc-rank-leaderboard)
+  - [9.2 领取周榜奖励（/api/rank/claim-week）](#toc-rank-claim-week)
+  - [9.3 领取赛季奖励（/api/rank/claim-season）](#toc-rank-claim-season)
+
 - [调用要点](#toc-notes)
 - [统一错误返回与错误码](#toc-errors)
 
@@ -554,10 +557,7 @@ POST /api/travel/stage/get-random-message
 curl -X POST https://host/api/travel/stage/get-random-message \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
   -d '{"levelId":101}'
-
-
-
-
+  
 ---
 
 <a id="toc-collection"></a>
@@ -775,6 +775,81 @@ GET /api/admin/statistics/player-activity?date=2025-12-04
 
   -H "Authorization: Bearer <adminToken>" -H "Content-Type: application/json" \
   -d '{"files":["Item.json","Role_Upgrade.json"]}'
+
+---
+
+<a id="toc-rank"></a>
+9. 排行榜（Rank）
+
+说明与规则概览
+- 周期：周榜与赛季榜两种（periodType：1=周榜，2=赛季榜）。
+- 结算：周榜按 PVERank_Config.json 的 WeeklySettlement（1=周一...7=周日）结算，上周数据可在任意时刻领取；赛季按年简化结算（可根据需要改为季度）。
+- 设备：deviceType：0=跑步 Run，1=划船 Rowing，2=单车 Bicycle，3=手环 Bracelet。
+- 统计：以“总距离（米）”作为排序依据，距离相同则按更新时间早者在前（稳定排名）。
+- 性能：读走 pve_rank_board 聚合表，并有复合索引（period_type, period_id, device_type, total_distance_meters desc, updated_at）。写在完成运动时进行累加，O(1)。
+
+<a id="toc-rank-leaderboard"></a>
+9.1 获取排行榜
+POST /api/rank/leaderboard
+
+请求体
+{
+  "periodType": 1,   // int 1=周榜,2=赛季榜
+  "deviceType": 0,   // int 0=跑步,1=划船,2=单车,3=手环
+  "top": 100         // int? 返回前 N 名，默认 100，最大 100
+}
+
+响应体
+{
+  "periodType": 1,           // int
+  "deviceType": 0,           // int
+  "periodId": 202549,        // int 周榜: yyyyWW；赛季: yyyy
+  "top": [                   // List<LeaderboardItem>
+    { "userId": 123, "distanceMeters": 5600.0, "rank": 1 },
+    { "userId": 456, "distanceMeters": 4200.0, "rank": 2 }
+  ],
+  "me": { "userId": 999, "distanceMeters": 3500.0, "rank": 5 } // 可为空（未上榜/无数据）
+}
+
+说明
+- 排名计算：返回 TopN 的名次；“我”的名次为“超过我距离的人数 + 1”。
+- 客户端可按设备展示四个 tab；支持拉取前 100 名并在本地分页展示。
+
+<a id="toc-rank-claim-week"></a>
+9.2 领取周榜奖励
+POST /api/rank/claim-week
+
+请求体
+{ "deviceType": 0 }
+
+响应体
+{
+  "success": true,
+  "message": "ok",
+  "rewards": [ { "itemId": 1000, "amount": 100 } ]
+}
+
+说明
+- 仅针对“上一周”的最终名次发奖（幂等：重复领取返回失败消息）。
+- 发奖规则来自 Web/Json/PVERank_WeekReward.json；区间匹配 Rank 落点，按设备读取对应奖励。
+
+<a id="toc-rank-claim-season"></a>
+9.3 领取赛季奖励
+POST /api/rank/claim-season
+
+请求体
+{ "deviceType": 0 }
+
+响应体
+{
+  "success": true,
+  "message": "ok",
+  "rewards": [ { "itemId": 1000, "amount": 100 } ]
+}
+
+说明
+- 赛季奖励规则来自 Web/Json/PVERank_SeasonReward.json（当前简化为按年）。
+- 幂等防重：同周期+设备+用户仅能成功一次；发放记录写入 pve_rank_reward_grant。
 
 -------------------------------------------------------------------------------------------------------
 

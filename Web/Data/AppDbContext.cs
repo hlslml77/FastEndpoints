@@ -32,6 +32,11 @@ public class AppDbContext : DbContext
     public DbSet<OnlinePlayersSnapshot> OnlinePlayersSnapshot { get; set; }
     public DbSet<PlayerActivityStatistics> PlayerActivityStatistics { get; set; }
 
+    // PVE Rank
+    public DbSet<Web.Data.Entities.PlayerSportDaily> PlayerSportDaily { get; set; }
+    public DbSet<Web.Data.Entities.PveRankBoard> PveRankBoard { get; set; }
+    public DbSet<Web.Data.Entities.PveRankRewardGrant> PveRankRewardGrant { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -57,6 +62,15 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<CollectionGlobalCounter>()
             .HasKey(e => e.CollectionId);
+
+        // PVE Rank keys and indexes
+        modelBuilder.Entity<Web.Data.Entities.PlayerSportDaily>()
+            .HasKey(e => new { e.UserId, e.Date, e.DeviceType });
+
+        modelBuilder.Entity<Web.Data.Entities.PveRankBoard>()
+            .HasKey(e => new { e.PeriodType, e.PeriodId, e.DeviceType, e.UserId });
+        modelBuilder.Entity<Web.Data.Entities.PveRankBoard>()
+            .HasIndex(e => new { e.PeriodType, e.PeriodId, e.DeviceType, e.TotalDistanceMeters });
     }
 }
 

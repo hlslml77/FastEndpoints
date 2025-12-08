@@ -36,17 +36,20 @@ public class PlayerRoleService : IPlayerRoleService
     private readonly IRoleConfigService _configService;
     private readonly IInventoryService _inventoryService;
     private readonly IGeneralConfigService _generalConfigService;
+    private readonly IPveRankService _pveRankService;
 
     public PlayerRoleService(
         AppDbContext dbContext,
         IRoleConfigService configService,
         IInventoryService inventoryService,
-        IGeneralConfigService generalConfigService)
+        IGeneralConfigService generalConfigService,
+        IPveRankService pveRankService)
     {
         _dbContext = dbContext;
         _configService = configService;
         _inventoryService = inventoryService;
         _generalConfigService = generalConfigService;
+        _pveRankService = pveRankService;
     }
 
     /// <summary>
@@ -245,6 +248,10 @@ public class PlayerRoleService : IPlayerRoleService
 
         player.LastUpdateTime = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
+
+        // 推送到排行榜聚合（异步不阻塞）
+        try { _ = _pveRankService.AddSportAsync(userId, deviceType, distance, DateTime.UtcNow); }
+        catch { /* ignore */ }
 
         Log.Information(
             "User {UserId} completed sport with device {DeviceType} for {Distance}m. Current level: {Level}, Experience: {CurrentExp}",
