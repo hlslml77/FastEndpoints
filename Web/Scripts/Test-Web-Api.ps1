@@ -79,7 +79,19 @@ function Get-Token($key, $uid, $isAdmin = $false) {
 }
 
 function Test-RoleSystem($auth) {
+    
     Step "2) Testing Role System..."
+    # 3.5a Unlock with energy (100101 -> 100102) — always try
+    Info "   [3.5a] POST /api/map/unlock-with-energy (100101 -> 100102)"
+    $unlockTry = Invoke-ApiCall -Uri "$BaseUrl/api/map/unlock-with-energy" -Auth $auth -Method 'Post' -Body @{ startLocationId=100101; endLocationId=100102 }
+    if ($unlockTry) {
+        $ul = if ($unlockTry.unlockedLocationIds) { $unlockTry.unlockedLocationIds } else { @() }
+        Info ("   Unlocked: $($unlockTry.isUnlocked), Used: $($unlockTry.usedEnergyMeters)m, Remaining: $($unlockTry.storedEnergyMeters)m")
+        if ($ul.Count -gt 0) { Info ("   Unlocked IDs: $($ul -join ', ')") }
+        Ok "   ✓ Unlock with energy (100101->100102) call completed"
+    } else {
+        Err "   ✗ Unlock with energy (100101->100102) failed"
+    }
 
     # 2.1 Get player info
     Info "   [2.1] GET /api/role/get-player"
@@ -191,6 +203,7 @@ function Test-MapSystem($auth) {
     } else {
         Err "   ✗ Query location info failed"
     }
+
 
     # 3.5 Unlock with energy (optional, only if we have stored energy)
     if ($mapState -and $mapState.storedEnergyMeters -gt 0) {
