@@ -186,7 +186,7 @@ POST /api/map/save-progress
 - 注意：distanceMeters 单位为“米”
 - 仅保存进度，不会自动标记点位为完成
 - 若需标记完成，请在“访问地图点位”接口上报 isCompleted=true
-- 当 distanceMeters 超过终点位置配置的 UnlockDistance 时，自动解锁该位置，返回 unlockedLocationIds 列表包含该“终点”；若终点配置了 SurroundingPoints，则这些点位ID也会一并返回，并同时写入玩家已解锁列表。超出部分（distanceMeters - UnlockDistance）的增量会累加到“存储能量”
+- 当 distanceMeters 超过“起点配置（start）的 TheNextPointDistance 中对应 end 的要求距离”时，自动解锁该 end 点位；若 end 配置了 SurroundingPoints，则这些点位ID也会一并返回，并同时写入玩家已解锁列表。超出部分（distanceMeters - 要求距离）的增量会累加到“存储能量”
 - 解锁的位置会被添加到 /api/map/player-state 接口的 unlockedLocationIds 列表中
 - 人数统计：当本次 distanceMeters 达到/超过起点->终点的配置距离时，才会将玩家"当前所在点位"更新为 endLocationId，同时该点位的人数计数会自动增加 1
 
@@ -286,7 +286,7 @@ POST /api/map/player-state
 POST /api/map/unlock-with-energy
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：当某条路线的当前 distanceMeters 未达到终点的 UnlockDistance 时，可消耗玩家的“存储能量”（上限 10000 米）来直接解锁终点。仅消耗差额部分。
+- 说明：当某条路线（start→end）的当前 distanceMeters 未达到“起点配置（start）的 TheNextPointDistance 中对应 end 的要求距离”时，可消耗玩家的“存储能量”（上限 10000 米）来直接解锁终点，仅消耗差额（要求距离 - 当前进度）。若该路段在配置中不存在或要求距离≤0，则视为无需消耗能量，直接解锁。
 
 请求体
 {

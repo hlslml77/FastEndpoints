@@ -234,18 +234,19 @@ public class MapService : IMapService
             await IncrementLocationPeopleCountAsync(endLocationId);
         }
 
-        // 处理解锁与存储能量
+        // 处理解锁与存储能量（基于起点配置的 TheNextPointDistance）
         var unlockedList = new List<int>();
         var endLocationConfig = _mapConfigService.GetMapConfigByLocationId(endLocationId);
         decimal addEnergy = 0m;
-        if (endLocationConfig != null && endLocationConfig.UnlockDistance.HasValue && endLocationConfig.UnlockDistance > 0)
+        var requiredDist = GetRequiredDistanceFromStartToEnd(startLocationId, endLocationId);
+        if (requiredDist.HasValue && requiredDist.Value > 0)
         {
-            var unlockDist = endLocationConfig.UnlockDistance.Value;
-            var prevExcess = Math.Max(0m, previousDistance - unlockDist);
-            var newExcess = Math.Max(0m, distanceMeters - unlockDist);
+            var req = (decimal)requiredDist.Value;
+            var prevExcess = Math.Max(0m, previousDistance - req);
+            var newExcess = Math.Max(0m, distanceMeters - req);
             addEnergy = Math.Max(0m, newExcess - prevExcess);
 
-            if (distanceMeters >= unlockDist)
+            if (distanceMeters >= req)
             {
                 // 检查是否已经解锁过
                 var alreadyUnlocked = await _dbContext.PlayerUnlockedLocation
@@ -285,8 +286,8 @@ public class MapService : IMapService
                     }
 
                     Log.Information(
-                        "User {UserId} unlocked location {LocationId} by reaching distance {Distance}m",
-                        userId, endLocationId, distanceMeters);
+                        "User {UserId} unlocked location {LocationId} by reaching required distance {Distance}m (start={Start})",
+                        userId, endLocationId, distanceMeters, startLocationId);
                 }
             }
         }
@@ -518,9 +519,11 @@ public class MapService : IMapService
             }
         }
 
-        if (endConfig == null || !endConfig.UnlockDistance.HasValue || endConfig.UnlockDistance.Value <= 0)
+        // 基于起点配置的 TheNextPointDistance 判断所需距离
+        var requiredDist = GetRequiredDistanceFromStartToEnd(startLocationId, endLocationId);
+        if (!requiredDist.HasValue || requiredDist.Value <= 0)
         {
-            // 没有解锁需求，视为可解锁且不消耗能量
+            // 无路段要求，视为可直接解锁且不消耗能量
             var already = await _dbContext.PlayerUnlockedLocation.AnyAsync(u => u.UserId == userId && u.LocationId == endLocationId);
             if (!already)
             {
@@ -531,10 +534,10 @@ public class MapService : IMapService
             return (true, 0m, player0.StoredEnergyMeters, unlockedList);
         }
 
-        var unlockDist = endConfig.UnlockDistance.Value;
+        var req = (decimal)requiredDist.Value;
         var progress = await _dbContext.PlayerMapProgress.FirstOrDefaultAsync(p => p.UserId == userId && p.StartLocationId == startLocationId && p.EndLocationId == endLocationId);
         var current = progress?.DistanceMeters ?? 0m;
-        if (current >= unlockDist)
+        if (current >= req)
         {
             // 已满足，确保已解锁
             var already = await _dbContext.PlayerUnlockedLocation.AnyAsync(u => u.UserId == userId && u.LocationId == endLocationId);
@@ -547,7 +550,7 @@ public class MapService : IMapService
             return (true, 0m, player1.StoredEnergyMeters, unlockedList);
         }
 
-        var need = unlockDist - current;
+        var need = req - current;
         var player = await _playerRoleService.GetOrCreatePlayerAsync(userId);
         if (player.StoredEnergyMeters >= need)
         {
@@ -559,12 +562,12 @@ public class MapService : IMapService
                 await AddUnlockRecordsAsync();
             }
             await _dbContext.SaveChangesAsync();
-            Log.Information("User {UserId} unlocked location {LocationId} by spending stored energy {Used}m, remain {Remain}m", userId, endLocationId, need, player.StoredEnergyMeters);
+            Log.Information("User {UserId} unlocked location {LocationId} from start {Start} by spending stored energy {Used}m, remain {Remain}m", userId, endLocationId, startLocationId, need, player.StoredEnergyMeters);
             return (true, need, player.StoredEnergyMeters, unlockedList);
         }
 
         // 能量不足，返回未解锁
-        Log.Information("User {UserId} insufficient stored energy to unlock {LocationId}. Need {Need}m, have {Have}m", userId, endLocationId, need, player.StoredEnergyMeters);
+        Log.Information("User {UserId} insufficient stored energy to unlock {LocationId} from start {Start}. Need {Need}m, have {Have}m", userId, endLocationId, startLocationId, need, player.StoredEnergyMeters);
         return (false, 0m, player.StoredEnergyMeters, unlockedList);
     }
 
