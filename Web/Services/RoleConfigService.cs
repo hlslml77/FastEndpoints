@@ -21,7 +21,8 @@ public interface IRoleConfigService
 
     // 经验配置
     int GetExperienceForLevel(int level /* Rank */);
-    int GetExperienceFromJoules(int joules);
+    int GetExperienceFromJoules(int joules); // backward compat
+    int GetExperienceFromDistance(decimal distanceMeters);
 
     // 运动配置：根据设备类型与距离获取四个主属性的加点结果
     SportDistributionResult? GetSportDistribution(int deviceType, decimal distance);
@@ -46,7 +47,8 @@ public class RoleConfigService : IRoleConfigService, IReloadableConfig, IDisposa
         try
         {
             Reload();
-            _watcher = new JsonConfigWatcher(_dir, "Role_*.json", () => Reload());
+            // 监听整个 Json 目录（包含 WorldConfig.json）
+            _watcher = new JsonConfigWatcher(_dir, "*.json", () => Reload());
             Log.Information("Role configuration loaded successfully from {Path}", _dir);
         }
         catch (Exception ex)
@@ -103,40 +105,36 @@ public class RoleConfigService : IRoleConfigService, IReloadableConfig, IDisposa
         sportEntries = new List<RoleSportEntry>();
         experience = new List<RoleExperienceConfig>();
 
-        // 1) Role_Config.json（每日属性点上限等）
-        var cfgPath = Path.Combine(path, "Role_Config.json");
-        if (File.Exists(cfgPath))
+        // 1) WorldConfig.json（每日属性点上限 moved here, ID=8, Value1）优先读取
+        var worldCfgPath = Path.Combine(path, "WorldConfig.json");
+        if (File.Exists(worldCfgPath))
         {
-            var cfgContent = File.ReadAllText(cfgPath);
-            var root = JsonSerializer.Deserialize<JsonElement>(cfgContent);
-            if (root.ValueKind == JsonValueKind.Array)
+            try
             {
-                foreach (var item in root.EnumerateArray())
+                var worldContent = File.ReadAllText(worldCfgPath);
+                var root = JsonSerializer.Deserialize<JsonElement>(worldContent);
+                if (root.ValueKind == JsonValueKind.Array)
                 {
-                    var id = 0;
-                    if (item.TryGetProperty("ID", out var idEl))
+                    foreach (var item in root.EnumerateArray())
                     {
-                        if (idEl.ValueKind == JsonValueKind.Number) id = idEl.GetInt32();
-                        else if (idEl.ValueKind == JsonValueKind.String && int.TryParse(idEl.GetString(), out var tmp)) id = tmp;
-                    }
-                    else if (item.TryGetProperty("Id", out var idEl2))
-                    {
-                        if (idEl2.ValueKind == JsonValueKind.Number) id = idEl2.GetInt32();
-                        else if (idEl2.ValueKind == JsonValueKind.String && int.TryParse(idEl2.GetString(), out var tmp2)) id = tmp2;
-                    }
-
-                    if (id == RoleConfigIds.DailyAttributePointsRowId)
-                    {
-                        if (item.TryGetProperty("Value1", out var v))
+                        if (item.TryGetProperty("ID", out var idEl) && idEl.ValueKind == JsonValueKind.Number && idEl.GetInt32() == 8)
                         {
-                            if (v.ValueKind == JsonValueKind.Number) roleCfg.DailyAttributePointsLimit = v.GetInt32();
-                            else if (v.ValueKind == JsonValueKind.String && int.TryParse(v.GetString(), out var lim)) roleCfg.DailyAttributePointsLimit = lim;
+                            if (item.TryGetProperty("Value1", out var v))
+                            {
+                                if (v.ValueKind == JsonValueKind.Number) roleCfg.DailyAttributePointsLimit = v.GetInt32();
+                                else if (v.ValueKind == JsonValueKind.String && int.TryParse(v.GetString(), out var lim)) roleCfg.DailyAttributePointsLimit = lim;
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to read DailyAttributePoints from WorldConfig.json; will fallback.");
+            }
         }
+
 
         // 2) Role_Attribute.json（四个主属性及其每点带来的副属性加成）
         var attrPath = Path.Combine(path, "Role_Attribute.json");
@@ -146,17 +144,92 @@ public class RoleConfigService : IRoleConfigService, IReloadableConfig, IDisposa
             if (attrs != null)
                 attributes.AddRange(attrs.OrderBy(a => a.Id));
         }
+        // 2.1) Role_AttributeID.json - 初始值来自该表（ID=1..4），字段 Init
+        var attrIdPath = Path.Combine(path, "Role_AttributeID.json");
+        if (File.Exists(attrIdPath) && attributes.Count > 0)
+        {
+            try
+            {
+                var root = JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(attrIdPath));
+                if (root.ValueKind == JsonValueKind.Array)
+                {
+                    var initDict = new Dictionary<int, int>();
+                    foreach (var item in root.EnumerateArray())
+                    {
+                        if (!item.TryGetProperty("ID", out var idEl)) continue;
+                        var id = idEl.ValueKind == JsonValueKind.Number ? idEl.GetInt32() : 0;
+                        if (id < 1 || id > 4) continue; // 只取 1..4 主属性
+                        int init = 0;
+                        if (item.TryGetProperty("Init", out var initEl))
+                        {
+                            if (initEl.ValueKind == JsonValueKind.Number) init = initEl.GetInt32();
+                            else if (initEl.ValueKind == JsonValueKind.String && int.TryParse(initEl.GetString(), out var tmp)) init = tmp;
+                        }
+                        initDict[id] = init;
+                    }
+                    if (initDict.Count > 0)
+                    {
+                        foreach (var def in attributes)
+                        {
+                            if (initDict.TryGetValue(def.Id, out var val))
+                                def.Initial = val;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to merge Role_AttributeID.json inits.");
+            }
+        }
 
-        // 3) Role_Upgrade.json（等级=Rank）
+        // 3) Role_Upgrade.json（等级） - 兼容 ID 或 Rank 字段
         var upPath = Path.Combine(path, "Role_Upgrade.json");
         if (File.Exists(upPath))
         {
-            var ups = JsonSerializer.Deserialize<List<RoleUpgradeConfig>>(File.ReadAllText(upPath), options);
-            if (ups != null)
-                upgradeConfigs.AddRange(ups.OrderBy(u => u.Rank));
+            try
+            {
+                var root = JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(upPath));
+                if (root.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var item in root.EnumerateArray())
+                    {
+                        var cfg = new RoleUpgradeConfig();
+                        // Rank 兼容
+                        if (item.TryGetProperty("Rank", out var rEl) && rEl.ValueKind == JsonValueKind.Number)
+                            cfg.Rank = rEl.GetInt32();
+                        else if (item.TryGetProperty("ID", out var idEl3) && idEl3.ValueKind == JsonValueKind.Number)
+                            cfg.Rank = idEl3.GetInt32();
+
+                        if (item.TryGetProperty("Experience", out var expEl) && expEl.ValueKind == JsonValueKind.Number)
+                            cfg.Experience = expEl.GetInt32();
+
+                        int ReadInt(string name)
+                        {
+                            if (item.TryGetProperty(name, out var el))
+                            {
+                                if (el.ValueKind == JsonValueKind.Number) return el.GetInt32();
+                                if (el.ValueKind == JsonValueKind.String && int.TryParse(el.GetString(), out var t)) return t;
+                            }
+                            return 0;
+                        }
+                        cfg.UpperLimb = ReadInt("UpperLimb");
+                        cfg.LowerLimb = ReadInt("LowerLimb");
+                        cfg.Core = ReadInt("Core");
+                        cfg.HeartLungs = ReadInt("HeartLungs");
+
+                        upgradeConfigs.Add(cfg);
+                    }
+                    upgradeConfigs.Sort((a, b) => a.Rank.CompareTo(b.Rank));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to parse Role_Upgrade.json; upgrades may be empty.");
+            }
         }
 
-        // 4) Role_Sport.json（距离与分配）
+        // 4) Role_Sport.json（距离与分配） - 新版为长度4数组，索引 0=跑步机,1=划船机,2=单车,3=手环
         var sportPath = Path.Combine(path, "Role_Sport.json");
         if (File.Exists(sportPath))
         {
@@ -178,10 +251,10 @@ public class RoleConfigService : IRoleConfigService, IReloadableConfig, IDisposa
                             entry.Distance = dEl.GetDecimal();
                     }
 
-                    entry.UpperLimb = TryToMatrix(item, "UpperLimb");
-                    entry.LowerLimb = TryToMatrix(item, "LowerLimb");
-                    entry.Core = TryToMatrix(item, "Core");
-                    entry.HeartLungs = TryToMatrix(item, "HeartLungs");
+                    entry.UpperLimb = TryToDeviceArray(item, "UpperLimb");
+                    entry.LowerLimb = TryToDeviceArray(item, "LowerLimb");
+                    entry.Core = TryToDeviceArray(item, "Core");
+                    entry.HeartLungs = TryToDeviceArray(item, "HeartLungs");
 
                     sportEntries.Add(entry);
                 }
@@ -195,7 +268,7 @@ public class RoleConfigService : IRoleConfigService, IReloadableConfig, IDisposa
         {
             var exps = JsonSerializer.Deserialize<List<RoleExperienceConfig>>(File.ReadAllText(expPath), options);
             if (exps != null)
-                experience.AddRange(exps.OrderBy(e => e.Joule));
+                experience.AddRange(exps.OrderBy(e => e.Distance > 0 ? e.Distance : e.Joule));
         }
     }
 
@@ -228,6 +301,66 @@ public class RoleConfigService : IRoleConfigService, IReloadableConfig, IDisposa
         }
         return result.Count == 0 ? null : result;
     }
+    private static List<int>? TryToDeviceArray(JsonElement node, string propName)
+    {
+        if (!node.TryGetProperty(propName, out var prop) || prop.ValueKind == JsonValueKind.Null)
+            return null;
+        if (prop.ValueKind != JsonValueKind.Array)
+            return null;
+
+        // 情况A：新格式，直接是长度为4的数字数组 [跑步机, 划船机, 单车, 手环]
+        bool allNumbers = true;
+        foreach (var el in prop.EnumerateArray())
+        {
+            if (el.ValueKind != JsonValueKind.Number)
+            {
+                allNumbers = false;
+                break;
+            }
+        }
+        if (allNumbers)
+        {
+            var res = new int[4];
+            int i = 0;
+            foreach (var el in prop.EnumerateArray())
+            {
+                if (i < 4)
+                    res[i] = el.GetInt32();
+                i++;
+            }
+            return new List<int>(res);
+        }
+
+        // 情况B：兼容旧格式 [[deviceType, points], ...]
+        var map = new int[4];
+        foreach (var row in prop.EnumerateArray())
+        {
+            if (row.ValueKind != JsonValueKind.Array) continue;
+            int idx = 0;
+            int device = -1, points = 0;
+            foreach (var cell in row.EnumerateArray())
+            {
+                if (idx == 0)
+                {
+                    if (cell.ValueKind == JsonValueKind.Number) device = cell.GetInt32();
+                    else if (cell.ValueKind == JsonValueKind.String && int.TryParse(cell.GetString(), out var dv)) device = dv;
+                }
+                else if (idx == 1)
+                {
+                    if (cell.ValueKind == JsonValueKind.Number) points = cell.GetInt32();
+                    else if (cell.ValueKind == JsonValueKind.String && int.TryParse(cell.GetString(), out var pv)) points = pv;
+                }
+                idx++;
+            }
+            if (device >= 0 && device < 4)
+            {
+                // 新规则：为最终值，直接覆盖
+                map[device] = points;
+            }
+        }
+        return new List<int>(map);
+    }
+
 
     public RoleConfig GetRoleConfig() => _roleConfig;
     public IReadOnlyList<RoleAttributeDef> GetAttributeDefs() => _attributes;
@@ -248,40 +381,47 @@ public class RoleConfigService : IRoleConfigService, IReloadableConfig, IDisposa
     public int GetExperienceFromJoules(int joules)
     {
         var config = _experienceConfigs
-            .Where(c => c.Joule <= joules)
+            .Where(c => c.Joule > 0 && c.Joule <= joules)
             .OrderByDescending(c => c.Joule)
             .FirstOrDefault();
         return config?.Experience ?? 0;
     }
 
+    public int GetExperienceFromDistance(decimal distanceMeters)
+    {
+        var dm = (int)Math.Floor(distanceMeters);
+        var config = _experienceConfigs
+            .Where(c => c.Distance > 0 && c.Distance <= dm)
+            .OrderByDescending(c => c.Distance)
+            .FirstOrDefault();
+        if (config != null) return config.Experience;
+
+        // fallback: 若 Distance 全为 0，则尝试按 Joule（兼容旧表）
+        return GetExperienceFromJoules(dm);
+    }
+
     public SportDistributionResult? GetSportDistribution(int deviceType, decimal distance)
     {
-        // 取不超过 distance 的最大条目
+        // 取不超过 distance 的最大条目（距离单位与 Role_Sport.json 保持一致；当前配置为米）
         var entry = _sportEntries
             .Where(e => e.Distance <= distance)
             .OrderByDescending(e => e.Distance)
             .FirstOrDefault();
         if (entry == null) return null;
 
-        // 累计四个主属性在指定设备类型下的加点
-        int SumPoints(List<List<int>>? matrix)
+        int GetVal(List<int>? arr)
         {
-            if (matrix == null) return 0;
-            var total = 0;
-            foreach (var row in matrix)
-            {
-                if (row.Count >= 2 && row[0] == deviceType)
-                    total += row[1];
-            }
-            return total;
+            if (arr == null) return 0;
+            if (deviceType < 0 || deviceType >= arr.Count) return 0;
+            return arr[deviceType];
         }
 
         return new SportDistributionResult
         {
-            UpperLimb = SumPoints(entry.UpperLimb),
-            LowerLimb = SumPoints(entry.LowerLimb),
-            Core = SumPoints(entry.Core),
-            HeartLungs = SumPoints(entry.HeartLungs)
+            UpperLimb = GetVal(entry.UpperLimb),
+            LowerLimb = GetVal(entry.LowerLimb),
+            Core = GetVal(entry.Core),
+            HeartLungs = GetVal(entry.HeartLungs)
         };
     }
 }

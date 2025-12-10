@@ -206,11 +206,9 @@ public class PlayerRoleService : IPlayerRoleService
     {
         var player = await GetOrCreatePlayerAsync(userId);
 
-        // 配置表、客户端 deviceType: 0=跑步, 1=划船, 2=单车, 3=手环
-        // 距离单位从米转换为公里，以匹配配置表
-        var distanceInKm = distance / 1000.0m;
-
-        var dist = _configService.GetSportDistribution(deviceType, distanceInKm);
+        // 配置表、客户端 deviceType: 0=跑步机；1=划船机；2=单车；3=手环
+        // 距离单位：与 Role_Sport.json 保持一致（当前为“米”），不再转换为公里
+        var dist = _configService.GetSportDistribution(deviceType, distance);
 
         if (dist == null)
         {
@@ -233,14 +231,14 @@ public class PlayerRoleService : IPlayerRoleService
 
         // 1.1 副属性改为即时计算，不再落库
 
-        // 2. 根据消耗的热量增加经验值
-        var experience = _configService.GetExperienceFromJoules(calorie);
+        // 2. 按“运动距离（米）”增加经验值（配置：Role_Experience.json 的 Distance 字段）
+        var experience = _configService.GetExperienceFromDistance(distance);
         if (experience > 0)
         {
             player.CurrentExperience += experience;
             Log.Information(
-                "User {UserId} gained {Experience} experience from {Calorie} calories.",
-                userId, experience, calorie);
+                "User {UserId} gained {Experience} experience from distance {Distance}m.",
+                userId, experience, distance);
 
             // 3. 检查是否升级
             CheckAndLevelUp(player);

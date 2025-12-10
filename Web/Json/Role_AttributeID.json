@@ -1,0 +1,80 @@
+[
+  {
+    "ID": 1,
+    "Desc": "上肢力量",
+    "Init": 5,
+    "LanguageID": 10022
+  },
+  {
+    "ID": 2,
+    "Desc": "下肢力量",
+    "Init": 5,
+    "LanguageID": 10023
+  },
+  {
+    "ID": 3,
+    "Desc": "核心控制",
+    "Init": 5,
+    "LanguageID": 10024
+  },
+  {
+    "ID": 4,
+    "Desc": "心肺机能",
+    "Init": 5,
+    "LanguageID": 10025
+  },
+  {
+    "ID": 100,
+    "Desc": "攻击力",
+    "Init": 0,
+    "LanguageID": 10026
+  },
+  {
+    "ID": 101,
+    "Desc": "生命值",
+    "Init": 0,
+    "LanguageID": 10027
+  },
+  {
+    "ID": 102,
+    "Desc": "防御力",
+    "Init": 0,
+    "LanguageID": 10028
+  },
+  {
+    "ID": 103,
+    "Desc": "攻速加成",
+    "Init": 0,
+    "LanguageID": 10029
+  },
+  {
+    "ID": 104,
+    "Desc": "暴击率",
+    "Init": 0,
+    "LanguageID": 10030
+  },
+  {
+    "ID": 105,
+    "Desc": "暴击伤害",
+    "Init": 0,
+    "LanguageID": 10031
+  },
+  {
+    "ID": 106,
+    "Desc": "平局速度加成",
+    "Init": 0,
+    "LanguageID": 10032
+  },
+  {
+    "ID": 107,
+    "Desc": "资源产出效率",
+    "Init": 0,
+    "LanguageID": 10033
+  },
+  {
+    "ID": 108,
+    "Desc": "能量储存上限",
+    "Init": 0,
+    "LanguageID": 10034
+  }
+]

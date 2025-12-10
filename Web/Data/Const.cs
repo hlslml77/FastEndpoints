@@ -39,13 +39,13 @@ public static class ItemQuality
 
 /// <summary>
 /// 设备类型（complete-sport）
-/// 0=跑步机, 1=单车, 2=划船机, 3=手环
+/// 0=跑步机；1=划船机；2=单车；3=手环
 /// </summary>
 public static class DeviceTypes
 {
     public const int Treadmill = 0;
-    public const int Bicycle = 1;
-    public const int Rowing = 2;
+    public const int Rowing = 1;
+    public const int Bicycle = 2;
     public const int Band = 3;
 }
 

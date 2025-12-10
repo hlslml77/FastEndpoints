@@ -1,8 +1,6 @@
 [
   {
     "ID": 1,
-    "AttributeID": 0,
-    "Initial": 5,
     "Name": "UpperLimb",
     "Attack": 0.25,
     "HP": 0.0,
@@ -16,8 +14,6 @@
   },
   {
     "ID": 2,
-    "AttributeID": 1,
-    "Initial": 5,
     "Name": "LowerLimb",
     "Attack": 0.25,
     "HP": 0.0,
@@ -31,8 +27,6 @@
   },
   {
     "ID": 3,
-    "AttributeID": 2,
-    "Initial": 5,
     "Name": "Core",
     "Attack": 0.0,
     "HP": 0.25,
@@ -46,8 +40,6 @@
   },
   {
     "ID": 4,
-    "AttributeID": 3,
-    "Initial": 5,
     "Name": "HeartLungs",
     "Attack": 0.0,
     "HP": 0.25,

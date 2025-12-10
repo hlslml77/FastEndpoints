@@ -79,42 +79,60 @@ function Get-Token($key, $uid, $isAdmin = $false) {
 }
 
 function Test-RoleSystem($auth) {
-    
-    Step "2) Testing Role System..."
-    # 3.5a Unlock with energy (100101 -> 100102) — always try
-    Info "   [3.5a] POST /api/map/unlock-with-energy (100101 -> 100102)"
+    function Get-PlayerState($auth){
+        return Invoke-ApiCall -Uri "$BaseUrl/api/role/get-player" -Auth $auth -Method 'Post' -Body @{}
+    }
+
+    Step "2) Testing Role System (new Role_Sport + WorldConfig.DailyLimit)..."
+
+    # 尝试用能量解锁一次（不阻塞，方便后续跑图）
+    Info "   [2.0] POST /api/map/unlock-with-energy (100101 -> 100102)"
     $unlockTry = Invoke-ApiCall -Uri "$BaseUrl/api/map/unlock-with-energy" -Auth $auth -Method 'Post' -Body @{ startLocationId=100101; endLocationId=100102 }
     if ($unlockTry) {
         $ul = if ($unlockTry.unlockedLocationIds) { $unlockTry.unlockedLocationIds } else { @() }
         Info ("   Unlocked: $($unlockTry.isUnlocked), Used: $($unlockTry.usedEnergyMeters)m, Remaining: $($unlockTry.storedEnergyMeters)m")
         if ($ul.Count -gt 0) { Info ("   Unlocked IDs: $($ul -join ', ')") }
-        Ok "   ✓ Unlock with energy (100101->100102) call completed"
+        Ok "   ✓ Unlock with energy call completed"
     } else {
-        Err "   ✗ Unlock with energy (100101->100102) failed"
+        Warn "   ⚠ Unlock with energy not available"
     }
 
-    # 2.1 Get player info
-    Info "   [2.1] GET /api/role/get-player"
-    $player1 = Invoke-ApiCall -Uri "$BaseUrl/api/role/get-player" -Auth $auth -Method 'Post' -Body @{}
-    if ($player1) {
-        Info ("   Player Lv {0}, Exp {1}/{2}" -f $player1.currentLevel, $player1.currentExperience, $player1.experienceToNextLevel)
-        Ok "   ✓ Get player info successful"
-    } else {
-        Err "   ✗ Get player info failed"
-        return
-    }
+    # 2.1 获取玩家基线
+    Info "   [2.1] GET /api/role/get-player (baseline)"
+    $p0 = Get-PlayerState $auth
+    if (-not $p0) { Err "   ✗ Get player failed"; return }
+    Info ("   Lv {0}, EXP {1}/{2}, TodayPts {3}, Available {4}" -f $p0.currentLevel, $p0.currentExperience, $p0.experienceToNextLevel, $p0.todayAttributePoints, $p0.availableAttributePoints)
+    Info ("   Main Attrs => Upper:{0} Lower:{1} Core:{2} Heart:{3}" -f $p0.upperLimb, $p0.lowerLimb, $p0.core, $p0.heartLungs)
 
-    # 2.2 Complete sport
-    Info "   [2.2] POST /api/role/complete-sport"
-    $sport = @{ deviceType=0; distance=1500; calorie=100 }
-    $sportResult = Invoke-ApiCall -Uri "$BaseUrl/api/role/complete-sport" -Auth $auth -Method 'Post' -Body $sport
-    if ($sportResult) {
-        $player2 = Invoke-ApiCall -Uri "$BaseUrl/api/role/get-player" -Auth $auth -Method 'Post' -Body @{}
-        if ($player2) {
-            Ok ("   ✓ Completed sport. Player is now Lv {0}, Exp {1}/{2}" -f $player2.currentLevel, $player2.currentExperience, $player2.experienceToNextLevel)
-        }
-    } else {
-        Err "   ✗ Complete sport failed"
+    # 2.2 按新设备映射与距离做多组运动测试
+    # 设备映射：0=跑步机；1=划船机；2=单车；3=手环
+    $tests = @(
+        @{ name='Treadmill 500m'; deviceType=0; distance=500; calorie=80 },
+        @{ name='Band 500m';       deviceType=3; distance=500; calorie=80 },
+        @{ name='Treadmill 1500m'; deviceType=0; distance=1500; calorie=120 },
+        @{ name='Treadmill 2000m'; deviceType=0; distance=2000; calorie=150 },
+        @{ name='Treadmill 2500m'; deviceType=0; distance=2500; calorie=180 }
+    )
+
+    foreach ($t in $tests) {
+        Info ("   [2.2] POST /api/role/complete-sport — {0} (device={1}, dist={2}m, cal={3})" -f $t.name, $t.deviceType, $t.distance, $t.calorie)
+        $before = Get-PlayerState $auth
+        if (-not $before) { Err "   ✗ Get player before failed"; break }
+
+        $resp = Invoke-ApiCall -Uri "$BaseUrl/api/role/complete-sport" -Auth $auth -Method 'Post' -Body @{ deviceType=$t.deviceType; distance=$t.distance; calorie=$t.calorie }
+        if (-not $resp) { Err "   ✗ Complete sport failed"; continue }
+
+        $after = Get-PlayerState $auth
+        if (-not $after) { Err "   ✗ Get player after failed"; continue }
+
+        $dU = ($after.upperLimb - $before.upperLimb)
+        $dL = ($after.lowerLimb - $before.lowerLimb)
+        $dC = ($after.core - $before.core)
+        $dH = ($after.heartLungs - $before.heartLungs)
+        $dPts = ($after.todayAttributePoints - $before.todayAttributePoints)
+        $dExp = ($after.currentExperience - $before.currentExperience)
+        Info ("      ΔMain => U:{0} L:{1} C:{2} H:{3} | ΔTodayPts:{4} | ΔExp:{5}" -f $dU, $dL, $dC, $dH, $dPts, $dExp)
+        Ok  ("      ✓ Now Lv {0}, Exp {1}/{2}, TodayPts {3}/{4}" -f $after.currentLevel, $after.currentExperience, $after.experienceToNextLevel, $after.todayAttributePoints, ($after.todayAttributePoints + $after.availableAttributePoints))
     }
 }
 

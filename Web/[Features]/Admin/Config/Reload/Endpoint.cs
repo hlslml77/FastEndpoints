@@ -69,12 +69,13 @@ public class Endpoint : EndpointWithoutRequest<object>
 
         // 2) 文件名 -> 配置服务 映射
         var itemFiles = new HashSet<string>(new[] { "item.json", "equipment.json" }, StringComparer.OrdinalIgnoreCase);
-        var roleFiles = new HashSet<string>(new[] { "role_config.json", "role_attribute.json", "role_upgrade.json", "role_sport.json", "role_experience.json" }, StringComparer.OrdinalIgnoreCase);
+        var roleFiles = new HashSet<string>(new[] { "role_attribute.json", "role_attributeid.json", "role_upgrade.json", "role_sport.json", "role_experience.json" }, StringComparer.OrdinalIgnoreCase);
         var mapFiles = new HashSet<string>(new[] { "worlduimap_mapbase.json" }, StringComparer.OrdinalIgnoreCase);
         var eventFiles = new HashSet<string>(new[] { "travel_eventlist.json" }, StringComparer.OrdinalIgnoreCase);
         var dropFiles = new HashSet<string>(new[] { "travel_droppoint.json" }, StringComparer.OrdinalIgnoreCase);
         var collectionFiles = new HashSet<string>(new[] { "collectionlist_item.json", "collectionlist_combination.json" }, StringComparer.OrdinalIgnoreCase);
         var rankFiles = new HashSet<string>(new[] { "pverank_config.json", "pverank_weekreward.json", "pverank_seasonreward.json" }, StringComparer.OrdinalIgnoreCase);
+        var generalFiles = new HashSet<string>(new[] { "worldconfig.json" }, StringComparer.OrdinalIgnoreCase);
 
         var matchedServiceNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var unknownFiles = new List<string>();
@@ -95,6 +96,7 @@ public class Endpoint : EndpointWithoutRequest<object>
                 else if (dropFiles.Contains(f)) matchedServiceNames.Add("drop");
                 else if (collectionFiles.Contains(f)) matchedServiceNames.Add("collection");
                 else if (rankFiles.Contains(f)) matchedServiceNames.Add("pverank");
+                else if (generalFiles.Contains(f)) matchedServiceNames.Add("general");
                 else unknownFiles.Add(f);
             }
         }

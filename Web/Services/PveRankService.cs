@@ -62,14 +62,50 @@ public class PveRankService : IPveRankService
 
     private async Task UpsertBoardAsync(int periodType, int periodId, int deviceType, long userId, decimal addMeters, DateTime nowUtc)
     {
-        // 原子 UPSERT：依赖 pve_rank_board 的唯一键（period_type, period_id, device_type, user_id）
-        // total_distance_meters 采用自增累加，updated_at 同步更新
-        var sql = @"INSERT INTO pve_rank_board
+        // 根据数据库提供程序选择合适的 UPSERT 语法；失败则回退到 EF 方式，避免崩溃
+        var provider = _db.Database.ProviderName ?? string.Empty;
+        try
+        {
+            if (provider.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
+            {
+                var sql = @"INSERT INTO pve_rank_board
+(period_type, period_id, device_type, user_id, total_distance_meters, updated_at)
+VALUES ({0}, {1}, {2}, {3}, {4}, {5})
+ON CONFLICT(period_type, period_id, device_type, user_id)
+DO UPDATE SET total_distance_meters = total_distance_meters + EXCLUDED.total_distance_meters,
+              updated_at = EXCLUDED.updated_at;";
+                await _db.Database.ExecuteSqlRawAsync(sql, periodType, periodId, deviceType, userId, addMeters, nowUtc);
+            }
+            else if (provider.Contains("MySql", StringComparison.OrdinalIgnoreCase) || provider.Contains("Pomelo", StringComparison.OrdinalIgnoreCase))
+            {
+                var sql = @"INSERT INTO pve_rank_board
 (period_type, period_id, device_type, user_id, total_distance_meters, updated_at)
 VALUES ({0}, {1}, {2}, {3}, {4}, {5})
 ON DUPLICATE KEY UPDATE total_distance_meters = total_distance_meters + VALUES(total_distance_meters),
                         updated_at = VALUES(updated_at);";
-        await _db.Database.ExecuteSqlRawAsync(sql, periodType, periodId, deviceType, userId, addMeters, nowUtc);
+                await _db.Database.ExecuteSqlRawAsync(sql, periodType, periodId, deviceType, userId, addMeters, nowUtc);
+            }
+            else if (provider.Contains("SqlServer", StringComparison.OrdinalIgnoreCase))
+            {
+                var sql = @"MERGE pve_rank_board AS t
+USING (SELECT {0} AS period_type, {1} AS period_id, {2} AS device_type, {3} AS user_id, {4} AS total_distance_meters, {5} AS updated_at) AS s
+ON (t.period_type=s.period_type AND t.period_id=s.period_id AND t.device_type=s.device_type AND t.user_id=s.user_id)
+WHEN MATCHED THEN UPDATE SET t.total_distance_meters = t.total_distance_meters + s.total_distance_meters, t.updated_at = s.updated_at
+WHEN NOT MATCHED THEN INSERT (period_type, period_id, device_type, user_id, total_distance_meters, updated_at)
+VALUES (s.period_type, s.period_id, s.device_type, s.user_id, s.total_distance_meters, s.updated_at);";
+                await _db.Database.ExecuteSqlRawAsync(sql, periodType, periodId, deviceType, userId, addMeters, nowUtc);
+            }
+            else
+            {
+                // 未识别的提供程序，使用 EF 回退
+                await EfFallbackUpsert(periodType, periodId, deviceType, userId, addMeters, nowUtc);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "UpsertBoard raw SQL failed for provider {Provider}. Falling back to EF.", provider);
+            await EfFallbackUpsert(periodType, periodId, deviceType, userId, addMeters, nowUtc);
+        }
 
         // 失效短缓存（内存 & 分布式）。TTL 很短，失效非必须，这里尽量清理热点 Top 数
         var keysTop = new[] { 10, 20, 50, 100 };
@@ -82,6 +118,31 @@ ON DUPLICATE KEY UPDATE total_distance_meters = total_distance_meters + VALUES(t
         var meKey = MeCacheKey(periodType, periodId, deviceType, userId);
         _mem.Remove(meKey);
         if (_dist != null) await _dist.RemoveAsync(meKey);
+    }
+
+    private async Task EfFallbackUpsert(int periodType, int periodId, int deviceType, long userId, decimal addMeters, DateTime nowUtc)
+    {
+        var row = await _db.PveRankBoard.FindAsync(periodType, periodId, deviceType, userId);
+        if (row == null)
+        {
+            row = new PveRankBoard
+            {
+                PeriodType = periodType,
+                PeriodId = periodId,
+                DeviceType = deviceType,
+                UserId = userId,
+                TotalDistanceMeters = addMeters,
+                UpdatedAt = nowUtc
+            };
+            _db.PveRankBoard.Add(row);
+        }
+        else
+        {
+            row.TotalDistanceMeters += addMeters;
+            row.UpdatedAt = nowUtc;
+            _db.PveRankBoard.Update(row);
+        }
+        await _db.SaveChangesAsync();
     }
 
     public async Task<(List<RankItem> top, RankItem? me)> GetLeaderboardAsync(int periodType, int deviceType, int topN, long? userId)

@@ -19,6 +19,7 @@ using TestCases.ServerStreamingTest;
 using TestCases.UnitTestConcurrencyTest;
 using Web;
 using Web.PipelineBehaviors.PreProcessors;
+using Web.PipelineBehaviors.PostProcessors;
 using Web.Services;
 
 // 禁用 wwwroot 目录（纯 API 项目不需要静态文件）
@@ -45,8 +46,17 @@ var dbInitializer = new DatabaseInitializationService(bld.Configuration);
 await dbInitializer.InitializeAsync();
 
 bld.Services.AddDbContext<Web.Data.AppDbContext>(o =>
-    o.UseMySql(bld.Configuration.GetConnectionString("DefaultConnection"),
-               ServerVersion.AutoDetect(bld.Configuration.GetConnectionString("DefaultConnection"))));
+    {
+        var cs = bld.Configuration.GetConnectionString("DefaultConnection");
+        o.UseMySql(cs, ServerVersion.AutoDetect(cs));
+        // keep database logs concise and safe
+        o.EnableSensitiveDataLogging(false);
+        o.EnableDetailedErrors(false);
+        o.LogTo(
+            message => Log.Debug(LogSanitizer.CompactWhitespace(message)),
+            new[] { DbLoggerCategory.Database.Command.Name },
+            LogLevel.Information);
+    });
 bld.Services
    .AddCors()
    .AddOutputCache()
@@ -319,6 +329,11 @@ app.UseRequestLocalization(
                    ep.PostProcessors(Order.After, typeof(GlobalGenericPostProcessor<,>));
                    ep.PreProcessor<GlobalStatePreProcessor>(Order.Before);
                    ep.PreProcessors(Order.Before, new AdminHeaderChecker());
+
+                   // log request/response for every endpoint
+                   ep.PreProcessors(Order.Before, typeof(Web.PipelineBehaviors.PreProcessors.MyRequestLogger<>));
+                   ep.PostProcessors(Order.After, typeof(Web.PipelineBehaviors.PostProcessors.MyResponseLogger<,>));
+
                    if (ep.EndpointTags?.Contains("Orders") is true)
                        ep.Description(b => b.Produces<ErrorResponse>(400, "application/problem+json"));
                };

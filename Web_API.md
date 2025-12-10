@@ -657,10 +657,13 @@ POST /api/admin/config/reload
   - 文件名大小写不敏感，仅需传文件名本身（无需路径）。
 - 支持的映射（文件名 → 服务）：
   - item：item.json、equipment.json
-  - role：role_config.json、role_attribute.json、role_upgrade.json、role_sport.json、role_experience.json
+  - role：role_attribute.json、role_attributeid.json、role_upgrade.json、role_sport.json、role_experience.json
   - map：worlduimap_mapbase.json
   - event：travel_eventlist.json
   - drop：travel_droppoint.json
+  - collection：collectionlist_item.json、collectionlist_combination.json
+  - pverank：pverank_config.json、pverank_weekreward.json、pverank_seasonreward.json
+  - general：worldconfig.json
 
 请求方式 A（query，多值或逗号分隔）
 GET /api/admin/config/reload?file=Item.json&file=Role_Upgrade.json
