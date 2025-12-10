@@ -15,7 +15,7 @@ public interface IItemConfigService
 public class ItemConfigService : IItemConfigService, IReloadableConfig, IDisposable
 {
     private readonly string _dir;
-    private readonly JsonSerializerOptions _opts = new() { PropertyNameCaseInsensitive = true };
+    private readonly JsonSerializerOptions _opts = new() { PropertyNameCaseInsensitive = true, AllowTrailingCommas = true, ReadCommentHandling = JsonCommentHandling.Skip, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString };
     private readonly JsonConfigWatcher _watcher;
 
     private volatile List<ItemConfig> _items = new();

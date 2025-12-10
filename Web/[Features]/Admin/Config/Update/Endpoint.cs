@@ -3,6 +3,7 @@ using System.Text.Json;
 using FastEndpoints;
 using Serilog;
 using Web.Auth;
+using Web.Services;
 
 namespace Admin.Config.Update;
 
@@ -35,11 +36,11 @@ public sealed class Response
 
 public class Endpoint : Endpoint<Request, Response>
 {
-    private static readonly JsonWriterOptions WriterOptions = new()
+    private readonly IEnumerable<IReloadableConfig> _configs;
+    public Endpoint(IEnumerable<IReloadableConfig> configs)
     {
-        Indented = true,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    };
+        _configs = configs;
+    }
 
     public override void Configure()
     {
@@ -51,6 +52,12 @@ public class Endpoint : Endpoint<Request, Response>
             .WithDescription("允许管理员一次性更新 Web/Json 下的一个或多个 .json 文件（原子替换、自动备份）。"));
         Options(o => o.Accepts<Request>("application/json"));
     }
+
+    private static readonly JsonSerializerOptions s_writeOpts = new()
+    {
+        WriteIndented = true,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
 
     public override async Task HandleAsync(Request req, CancellationToken ct)
     {
@@ -72,6 +79,7 @@ public class Endpoint : Endpoint<Request, Response>
         Directory.CreateDirectory(baseDir);
         var baseFull = Path.GetFullPath(baseDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
 
+        var updatedFiles = new List<string>();
         foreach (var f in req.Files)
         {
             var r = new UpdateResult { File = f.File ?? string.Empty };
@@ -93,24 +101,22 @@ public class Endpoint : Endpoint<Request, Response>
                 if (!File.Exists(target))
                     throw new FileNotFoundException("target json not found", fileName);
 
+                // minimal shape guard: most configs expect top-level array
+                if (f.Content.ValueKind != JsonValueKind.Array)
+                    throw new InvalidOperationException("invalid content: root must be a JSON array");
+
                 // write to temp file first
                 var temp = target + ".tmp-" + Guid.NewGuid().ToString("N");
                 long bytesWritten = 0;
 
-                await using (var fs = new FileStream(temp, new FileStreamOptions
+                var json = JsonSerializer.Serialize(f.Content, new JsonSerializerOptions
                 {
-                    Mode = FileMode.CreateNew,
-                    Access = FileAccess.Write,
-                    Share = FileShare.None,
-                    Options = FileOptions.WriteThrough
-                }))
-                await using (var writer = new Utf8JsonWriter(fs, WriterOptions))
-                {
-                    f.Content.WriteTo(writer);
-                    await writer.FlushAsync(ct);
-                    await fs.FlushAsync(ct);
-                    bytesWritten = fs.Length;
-                }
+                    WriteIndented = true,
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                });
+                var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+                await File.WriteAllBytesAsync(temp, bytes, ct);
+                bytesWritten = bytes.LongLength;
 
                 // backup existing
                 string? backupPath = null;
@@ -123,6 +129,8 @@ public class Endpoint : Endpoint<Request, Response>
 
                 // atomic replace
                 File.Move(temp, target, overwrite: true);
+                // ensure fsw change event by touching last write time
+                try { File.SetLastWriteTimeUtc(target, DateTime.UtcNow); } catch { /* ignore */ }
 
                 r.Status = "ok";
                 r.Backup = backupPath is not null ? Path.GetFileName(backupPath) : null;
@@ -140,7 +148,13 @@ public class Endpoint : Endpoint<Request, Response>
             res.Results.Add(r);
         }
 
-        // NOTE: JsonConfigWatcher will pick up changes and reload corresponding services (debounced)
+        // Force immediate reload to ensure new configs are read right away
+        foreach (var c in _configs)
+        {
+            try { c.Reload(); }
+            catch (Exception ex) { Log.Error(ex, "Post-update reload failed for {Name}", c.Name); }
+        }
+
         await HttpContext.Response.SendAsync(res, 200, cancellation: ct);
     }
 }

@@ -3,7 +3,8 @@ namespace Web.Data.Config;
 public class ItemConfig
 {
     public int ID { get; set; }
-    public string? Name { get; set; }
+    // Name 在 JSON 中是本地化ID（数值），因此用 int? 以兼容当前数据格式
+    public int? Name { get; set; }
     public int PropType { get; set; } // 1=item(可叠加), 2=equipment(单件)
     public int Quality { get; set; }
     public int Part { get; set; } // 装备部位（当 PropType=2 时有意义）

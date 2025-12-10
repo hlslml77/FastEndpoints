@@ -1,99 +1,62 @@
 [
   {
     "ID": 1001,
-    "Type": 1,
+    "Resource": "Assets\\NewWorld\\ArtResources\\Animals\\Prefabs",
     "Quantity": 1,
     "Event": 1,
     "ResourceRandom": [
-      1001,
-      1002
+      1000,
+      1004
     ],
     "DropRandom": [
       5,
       7
     ],
+    "Probability": 7000,
     "Direction": 1,
     "Distance": 15,
     "Angle": 90,
-    "PlayerDistance": 500,
+    "PlayerDistance": 200,
     "SustainedDistance": 10
   },
   {
     "ID": 1002,
-    "Type": 0,
-    "Quantity": 0,
-    "Event": 0,
-    "ResourceRandom": null,
-    "DropRandom": null,
-    "Direction": 0,
-    "Distance": 0,
-    "Angle": 0,
-    "PlayerDistance": 0,
-    "SustainedDistance": 0
+    "Resource": "Assets\\NewWorld\\ArtResources\\Animals\\Prefabs",
+    "Quantity": 3,
+    "Event": 2,
+    "ResourceRandom": [
+      1000,
+      1005
+    ],
+    "DropRandom": [
+      5,
+      8
+    ],
+    "Probability": 5000,
+    "Direction": 2,
+    "Distance": 10,
+    "Angle": 60,
+    "PlayerDistance": 100,
+    "SustainedDistance": 15
   },
   {
     "ID": 1003,
-    "Type": 0,
-    "Quantity": 0,
-    "Event": 0,
-    "ResourceRandom": null,
-    "DropRandom": null,
-    "Direction": 0,
-    "Distance": 0,
-    "Angle": 0,
-    "PlayerDistance": 0,
-    "SustainedDistance": 0
-  },
-  {
-    "ID": 1004,
-    "Type": 0,
-    "Quantity": 0,
-    "Event": 0,
-    "ResourceRandom": null,
-    "DropRandom": null,
-    "Direction": 0,
-    "Distance": 0,
-    "Angle": 0,
-    "PlayerDistance": 0,
-    "SustainedDistance": 0
-  },
-  {
-    "ID": 1005,
-    "Type": 0,
-    "Quantity": 0,
-    "Event": 0,
-    "ResourceRandom": null,
-    "DropRandom": null,
-    "Direction": 0,
-    "Distance": 0,
-    "Angle": 0,
-    "PlayerDistance": 0,
-    "SustainedDistance": 0
-  },
-  {
-    "ID": 1006,
-    "Type": 0,
-    "Quantity": 0,
-    "Event": 0,
-    "ResourceRandom": null,
-    "DropRandom": null,
-    "Direction": 0,
-    "Distance": 0,
-    "Angle": 0,
-    "PlayerDistance": 0,
-    "SustainedDistance": 0
-  },
-  {
-    "ID": 1007,
-    "Type": 0,
-    "Quantity": 0,
-    "Event": 0,
-    "ResourceRandom": null,
-    "DropRandom": null,
-    "Direction": 0,
-    "Distance": 0,
-    "Angle": 0,
-    "PlayerDistance": 0,
-    "SustainedDistance": 0
+    "Resource": "Assets\\NewWorld\\ArtResources\\Animals\\Prefabs",
+    "Quantity": 1,
+    "Event": 3,
+    "ResourceRandom": [
+      1005,
+      1004
+    ],
+    "DropRandom": [
+      5,
+      9
+    ],
+    "Probability": 6000,
+    "Direction": 1,
+    "Distance": 5,
+    "Angle": 40,
+    "PlayerDistance": 150,
+    "SustainedDistance": 8
   }
 ]

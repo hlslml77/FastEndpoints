@@ -104,15 +104,13 @@ public class Endpoint : Endpoint<Request, Response>
                 granted.Add(new GrantedItem { ItemId = itemId, Amount = amount });
             }
 
-            // 固定奖励（可能多条）
-            if (cfg.FixReward != null)
+            // 固定奖励（单条 [itemId, amount]）
+            if (cfg.FixReward != null && cfg.FixReward.Length >= 2)
             {
-                foreach (var pair in cfg.FixReward)
+                var itemId = cfg.FixReward[0];
+                var amount = cfg.FixReward[1];
+                if (itemId > 0 && amount > 0)
                 {
-                    if (pair == null || pair.Length < 2) continue;
-                    var itemId = pair[0];
-                    var amount = pair[1];
-                    if (itemId <= 0 || amount <= 0) continue;
                     await _inventory.GrantItemAsync(userId, itemId, amount, ct);
                     granted.Add(new GrantedItem { ItemId = itemId, Amount = amount });
                 }
