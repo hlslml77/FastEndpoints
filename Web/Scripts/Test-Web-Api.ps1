@@ -420,6 +420,29 @@ function Test-AdminConfigStatus($auth) {
         Err "   ✗ Get config status failed"
     }
 }
+function Test-AdminConfigUpdate($adminAuth) {
+    Step "7.2) Testing Admin Config Update (/api/admin/config/update)..."
+
+    # choose a json file that is not used by services to avoid side effects
+    $payload = @{ files = @(@{ file = "EquipmentEntry.json"; content = @(@{ ID = 999001; EquipID = 1; Part = 1 }) }) }
+
+    $resp = Invoke-ApiCall -Uri "$BaseUrl/api/admin/config/update" -Auth $adminAuth -Method 'Post' -Body $payload
+    if ($resp) {
+        $ok = if ($null -ne $resp.ok) { [int]$resp.ok } else { 0 }
+        $fail = if ($null -ne $resp.fail) { [int]$resp.fail } else { 0 }
+        Info ("   Summary: ok={0}, fail={1}" -f $ok, $fail)
+        $first = $resp.results | Select-Object -First 1
+        if ($first -and $first.status -eq 'ok') {
+            Info ("   Updated file: {0}, backup: {1}, bytes: {2}" -f $first.file, $first.backup, $first.bytesWritten)
+            Ok  "   ✓ Admin config update successful"
+        } else {
+            Err "   ✗ Admin config update failed or returned unexpected result"
+        }
+    } else {
+        Err "   ✗ Admin config update request failed"
+    }
+}
+
 function Test-RankSystem($auth) {
     Step "8) Testing Rank System..."
 
@@ -462,6 +485,8 @@ function Test-RankSystem($auth) {
     } else {
         Err "   ✗ Claim week failed"
     }
+    $adminAuth = @{ Authorization = "Bearer $adminToken"; Accept = "application/json" }
+
 
     # 8.3 Claim season reward
     Info "   [8.3] POST /api/rank/claim-season"
@@ -485,6 +510,7 @@ function Test-RankSystem($auth) {
 
 function Invoke-AllTests($token, $adminToken) {
     $auth = @{ Authorization = "Bearer $token"; Accept = "application/json" }
+    $adminAuth = @{ Authorization = "Bearer $adminToken"; Accept = "application/json" }
 
     # Test all systems
     Test-RoleSystem $auth
@@ -493,6 +519,7 @@ function Invoke-AllTests($token, $adminToken) {
     Test-TravelSystem $auth
     Test-CollectionSystem $auth
     Test-AdminConfigStatus $auth
+    Test-AdminConfigUpdate $adminAuth
     Test-RankSystem $auth
 }
 

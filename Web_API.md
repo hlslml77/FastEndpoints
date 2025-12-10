@@ -29,6 +29,7 @@
 - [7. 配置热更新（Admin）](#toc-admin)
   - [查看配置状态（/api/admin/config/status）](#toc-admin-status)
   - [手动重载配置（/api/admin/config/reload）](#toc-admin-reload)
+  - [批量更新配置文件（/api/admin/config/update）](#toc-admin-update)
 - [8. 统计数据（Statistics）](#toc-stats)
   - [8.1 每日统计（/api/admin/statistics/daily）](#toc-stats-daily)
   - [8.2 小时在线快照（/api/admin/statistics/online-snapshots）](#toc-stats-snapshots)
@@ -557,7 +558,7 @@ POST /api/travel/stage/get-random-message
 curl -X POST https://host/api/travel/stage/get-random-message \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
   -d '{"levelId":101}'
-  
+
 ---
 
 <a id="toc-collection"></a>
@@ -694,8 +695,86 @@ curl -X GET "https://host/api/admin/config/reload?file=Item.json" \
 # POST + JSON（明确 Content-Type）
 curl -X POST https://host/api/admin/config/reload \
 
+<a id="toc-admin-update"></a>
+7.3 批量更新配置文件（Web/Json/*.json）
+POST /api/admin/config/update
+
+- 认证：需要 Bearer Token（admin 角色）
+- 范围：仅允许更新 Web/Json 目录下“已有的 .json 文件”；不会创建新文件
+- 校验：不做 schema 校验；仅做基础安全校验（必须为 .json、禁止目录穿越、目标文件必须存在、JSON 语法必须有效）
+- 写入策略：
+  - 将请求体中的 content 写入同目录临时文件，再原子替换目标文件（File.Move overwrite）
+  - 自动生成同名 .bak 备份（带 UTC 时间戳）
+  - 替换完成后由文件监控（JsonConfigWatcher）自动触发对应配置服务的热重载
+- 频控与大小：当前接口未内置限流与最大体积限制
+
+请求体（示例）
+{
+  "files": [
+    {
+      "file": "Item.json",
+      "content": [
+        { "ID": 1, "Name": "Potion", "Type": 1 },
+        { "ID": 2, "Name": "Sword",  "Type": 2 }
+      ]
+    },
+    {
+      "file": "Role_Upgrade.json",
+      "content": [
+        { "Rank": 1, "Experience": 0,   "UpperLimb": 1, "LowerLimb": 1, "Core": 1, "HeartLungs": 1 },
+        { "Rank": 2, "Experience": 200, "UpperLimb": 1, "LowerLimb": 1, "Core": 1, "HeartLungs": 1 }
+      ]
+    }
+  ]
+}
+
+响应示例（成功）
+{
+  "ok": 2,
+  "fail": 0,
+  "results": [
+    { "file": "Item.json", "status": "ok", "backup": "Item.json.20251210xxxxxx.bak", "bytesWritten": 2345 },
+    { "file": "Role_Upgrade.json", "status": "ok", "backup": "Role_Upgrade.json.20251210xxxxxx.bak", "bytesWritten": 4567 }
+  ]
+}
+
+响应示例（部分失败）
+{
+  "ok": 1,
+  "fail": 1,
+  "results": [
+    { "file": "Item.json", "status": "ok", "backup": "Item.json.20251210xxxxxx.bak", "bytesWritten": 2345 },
+    { "file": "WorldUiMap_NotExist.json", "status": "error", "error": "target json not found" }
+  ]
+}
+
+错误说明
+- 400 Bad Request：请求体缺少 files 或 files 为空
+- 403/401：鉴权失败或无 admin 角色
+- 415 Unsupported Media Type：Content-Type 非 application/json
+- 422/500：
+  - only .json files are allowed（文件扩展名非法）
+  - path traversal detected（目录穿越尝试）
+  - target json not found（目标文件不存在）
+
+示例（curl）
+cat <<'JSON' > body.json
+{
+  "files": [
+    { "file": "Item.json", "content": [{"ID":1,"Name":"Potion"}] },
+    { "file": "Role_Upgrade.json", "content": [{"Rank":1,"Experience":0}] }
+  ]
+}
+JSON
+
+curl -X POST https://host/api/admin/config/update \
+  -H "Authorization: Bearer <adminToken>" \
+  -H "Content-Type: application/json" \
+  --data-binary @body.json
+
+
 <a id="toc-stats"></a>
-8. 统计数据（Statistics）
+1. 统计数据（Statistics）
 
 说明：以下接口用于读取 AddGameStatisticsTables.sql 创建的三张统计表的数据，均为只读查询接口。
 - 表：daily_game_statistics（每日统计）
