@@ -73,6 +73,7 @@ public class Endpoint : EndpointWithoutRequest<object>
         var mapFiles = new HashSet<string>(new[] { "worlduimap_mapbase.json" }, StringComparer.OrdinalIgnoreCase);
         var eventFiles = new HashSet<string>(new[] { "travel_eventlist.json" }, StringComparer.OrdinalIgnoreCase);
         var dropFiles = new HashSet<string>(new[] { "travel_droppoint.json" }, StringComparer.OrdinalIgnoreCase);
+        var monsterFiles = new HashSet<string>(new[] { "monster.json" }, StringComparer.OrdinalIgnoreCase);
         var collectionFiles = new HashSet<string>(new[] { "collectionlist_item.json", "collectionlist_combination.json" }, StringComparer.OrdinalIgnoreCase);
         var rankFiles = new HashSet<string>(new[] { "pverank_config.json", "pverank_weekreward.json", "pverank_seasonreward.json" }, StringComparer.OrdinalIgnoreCase);
         var generalFiles = new HashSet<string>(new[] { "worldconfig.json" }, StringComparer.OrdinalIgnoreCase);
@@ -94,6 +95,7 @@ public class Endpoint : EndpointWithoutRequest<object>
                 else if (mapFiles.Contains(f)) matchedServiceNames.Add("map");
                 else if (eventFiles.Contains(f)) matchedServiceNames.Add("event");
                 else if (dropFiles.Contains(f)) matchedServiceNames.Add("drop");
+                else if (monsterFiles.Contains(f)) matchedServiceNames.Add("monster");
                 else if (collectionFiles.Contains(f)) matchedServiceNames.Add("collection");
                 else if (rankFiles.Contains(f)) matchedServiceNames.Add("pverank");
                 else if (generalFiles.Contains(f)) matchedServiceNames.Add("general");

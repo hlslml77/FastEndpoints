@@ -12,6 +12,8 @@
   - [3.3 获取玩家地图状态（/api/map/player-state）](#toc-map-player-state)
   - [3.4 使用存储能量解锁终点（/api/map/unlock-with-energy）](#toc-map-unlock-with-energy)
   - [3.5 查询点位信息（/api/map/location-info）](#toc-map-location-info)
+  - [3.6 怪物奖励（/api/map/monster/reward）](#toc-map-monster-reward)
+
 - [4. 背包与装备（Inventory）](#toc-inventory)
   - [4.1 查询玩家道具清单（GET/POST /api/inventory/items）](#toc-inventory-items)
   - [4.2 查询玩家装备清单（GET/POST /api/inventory/equipments）](#toc-inventory-equipments)
@@ -325,7 +327,34 @@ POST /api/map/location-info
 示例（curl）
 curl -X POST https://host/api/map/location-info \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
-  -d '{"locationId":10011}'
+
+<a id="toc-map-monster-reward"></a>
+3.6 怪物奖励（基于 Monster.json）
+POST /api/map/monster/reward
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 策划表：Web/Json/Monster.json
+- 说明：客户端传入怪物ID（配置表的 ID 字段），服务端将按该配置的 Reward 列表逐条发放奖励。每项为 [itemId, amount]。
+
+请求体
+{
+  "monsterId": 1000 // int
+}
+
+响应体
+{
+  "success": true,
+  "rewards": [ { "itemId": 1000, "amount": 1 }, { "itemId": 1001, "amount": 1 } ]
+}
+
+示例（curl）
+curl -X POST https://host/api/map/monster/reward \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"monsterId":1000}'
+
+说明：该接口已从自动 Swagger 文档中排除（仅在本文档说明使用）。
+
+
 
 ---
 

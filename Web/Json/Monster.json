@@ -1,0 +1,42 @@
+[
+  {
+    "ID": 1000,
+    "Name": "无人机1",
+    "DisplayName": 0,
+    "Type": 1,
+    "Hp": 20,
+    "Reward": [
+      [
+        1000,
+        1
+      ],
+      [
+        1001,
+        1
+      ]
+    ],
+    "Model": "Model_1",
+    "DestroyAni": "Effect_1",
+    "BehitAni": "Effect_1"
+  },
+  {
+    "ID": 2000,
+    "Name": "矿石1",
+    "DisplayName": 0,
+    "Type": 2,
+    "Hp": 10,
+    "Reward": [
+      [
+        1005,
+        3
+      ],
+      [
+        1005,
+        3
+      ]
+    ],
+    "Model": "Model_2",
+    "DestroyAni": "Effect_2",
+    "BehitAni": "Effect_2"
+  }
+]

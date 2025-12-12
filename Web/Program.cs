@@ -138,6 +138,11 @@ bld.Services
    .AddSingleton<ITravelDropPointConfigService>(sp => sp.GetRequiredService<TravelDropPointConfigService>())
    .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<TravelDropPointConfigService>())
 
+   // Monster config
+   .AddSingleton<MonsterConfigService>()
+   .AddSingleton<IMonsterConfigService>(sp => sp.GetRequiredService<MonsterConfigService>())
+   .AddSingleton<IReloadableConfig>(sp => sp.GetRequiredService<MonsterConfigService>())
+
    // Random world event config
    .AddSingleton<RandomWorldEventConfigService>()
    .AddSingleton<IRandomWorldEventConfigService>(sp => sp.GetRequiredService<RandomWorldEventConfigService>())
@@ -360,7 +365,7 @@ app.MapGet("api/admin/config/reload2/{type?}", (HttpContext ctx, string? type) =
     IEnumerable<Web.Services.IReloadableConfig> targets = configs;
     if (t != "all")
     {
-        var set = new HashSet<string>(new[] { "role", "item", "map", "event", "drop" });
+        var set = new HashSet<string>(new[] { "role", "item", "map", "event", "drop", "monster" });
         if (!set.Contains(t))
             return Results.Json(new { statusCode = 400, message = $"不支持的类型: {t}" }, statusCode: 400);
         targets = configs.Where(c => string.Equals(c.Name, t, StringComparison.OrdinalIgnoreCase));
