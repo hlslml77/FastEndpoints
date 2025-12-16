@@ -19,6 +19,11 @@ public class SaveStageMessageRequest
     public int LevelId { get; set; }
 
     /// <summary>
+    /// 节点ID（关卡内的节点/点位ID）
+    /// </summary>
+    public int NodeId { get; set; }
+
+    /// <summary>
     /// 三个整型ID的列表
     /// </summary>
     public List<int> IdList { get; set; } = new();
@@ -58,8 +63,8 @@ public class Endpoint : Endpoint<SaveStageMessageRequest, SaveStageMessageRespon
         Permissions("web_access");
         Description(x => x
             .WithTags("Travel")
-            .WithSummary("保存旅行关卡留言")
-            .WithDescription("玩家在完成关卡后可以输入一句话进行留言，该留言会被保存到数据库"));
+            .WithSummary("保存旅行关卡留言（包含节点）")
+            .WithDescription("玩家在完成关卡后的某个节点记录三个整型ID列表，保存到数据库"));
     }
 
     public override async Task HandleAsync(SaveStageMessageRequest req, CancellationToken ct)
@@ -84,6 +89,14 @@ public class Endpoint : Endpoint<SaveStageMessageRequest, SaveStageMessageRespon
                 return;
             }
 
+            // 验证节点ID
+            if (req.NodeId <= 0)
+            {
+                var errorBody = new { statusCode = 400, code = ErrorCodes.Common.BadRequest, message = "节点ID无效" };
+                await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
+                return;
+            }
+
             // 验证ID列表（必须是3个正整数）
             if (req.IdList is null || req.IdList.Count != 3 || req.IdList.Any(x => x <= 0))
             {
@@ -92,7 +105,7 @@ public class Endpoint : Endpoint<SaveStageMessageRequest, SaveStageMessageRespon
                 return;
             }
 
-            // 序列化为JSON存入MessageContent，避免改表结构
+            // 序列化为JSON存入MessageContent
             var json = JsonSerializer.Serialize(req.IdList);
 
             // 创建记录
@@ -100,6 +113,7 @@ public class Endpoint : Endpoint<SaveStageMessageRequest, SaveStageMessageRespon
             {
                 UserId = userId,
                 StageId = req.LevelId,
+                NodeId = req.NodeId,
                 MessageContent = json,
                 CreatedAt = DateTime.UtcNow
             };
@@ -115,7 +129,7 @@ public class Endpoint : Endpoint<SaveStageMessageRequest, SaveStageMessageRespon
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Save stage message failed. levelId={LevelId}", req.LevelId);
+            Log.Error(ex, "Save stage message failed. levelId={LevelId}, nodeId={NodeId}", req.LevelId, req.NodeId);
             var errorBody = new { statusCode = 500, code = ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }

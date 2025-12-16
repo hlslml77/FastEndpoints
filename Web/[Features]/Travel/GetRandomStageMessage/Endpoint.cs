@@ -17,6 +17,11 @@ public class GetRandomStageMessageRequest
     /// 关卡LevelId
     /// </summary>
     public int LevelId { get; set; }
+
+    /// <summary>
+    /// 节点ID（关卡内的节点/点位ID）
+    /// </summary>
+    public int NodeId { get; set; }
 }
 
 /// <summary>
@@ -64,8 +69,8 @@ public class Endpoint : Endpoint<GetRandomStageMessageRequest, GetRandomStageMes
         Permissions("web_access");
         Description(x => x
             .WithTags("Travel")
-            .WithSummary("获取随机关卡留言")
-            .WithDescription("玩家在跑关卡的过程中可以获取本关所有玩家的留言中的随机一条"));
+            .WithSummary("获取随机关卡留言（按节点）")
+            .WithDescription("玩家在跑关卡的过程中可以获取本关某个节点的所有玩家留言中的随机一条"));
     }
 
     public override async Task HandleAsync(GetRandomStageMessageRequest req, CancellationToken ct)
@@ -90,9 +95,17 @@ public class Endpoint : Endpoint<GetRandomStageMessageRequest, GetRandomStageMes
                 return;
             }
 
-            // 获取该关卡的所有留言
+            // 验证节点ID
+            if (req.NodeId <= 0)
+            {
+                var errorBody = new { statusCode = 400, code = ErrorCodes.Common.BadRequest, message = "节点ID无效" };
+                await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
+                return;
+            }
+
+            // 获取该关卡+节点的所有留言
             var messages = await _dbContext.TravelStageMessage
-                .Where(m => m.StageId == req.LevelId)
+                .Where(m => m.StageId == req.LevelId && m.NodeId == req.NodeId)
                 .ToListAsync(ct);
 
             if (messages.Count == 0)
@@ -108,9 +121,9 @@ public class Endpoint : Endpoint<GetRandomStageMessageRequest, GetRandomStageMes
                 return;
             }
 
-            // 查询当前用户在该关卡自己保存过的所有ID集合
+            // 查询当前用户在该关卡+节点自己保存过的所有ID集合
             var ownContents = await _dbContext.TravelStageMessage
-                .Where(m => m.StageId == req.LevelId && m.UserId == userId)
+                .Where(m => m.StageId == req.LevelId && m.NodeId == req.NodeId && m.UserId == userId)
                 .Select(m => m.MessageContent)
                 .ToListAsync(ct);
 
@@ -162,7 +175,7 @@ public class Endpoint : Endpoint<GetRandomStageMessageRequest, GetRandomStageMes
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Get random stage message failed. levelId={LevelId}", req.LevelId);
+            Log.Error(ex, "Get random stage message failed. levelId={LevelId}, nodeId={NodeId}", req.LevelId, req.NodeId);
             var errorBody = new { statusCode = 500, code = ErrorCodes.Common.InternalError, message = "服务器内部错误" };
             await HttpContext.Response.SendAsync(errorBody, 500, cancellation: ct);
         }

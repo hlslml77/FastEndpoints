@@ -319,6 +319,13 @@ public class TravelStageMessage
     public int StageId { get; set; }
 
     /// <summary>
+    /// 节点ID
+    /// </summary>
+    [Column("node_id")]
+    public int NodeId { get; set; }
+
+
+    /// <summary>
     /// 留言内容
     /// </summary>
     [Column("message_content")]
