@@ -87,23 +87,34 @@ public class Endpoint : Endpoint<GetMyStageMessagesRequest, GetMyStageMessagesRe
                 return;
             }
 
+            Log.Debug("Fetching stage messages for userId={UserId}, levelId={LevelId}", userId, req.LevelId);
+
             // 读取该玩家在该关卡的全部留言，按节点分组，取每组最新一条
             var records = await _dbContext.TravelStageMessage
                 .Where(m => m.StageId == req.LevelId && m.UserId == userId)
                 .OrderByDescending(m => m.CreatedAt)
+                .AsNoTracking()  // 只读查询，提高性能
                 .ToListAsync(ct);
+
+            Log.Debug("Found {Count} total records for userId={UserId}, levelId={LevelId}", records.Count, userId, req.LevelId);
 
             var latestPerNode = records
                 .GroupBy(r => r.NodeId)
-                .Select(g => g.OrderByDescending(x => x.CreatedAt).First())
+                .Select(g => g.First())  // 已按 CreatedAt 倒序排列，所以 First() 就是最新的
                 .ToList();
+
+            Log.Debug("Found {Count} nodes with messages for userId={UserId}, levelId={LevelId}", latestPerNode.Count, userId, req.LevelId);
 
             var items = new List<MyStageMessageItem>(latestPerNode.Count);
             foreach (var r in latestPerNode)
             {
                 List<int> ids;
                 try { ids = JsonSerializer.Deserialize<List<int>>(r.MessageContent) ?? new(); }
-                catch { ids = new(); }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Failed to deserialize message content for messageId={MessageId}", r.Id);
+                    ids = new();
+                }
 
                 items.Add(new MyStageMessageItem
                 {

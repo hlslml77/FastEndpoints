@@ -309,10 +309,12 @@ function Test-TravelSystem($auth) {
     Info "   [5.1] POST /api/travel/event/reward"
     $eventReward = Invoke-ApiCall -Uri "$BaseUrl/api/travel/event/reward" -Auth $auth -Method 'Post' -Body @{ eventId=1001 }
     if ($eventReward) {
-        if ($eventReward.success) {
+        $evSuccess = if ($eventReward.success) { $eventReward.success } else { $eventReward.Success }
+        if ($evSuccess) {
             Ok ("   ✓ Event reward: Item $($eventReward.itemId) x $($eventReward.amount)")
         } else {
-            Warn ("   ⚠ Event reward returned: $($eventReward.message)")
+            $evMsg = if ($eventReward.message) { $eventReward.message } else { $eventReward.Message }
+            Warn ("   ⚠ Event reward returned: $evMsg")
         }
     } else {
         Err "   ✗ Event reward failed"
@@ -322,17 +324,68 @@ function Test-TravelSystem($auth) {
     Info "   [5.2] POST /api/travel/drop-point/reward"
     $dropReward = Invoke-ApiCall -Uri "$BaseUrl/api/travel/drop-point/reward" -Auth $auth -Method 'Post' -Body @{ levelId=101; distance=600 }
     if ($dropReward) {
-        if ($dropReward.success) {
+        $dpSuccess = if ($dropReward.success) { $dropReward.success } else { $dropReward.Success }
+        if ($dpSuccess) {
             if ($dropReward.rewards) {
                 Ok ("   ✓ Drop reward: $($dropReward.rewards.Count) items")
             } else {
                 Ok "   ✓ Drop reward successful"
             }
         } else {
-            Warn ("   ⚠ Drop reward returned: $($dropReward.message)")
+            $dpMsg = if ($dropReward.message) { $dropReward.message } else { $dropReward.Message }
+            Warn ("   ⚠ Drop reward returned: $dpMsg")
         }
     } else {
         Err "   ✗ Drop reward failed"
+    }
+
+    # 5.3 Save my stage message
+    Info "   [5.3] POST /api/travel/stage/save-message"
+    $saveBody = @{ levelId = 101; nodeId = 10011; idList = @(101,202,303) }
+    $saveResp = Invoke-ApiCall -Uri "$BaseUrl/api/travel/stage/save-message" -Auth $auth -Method 'Post' -Body $saveBody
+    if ($saveResp) {
+        $svSuccess = if ($saveResp.success) { $saveResp.success } else { $saveResp.Success }
+        if ($svSuccess) {
+            $mid = if ($saveResp.messageId) { $saveResp.messageId } else { $saveResp.MessageId }
+            Ok ("   ✓ Saved stage message. ID=$mid (level=101, node=10011, ids=101/202/303)")
+        } else {
+            Warn "   ⚠ Save stage message returned success=false"
+        }
+    } else {
+        Err "   ✗ Save stage message failed"
+    }
+
+    Start-Sleep -Milliseconds 200
+
+    # 5.4 Get my stage messages
+    Info "   [5.4] POST /api/travel/stage/my-messages"
+    $myReq = @{ levelId = 101 }
+    $myMsgs = Invoke-ApiCall -Uri "$BaseUrl/api/travel/stage/my-messages" -Auth $auth -Method 'Post' -Body $myReq
+    if ($myMsgs) {
+        $mySuccess = if ($myMsgs.success) { $myMsgs.success } else { $myMsgs.Success }
+        if ($mySuccess) {
+            $items = $myMsgs.items
+            $cnt = if ($items) { $items.Count } else { 0 }
+            Info ("   Items: $cnt")
+            if ($cnt -gt 0) {
+                # find node 10011
+                $node = $items | Where-Object { $_.nodeId -eq 10011 } | Select-Object -First 1
+                if ($node) {
+                    $ids = if ($node.messageIDList) { $node.messageIDList -join ', ' } else { '' }
+                    Info ("   NodeId=10011, MessageId=$($node.messageId), CreatedAt=$($node.createdAt)")
+                    Info ("   IDs: [$ids]")
+                    Ok  "   ✓ My stage messages returned expected node"
+                } else {
+                    Warn "   ⚠ My stage messages have no entry for nodeId=10011"
+                }
+            } else {
+                Warn "   ⚠ My stage messages returned empty items"
+            }
+        } else {
+            Warn "   ⚠ My stage messages returned success=false"
+        }
+    } else {
+        Err "   ✗ My stage messages request failed"
     }
 }
 
