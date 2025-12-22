@@ -65,7 +65,18 @@ public interface IMapService
     /// 统计在指定点位的玩家人数（基于当前所在点位），并返回玩家的下次挑战时间
     /// </summary>
     Task<(int PeopleCount, DateTime? NextChallengeTime)> CountPlayersAtLocationAsync(long userId, int locationId);
+    /// <summary>
+    /// 根据设备类型灌输存储能量
+    /// </summary>
+    Task<(decimal UsedDistanceMeters, decimal StoredEnergyMeters)> FeedStoredEnergyAsync(long userId, int deviceType, decimal distanceMeters);
+
+    /// <summary>
+    /// 查询玩家剩余能量以及各设备可灌输的最大距离
+    /// </summary>
+    Task<(decimal RemainingEnergyMeters, Dictionary<int, decimal> DeviceDistances)> GetFeedCapacityAsync(long userId);
 }
+
+
 
 /// <summary>
 /// 地图点位访问结果
@@ -121,6 +132,15 @@ public class MapService : IMapService
 
     private readonly IRandomWorldEventConfigService _randomCfg;
     private readonly Random _rand = new();
+
+    // 各设备的能量灌输效率倍数（距离 × 倍数 = 存储能量）
+    private static readonly Dictionary<int, decimal> _deviceEfficiency = new()
+    {
+        [0] = 1.2m,
+        [1] = 2.0m,
+        [2] = 1.5m,
+        [3] = 1.0m
+    };
 
     public MapService(
         AppDbContext dbContext,
@@ -711,6 +731,56 @@ public class MapService : IMapService
         await _dbContext.SaveChangesAsync();
         return (true, rewards);
     }
+
+    #region StoredEnergy
+
+    public async Task<(decimal UsedDistanceMeters, decimal StoredEnergyMeters)> FeedStoredEnergyAsync(long userId, int deviceType, decimal distanceMeters)
+    {
+        if (!_deviceEfficiency.TryGetValue(deviceType, out var eff))
+            throw new ArgumentException("Invalid deviceType", nameof(deviceType));
+        if (distanceMeters <= 0)
+            throw new ArgumentException("distanceMeters must be positive", nameof(distanceMeters));
+
+        var player = await _playerRoleService.GetOrCreatePlayerAsync(userId);
+        var cap = _generalConfigService.GetStoredEnergyMaxMeters();
+        var remaining = Math.Max(0m, cap - player.StoredEnergyMeters);
+        if (remaining <= 0)
+            return (0m, player.StoredEnergyMeters);
+
+        var potentialEnergy = distanceMeters * eff;
+        decimal energyAdded;
+        decimal usedDistance;
+        if (potentialEnergy <= remaining)
+        {
+            energyAdded = potentialEnergy;
+            usedDistance = distanceMeters;
+        }
+        else
+        {
+            energyAdded = remaining;
+            usedDistance = Math.Round(remaining / eff, 3, MidpointRounding.AwayFromZero);
+        }
+
+        player.StoredEnergyMeters += energyAdded;
+        await _dbContext.SaveChangesAsync();
+        return (usedDistance, player.StoredEnergyMeters);
+    }
+
+    public async Task<(decimal RemainingEnergyMeters, Dictionary<int, decimal> DeviceDistances)> GetFeedCapacityAsync(long userId)
+    {
+        var player = await _playerRoleService.GetOrCreatePlayerAsync(userId);
+        var cap = _generalConfigService.GetStoredEnergyMaxMeters();
+        var remaining = Math.Max(0m, cap - player.StoredEnergyMeters);
+        var dict = new Dictionary<int, decimal>();
+        foreach (var kv in _deviceEfficiency)
+        {
+            var dist = kv.Value > 0 ? Math.Round(remaining / kv.Value, 3, MidpointRounding.AwayFromZero) : 0m;
+            dict[kv.Key] = dist;
+        }
+        return (remaining, dict);
+    }
+
+    #endregion
 
     public async Task<decimal> GetPlayerStoredEnergyMetersAsync(long userId)
     {

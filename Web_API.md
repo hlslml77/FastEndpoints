@@ -13,6 +13,9 @@
   - [3.4 使用存储能量解锁终点（/api/map/unlock-with-energy）](#toc-map-unlock-with-energy)
   - [3.5 查询点位信息（/api/map/location-info）](#toc-map-location-info)
   - [3.6 怪物奖励（/api/map/monster/reward）](#toc-map-monster-reward)
+  - [3.7 主动灌输能量（/api/map/feed-energy）](#toc-map-feed-energy)
+  - [3.8 查询能量槽容量（/api/map/energy-capacity）](#toc-map-energy-capacity)
+
 
 - [4. 背包与装备（Inventory）](#toc-inventory)
   - [4.1 查询玩家道具清单（GET/POST /api/inventory/items）](#toc-inventory-items)
@@ -355,6 +358,61 @@ curl -X POST https://host/api/map/monster/reward \
 
 说明：该接口已从自动 Swagger 文档中排除（仅在本文档说明使用）。
 
+
+
+<a id="toc-map-feed-energy"></a>
+3.7 主动灌输能量
+POST /api/map/feed-energy
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：客户端上传本次运动的设备类型（deviceType）与距离（distanceMeters，单位米）。服务端按设备效率倍率（跑步1.2、划船2.0、单车1.5、手环/无设备1.0）将距离折算为能量并累加到玩家的 "存储能量"（上限 10000 米）。当存储能量已满时，只会注入差值。
+- 设备类型：0=跑步, 1=划船, 2=单车, 3=手环/无设备
+- 可选字段：userId（long）——服务器部署在后台环境时允许直传；正常前台请求可不传（将以 JWT 中的 sub 为准）。
+
+请求体
+{
+  "userId": 123456,     // long?, 可选
+  "deviceType": 0,      // int
+  "distanceMeters": 1200.0 // double, 单位: 米
+}
+
+响应体
+{
+  "usedDistanceMeters": 1000.0, // double, 实际被计入的距离（米）
+  "storedEnergyMeters": 8600.0  // double, 注入后玩家当前存储能量（米）
+}
+
+示例（curl）
+curl -X POST https://host/api/map/feed-energy \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"deviceType":0,"distanceMeters":1200}'
+
+<a id="toc-map-energy-capacity"></a>
+3.8 查询能量槽容量
+POST /api/map/energy-capacity
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：返回玩家距能量上限还可存储的能量（米），以及按四个设备类型分别还能灌输的最大距离（米）。
+
+请求体（可选传 userId，否则从 JWT 解析）
+{
+  "userId": 123456 // long?, 可选
+}
+
+响应体
+{
+  "remainingEnergyMeters": 1400.0, // double, 距上限还可注入的能量（米）
+  "deviceDistances": [             // List<{ deviceType, distanceMeters }>
+    { "deviceType": 0, "distanceMeters": 1166.7 },
+    { "deviceType": 1, "distanceMeters": 700.0 },
+    { "deviceType": 2, "distanceMeters": 933.3 },
+    { "deviceType": 3, "distanceMeters": 1400.0 }
+  ]
+}
+
+示例（curl）
+curl -X POST https://host/api/map/energy-capacity \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" -d '{}'
 
 
 ---
