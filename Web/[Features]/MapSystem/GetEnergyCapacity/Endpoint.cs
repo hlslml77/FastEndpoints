@@ -53,7 +53,7 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
             {
                 resp.DeviceDistances.Add(new DeviceDistanceInfo { DeviceType = kv.Key, DistanceMeters = kv.Value });
             }
-            await SendAsync(resp, cancellation: ct);
+            await Send.OkAsync(resp, ct);
         }
         catch (Exception ex)
         {

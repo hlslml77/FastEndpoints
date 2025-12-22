@@ -40,7 +40,7 @@ public class Endpoint : Endpoint<FeedEnergyRequest, FeedEnergyResponse>
             }
 
             var (used, stored) = await _mapService.FeedStoredEnergyAsync(userId, req.DeviceType, req.DistanceMeters);
-            await SendAsync(new FeedEnergyResponse { UsedDistanceMeters = used, StoredEnergyMeters = stored }, cancellation: ct);
+            await Send.OkAsync(new FeedEnergyResponse { UsedDistanceMeters = used, StoredEnergyMeters = stored }, ct);
         }
         catch (ArgumentException ex)
         {
