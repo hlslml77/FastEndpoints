@@ -15,8 +15,6 @@
   - [3.6 怪物奖励（/api/map/monster/reward）](#toc-map-monster-reward)
   - [3.7 主动灌输能量（/api/map/feed-energy）](#toc-map-feed-energy)
   - [3.8 查询设备可灌输距离（/api/map/device-distance）](#toc-map-device-distance)
-
-
 - [4. 背包与装备（Inventory）](#toc-inventory)
   - [4.1 查询玩家道具清单（GET/POST /api/inventory/items）](#toc-inventory-items)
   - [4.2 查询玩家装备清单（GET/POST /api/inventory/equipments）](#toc-inventory-equipments)
@@ -416,7 +414,7 @@ curl -X POST https://host/api/map/energy-capacity \
 ---
 
 <a id="toc-inventory"></a>
-1. 背包与装备（Inventory）
+4. 背包与装备（Inventory）
 
 <a id="toc-inventory-items"></a>
 4.1 查询玩家道具清单
