@@ -372,6 +372,7 @@ POST /api/map/feed-energy
 请求体
 {
   "deviceType": 0,      // int
+  "distanceMeters": 1200 // double, 单位: 米
 }
 
 响应体
