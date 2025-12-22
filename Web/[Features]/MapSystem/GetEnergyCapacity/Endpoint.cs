@@ -20,12 +20,12 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
 
     public override void Configure()
     {
-        Post("/map/energy-capacity");
+        Post("/map/device-distance");
         Permissions("web_access");
         Description(x => x
             .WithTags("MapSystem")
-            .WithSummary("查询能量槽剩余容量")
-            .WithDescription("返回玩家距离上限还可存储的能量，以及四个设备各自最多还能灌输的距离。"));
+            .WithSummary("查询设备可灌输距离")
+            .WithDescription("返回四种设备各自最多还能灌输的距离（米）。"));
     }
 
     public override async Task HandleAsync(EnergyCapacityRequest req, CancellationToken ct)

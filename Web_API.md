@@ -14,7 +14,7 @@
   - [3.5 查询点位信息（/api/map/location-info）](#toc-map-location-info)
   - [3.6 怪物奖励（/api/map/monster/reward）](#toc-map-monster-reward)
   - [3.7 主动灌输能量（/api/map/feed-energy）](#toc-map-feed-energy)
-  - [3.8 查询能量槽容量（/api/map/energy-capacity）](#toc-map-energy-capacity)
+  - [3.8 查询设备可灌输距离（/api/map/device-distance）](#toc-map-device-distance)
 
 
 - [4. 背包与装备（Inventory）](#toc-inventory)
@@ -367,13 +367,11 @@ POST /api/map/feed-energy
 - 认证：需要 Bearer Token（权限 web_access）
 - 说明：客户端上传本次运动的设备类型（deviceType）与距离（distanceMeters，单位米）。服务端按设备效率倍率（跑步1.2、划船2.0、单车1.5、手环/无设备1.0）将距离折算为能量并累加到玩家的 "存储能量"（上限 10000 米）。当存储能量已满时，只会注入差值。
 - 设备类型：0=跑步, 1=划船, 2=单车, 3=手环/无设备
-- 可选字段：userId（long）——服务器部署在后台环境时允许直传；正常前台请求可不传（将以 JWT 中的 sub 为准）。
+
 
 请求体
 {
-  "userId": 123456,     // long?, 可选
   "deviceType": 0,      // int
-  "distanceMeters": 1200.0 // double, 单位: 米
 }
 
 响应体
@@ -387,16 +385,15 @@ curl -X POST https://host/api/map/feed-energy \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
   -d '{"deviceType":0,"distanceMeters":1200}'
 
-<a id="toc-map-energy-capacity"></a>
-3.8 查询能量槽容量
-POST /api/map/energy-capacity
+<a id="toc-map-device-distance"></a>
+3.8 查询设备可灌输距离
+POST /api/map/device-distance
 
 - 认证：需要 Bearer Token（权限 web_access）
 - 说明：返回玩家距能量上限还可存储的能量（米），以及按四个设备类型分别还能灌输的最大距离（米）。
 
-请求体（可选传 userId，否则从 JWT 解析）
+请求体：空对象 {} 或不传
 {
-  "userId": 123456 // long?, 可选
 }
 
 响应体
@@ -418,7 +415,7 @@ curl -X POST https://host/api/map/energy-capacity \
 ---
 
 <a id="toc-inventory"></a>
-4. 背包与装备（Inventory）
+1. 背包与装备（Inventory）
 
 <a id="toc-inventory-items"></a>
 4.1 查询玩家道具清单
