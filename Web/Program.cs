@@ -52,11 +52,22 @@ bld.Services.AddDbContext<Web.Data.AppDbContext>(o =>
         // keep database logs concise and safe
         o.EnableSensitiveDataLogging(false);
         o.EnableDetailedErrors(false);
-        o.LogTo(
-            message => Log.Debug(LogSanitizer.CompactWhitespace(message)),
-            new[] { DbLoggerCategory.Database.Command.Name },
-            LogLevel.Information);
+        // register interceptor to log only slow queries (>200ms)
+        o.AddInterceptors(new SlowQueryInterceptor(200));
     });
+
+// used by background jobs / fire-and-forget work to safely create a new dbcontext instance
+// NOTE: use Scoped lifetime to avoid resolving scoped DbContextOptions from a singleton factory
+bld.Services.AddDbContextFactory<Web.Data.AppDbContext>(
+    (sp, o) =>
+    {
+        var cs = sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection");
+        o.UseMySql(cs, ServerVersion.AutoDetect(cs));
+        o.EnableSensitiveDataLogging(false);
+        o.EnableDetailedErrors(false);
+        o.AddInterceptors(new SlowQueryInterceptor(200));
+    },
+    ServiceLifetime.Scoped);
 bld.Services
    .AddCors()
    .AddOutputCache()
@@ -70,9 +81,20 @@ bld.Services
    .AddScoped<IEmailService, EmailService>();
 
 // 添加HttpClient用于调用APP服务进行token验证
+// NOTE: BaseUrl must be configured (AppService:BaseUrl). If missing, fall back to a safe default
+// to avoid startup crash in dev environments.
 bld.Services.AddHttpClient("AppService", client =>
 {
-    client.BaseAddress = new Uri(bld.Configuration["AppService:BaseUrl"]!);
+    var baseUrl = bld.Configuration["AppService:BaseUrl"];
+    if (string.IsNullOrWhiteSpace(baseUrl))
+    {
+        // keep service alive even if the external app service isn't configured
+        // (endpoints that depend on this client may still fail when called)
+        baseUrl = "http://127.0.0.1:0";
+        Log.Warning("Missing config AppService:BaseUrl. Using placeholder BaseAddress: {BaseUrl}", baseUrl);
+    }
+
+    client.BaseAddress = new Uri(baseUrl, UriKind.Absolute);
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 

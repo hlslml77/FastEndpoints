@@ -32,6 +32,8 @@ public class AppDbContext : DbContext
     public DbSet<OnlinePlayersSnapshot> OnlinePlayersSnapshot { get; set; }
     public DbSet<PlayerActivityStatistics> PlayerActivityStatistics { get; set; }
 
+    public DbSet<PlayerTutorialProgress> PlayerTutorialProgress { get; set; }
+
     // PVE Rank
     public DbSet<Web.Data.Entities.PlayerSportDaily> PlayerSportDaily { get; set; }
     public DbSet<Web.Data.Entities.PveRankBoard> PveRankBoard { get; set; }

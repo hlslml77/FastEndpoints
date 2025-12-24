@@ -19,9 +19,14 @@ public class MyRequestLogger<TRequest> : IPreProcessor<TRequest>
         var query = http.Request.QueryString.HasValue ? http.Request.QueryString.Value : string.Empty;
         var traceId = http.TraceIdentifier;
 
+        var userId = http.User?.FindFirst("userId")?.Value
+                     ?? http.User?.FindFirst("uid")?.Value
+                     ?? http.User?.FindFirst("sub")?.Value
+                     ?? "anonymous";
+
         var input = LogSanitizer.ToSafeJson(context.Request);
 
-        Log.Information("REQ {Method} {Path} q={Query} input={Input} trace={TraceId}", method, path, query, input, traceId);
+        Log.Information("REQ uid={UserId} {Method} {Path} q={Query} input={Input} trace={TraceId}", userId, method, path, query, input, traceId);
         return Task.CompletedTask;
     }
 }

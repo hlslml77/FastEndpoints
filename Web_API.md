@@ -48,6 +48,10 @@
 - [10. GM 工具（GM）](#toc-gm)
   - [10.1 发放物品/装备给玩家（/gm/grant-item）](#toc-gm-grant-item)
   - [10.2 [DEV] 给自己发放物品/装备（/gm/dev/grant-item）](#toc-gm-grant-item-dev)
+- [11. 新手引导（Tutorial）](#toc-tutorial)
+  - [11.1 设置步骤（/api/tutorial/set-step）](#toc-tutorial-set-step)
+  - [11.2 获取步骤（/api/tutorial/get-step）](#toc-tutorial-get-step)
+
 
 
 - [调用要点](#toc-notes)
@@ -1184,6 +1188,43 @@ curl -X POST https://host/gm/dev/grant-item \
 ```
 
 ---
+
+<a id="toc-tutorial"></a>
+11. 新手引导（Tutorial）
+
+<a id="toc-tutorial-set-step"></a>
+11.1 设置步骤
+POST /api/tutorial/set-step
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：客户端上报当前的新手引导步骤 ID，服务端保存。
+
+请求体
+```json
+{ "stepId": 3 }
+```
+
+响应体
+```json
+{ "success": true, "stepId": 3 }
+```
+
+<a id="toc-tutorial-get-step"></a>
+11.2 获取步骤
+POST /api/tutorial/get-step（也可 GET）
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：返回当前玩家已保存的新手引导步骤 ID；若无记录则返回 0。
+
+请求体：空对象 `{}` 或不传
+
+响应体
+```json
+{ "stepId": 3 }
+```
+
+---
+
 
 -------------------------------------------------------------------------------------------------------
 

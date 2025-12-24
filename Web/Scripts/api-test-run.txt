@@ -1,0 +1,139 @@
+==== Test started at 2025-12-24 08:43:38Z ====
+
+1) Exchanging token...
+
+OK Successfully got token, length: 207
+
+1) Exchanging token...
+
+OK Successfully got token, length: 227
+
+2) Testing Role System (new Role_Sport + WorldConfig.DailyLimit)...
+
+[2.0] POST /api/map/unlock-with-energy (100101 -> 100102)
+Unlocked: True, Used: 0m, Remaining: 0.00m
+OK Unlock with energy call completed
+[2.1] GET /api/role/get-player (baseline)
+Lv 8, EXP 20/90, TodayPts 10, Available 0
+Main Attrs => Upper:306 Lower:314 Core:291 Heart:291
+[2.2] POST /api/role/complete-sport ?Treadmill 500m (device=0, dist=500m, cal=80)
+Main => U:1 L:1 C:0 H:0 | TodayPts:0 | Exp:4
+OK Now Lv 8, Exp 24/90, TodayPts 10/10
+[2.2] POST /api/role/complete-sport ?Band 500m (device=3, dist=500m, cal=80)
+Main => U:1 L:1 C:0 H:0 | TodayPts:0 | Exp:4
+OK Now Lv 8, Exp 28/90, TodayPts 10/10
+[2.2] POST /api/role/complete-sport ?Treadmill 1500m (device=0, dist=1500m, cal=120)
+Main => U:2 L:1 C:0 H:0 | TodayPts:0 | Exp:20
+OK Now Lv 8, Exp 48/90, TodayPts 10/10
+[2.2] POST /api/role/complete-sport ?Treadmill 2000m (device=0, dist=2000m, cal=150)
+Main => U:0 L:0 C:1 H:0 | TodayPts:0 | Exp:32
+OK Now Lv 8, Exp 80/90, TodayPts 10/10
+[2.2] POST /api/role/complete-sport ?Treadmill 2500m (device=0, dist=2500m, cal=180)
+Main => U:80 L:80 C:80 H:81 | TodayPts:0 | Exp:-50
+OK Now Lv 9, Exp 30/100, TodayPts 10/10
+
+3) Testing Map System...
+
+[3.1] POST /api/map/save-progress
+OK Saved progress: ID 5, Distance 850.5m
+[3.2] POST /api/map/visit-location
+First visit: False, Visit count: 15
+Location: 1000101
+OK Visit location successful
+[3.3] POST /api/map/player-state
+Unlocked: 2, Completed: 4
+Progress records: 3
+Current location: 100102
+OK Get player map state successful
+[3.4] POST /api/map/location-info
+People count: 11
+Next challenge time: 0001-01-01T00:00:00
+OK Query location info successful
+
+4) Testing Inventory System...
+
+[4.1a] GET /api/inventory/items
+Player has 4 types of items
+OK Query items (GET) successful
+[4.1b] POST /api/inventory/items
+OK Query items (POST) successful
+[4.2a] GET /api/inventory/equipments
+Player has 3 pieces of equipment
+OK Query equipments (GET) successful
+[4.2b] POST /api/inventory/equipments
+Player has 3 pieces of equipment
+OK Query equipments (POST) successful
+[4.3] POST /api/inventory/equip
+OK Equipped item ID 2
+[4.4] POST /api/inventory/unequip
+OK Unequipped item ID 2
+
+5) Testing Travel System...
+
+[5.1] POST /api/travel/event/reward
+OK Event reward: Item 1000 x 5
+[5.2] POST /api/travel/drop-point/reward
+FAIL HTTP Error: 404 on http://localhost:9005/api/travel/drop-point/reward
+FAIL Response: {"statusCode":404,"code":1002,"message":""}
+FAIL Drop reward failed
+[5.3] POST /api/travel/stage/save-message
+OK Saved stage message. ID=3 (level=101, node=10011, ids=101/202/303)
+[5.4] POST /api/travel/stage/my-messages
+Items: 1
+NodeId=10011, MessageId=3, CreatedAt=2025-12-24T08:43:42
+IDs: [101, 202, 303]
+OK My stage messages returned expected node
+
+6) Testing Collection System...
+
+[6.1] POST /api/collection/my
+Collections (before): 48
+OK Get my collections successful
+[6.2] POST /api/collection/obtain
+[1] Obtained ID: 88
+[2] Obtained ID: 88
+[3] Obtained ID: 107
+OK Obtained 3 collections
+[6.1] POST /api/collection/my (after obtain)
+Collections (after): 49
+OK Collection count increased
+[6.3] POST /api/collection/claim-combo
+WARN Claim combo:
+
+7) Testing Admin Config Status...
+
+[6.1] GET /api/admin/config/status
+Found 10 config services
+- role:  items, last reload: 2025-12-24T08:43:00.9541953Z
+- map:  items, last reload: 2025-12-24T08:43:00.9673545Z
+- item: 54 items, last reload: 2025-12-24T08:43:00.9739681Z
+- collection: 108 items, last reload: 2025-12-24T08:43:00.9788243Z
+- event:  items, last reload: 2025-12-24T08:43:00.9848257Z
+- drop:  items, last reload: 2025-12-24T08:43:00.9880025Z
+- monster:  items, last reload: 2025-12-24T08:43:00.9922833Z
+- event:  items, last reload: 2025-12-24T08:43:00.9965825Z
+- general:  items, last reload: 2025-12-24T08:43:01.0007234Z
+- pverank:  items, last reload: 2025-12-24T08:43:01.0088131Z
+OK Get config status successful
+
+7.2) Testing Admin Config Update (/api/admin/config/update)...
+
+Summary: ok=0, fail=1
+FAIL Admin config update failed or returned unexpected result
+
+8) Testing Rank System...
+
+[8.1] POST /api/rank/leaderboard
+Top count: , PeriodId: 202552
+Me: Rank 1, Distance 10500.00m
+OK Leaderboard query successful
+[8.2] POST /api/rank/claim-week
+WARN Claim week:
+[8.3] POST /api/rank/claim-season
+WARN Claim season:
+
+Test Summary
+
+Passed: 26 | Failed: 4 | Skipped: 3
+Pass Rate: 78.79%
+OK Script finished successfully.

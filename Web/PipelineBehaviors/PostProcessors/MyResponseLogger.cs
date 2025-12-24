@@ -18,6 +18,12 @@ public class MyResponseLogger<TRequest, TResponse> : IPostProcessor<TRequest, TR
         var status = http.Response?.StatusCode;
         var contentType = http.Response?.ContentType ?? string.Empty;
 
+
+        var userId = http.User?.FindFirst("userId")?.Value
+                     ?? http.User?.FindFirst("uid")?.Value
+                     ?? http.User?.FindFirst("sub")?.Value
+                     ?? "anonymous";
+
         double? elapsedMs = null;
         if (http.Items.TryGetValue(StartKey, out var startObj) && startObj is long startTicks)
         {
@@ -32,9 +38,9 @@ public class MyResponseLogger<TRequest, TResponse> : IPostProcessor<TRequest, TR
         }
 
         if (elapsedMs.HasValue)
-            Log.Information("RES {Method} {Path} status={Status} elapsed={ElapsedMs}ms output={Output} trace={TraceId}", method, path, status, Math.Round(elapsedMs.Value, 2), output, traceId);
+            Log.Information("RES uid={UserId} {Method} {Path} status={Status} elapsed={ElapsedMs}ms output={Output} trace={TraceId}", userId, method, path, status, Math.Round(elapsedMs.Value, 2), output, traceId);
         else
-            Log.Information("RES {Method} {Path} status={Status} output={Output} trace={TraceId}", method, path, status, output, traceId);
+            Log.Information("RES uid={UserId} {Method} {Path} status={Status} output={Output} trace={TraceId}", userId, method, path, status, output, traceId);
 
         return Task.CompletedTask;
     }

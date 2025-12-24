@@ -23,7 +23,7 @@ public record RankItem(long UserId, decimal TotalDistanceMeters, int Rank);
 
 public class PveRankService : IPveRankService
 {
-    private readonly AppDbContext _db;
+    private readonly IDbContextFactory<AppDbContext> _dbFactory;
     private readonly IPveRankConfigService _cfg;
     private readonly IInventoryService _inventory;
     private readonly IMemoryCache _mem;
@@ -32,38 +32,44 @@ public class PveRankService : IPveRankService
     private static readonly TimeSpan TopCacheTtl = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan MeCacheTtl = TimeSpan.FromSeconds(8);
 
-    public PveRankService(AppDbContext db, IPveRankConfigService cfg, IInventoryService inventory, IMemoryCache mem, IServiceProvider sp)
+    public PveRankService(IDbContextFactory<AppDbContext> dbFactory, IPveRankConfigService cfg, IInventoryService inventory, IMemoryCache mem, IServiceProvider sp)
     {
-        _db = db; _cfg = cfg; _inventory = inventory; _mem = mem; _dist = sp.GetService<IDistributedCache>();
+        _dbFactory = dbFactory;
+        _cfg = cfg;
+        _inventory = inventory;
+        _mem = mem;
+        _dist = sp.GetService<IDistributedCache>();
     }
 
     public async Task AddSportAsync(long userId, int deviceType, decimal distanceMeters, DateTime nowUtc)
     {
+        await using var db = await _dbFactory.CreateDbContextAsync();
+
         // 1) 更新每日汇总
         var today = DateOnly.FromDateTime(nowUtc);
-        var daily = await _db.PlayerSportDaily.FindAsync(userId, today, deviceType);
+        var daily = await db.PlayerSportDaily.FindAsync(userId, today, deviceType);
         if (daily == null)
         {
             daily = new PlayerSportDaily { UserId = userId, Date = today, DeviceType = deviceType, DistanceMeters = 0, Calories = 0, UpdatedAt = nowUtc };
-            _db.PlayerSportDaily.Add(daily);
+            db.PlayerSportDaily.Add(daily);
         }
         daily.DistanceMeters += distanceMeters;
         daily.UpdatedAt = nowUtc;
 
         // 2) 更新周榜/赛季榜
         var (weekType, weekId) = GetWeekPeriod(nowUtc);
-        await UpsertBoardAsync(weekType, weekId, deviceType, userId, distanceMeters, nowUtc);
+        await UpsertBoardAsync(db, weekType, weekId, deviceType, userId, distanceMeters, nowUtc);
 
         var (seasonType, seasonId) = GetSeasonPeriod(nowUtc);
-        await UpsertBoardAsync(seasonType, seasonId, deviceType, userId, distanceMeters, nowUtc);
+        await UpsertBoardAsync(db, seasonType, seasonId, deviceType, userId, distanceMeters, nowUtc);
 
-        await _db.SaveChangesAsync();
+        await db.SaveChangesAsync();
     }
 
-    private async Task UpsertBoardAsync(int periodType, int periodId, int deviceType, long userId, decimal addMeters, DateTime nowUtc)
+    private async Task UpsertBoardAsync(AppDbContext db, int periodType, int periodId, int deviceType, long userId, decimal addMeters, DateTime nowUtc)
     {
         // 根据数据库提供程序选择合适的 UPSERT 语法；失败则回退到 EF 方式，避免崩溃
-        var provider = _db.Database.ProviderName ?? string.Empty;
+        var provider = db.Database.ProviderName ?? string.Empty;
         try
         {
             if (provider.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
@@ -74,7 +80,7 @@ VALUES ({0}, {1}, {2}, {3}, {4}, {5})
 ON CONFLICT(period_type, period_id, device_type, user_id)
 DO UPDATE SET total_distance_meters = total_distance_meters + EXCLUDED.total_distance_meters,
               updated_at = EXCLUDED.updated_at;";
-                await _db.Database.ExecuteSqlRawAsync(sql, periodType, periodId, deviceType, userId, addMeters, nowUtc);
+                await db.Database.ExecuteSqlRawAsync(sql, periodType, periodId, deviceType, userId, addMeters, nowUtc);
             }
             else if (provider.Contains("MySql", StringComparison.OrdinalIgnoreCase) || provider.Contains("Pomelo", StringComparison.OrdinalIgnoreCase))
             {
@@ -83,7 +89,7 @@ DO UPDATE SET total_distance_meters = total_distance_meters + EXCLUDED.total_dis
 VALUES ({0}, {1}, {2}, {3}, {4}, {5})
 ON DUPLICATE KEY UPDATE total_distance_meters = total_distance_meters + VALUES(total_distance_meters),
                         updated_at = VALUES(updated_at);";
-                await _db.Database.ExecuteSqlRawAsync(sql, periodType, periodId, deviceType, userId, addMeters, nowUtc);
+                await db.Database.ExecuteSqlRawAsync(sql, periodType, periodId, deviceType, userId, addMeters, nowUtc);
             }
             else if (provider.Contains("SqlServer", StringComparison.OrdinalIgnoreCase))
             {
@@ -93,18 +99,18 @@ ON (t.period_type=s.period_type AND t.period_id=s.period_id AND t.device_type=s.
 WHEN MATCHED THEN UPDATE SET t.total_distance_meters = t.total_distance_meters + s.total_distance_meters, t.updated_at = s.updated_at
 WHEN NOT MATCHED THEN INSERT (period_type, period_id, device_type, user_id, total_distance_meters, updated_at)
 VALUES (s.period_type, s.period_id, s.device_type, s.user_id, s.total_distance_meters, s.updated_at);";
-                await _db.Database.ExecuteSqlRawAsync(sql, periodType, periodId, deviceType, userId, addMeters, nowUtc);
+                await db.Database.ExecuteSqlRawAsync(sql, periodType, periodId, deviceType, userId, addMeters, nowUtc);
             }
             else
             {
                 // 未识别的提供程序，使用 EF 回退
-                await EfFallbackUpsert(periodType, periodId, deviceType, userId, addMeters, nowUtc);
+                await EfFallbackUpsert(db, periodType, periodId, deviceType, userId, addMeters, nowUtc);
             }
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "UpsertBoard raw SQL failed for provider {Provider}. Falling back to EF.", provider);
-            await EfFallbackUpsert(periodType, periodId, deviceType, userId, addMeters, nowUtc);
+            await EfFallbackUpsert(db, periodType, periodId, deviceType, userId, addMeters, nowUtc);
         }
 
         // 失效短缓存（内存 & 分布式）。TTL 很短，失效非必须，这里尽量清理热点 Top 数
@@ -120,9 +126,9 @@ VALUES (s.period_type, s.period_id, s.device_type, s.user_id, s.total_distance_m
         if (_dist != null) await _dist.RemoveAsync(meKey);
     }
 
-    private async Task EfFallbackUpsert(int periodType, int periodId, int deviceType, long userId, decimal addMeters, DateTime nowUtc)
+    private static async Task EfFallbackUpsert(AppDbContext db, int periodType, int periodId, int deviceType, long userId, decimal addMeters, DateTime nowUtc)
     {
-        var row = await _db.PveRankBoard.FindAsync(periodType, periodId, deviceType, userId);
+        var row = await db.PveRankBoard.FindAsync(periodType, periodId, deviceType, userId);
         if (row == null)
         {
             row = new PveRankBoard
@@ -134,19 +140,20 @@ VALUES (s.period_type, s.period_id, s.device_type, s.user_id, s.total_distance_m
                 TotalDistanceMeters = addMeters,
                 UpdatedAt = nowUtc
             };
-            _db.PveRankBoard.Add(row);
+            db.PveRankBoard.Add(row);
         }
         else
         {
             row.TotalDistanceMeters += addMeters;
             row.UpdatedAt = nowUtc;
-            _db.PveRankBoard.Update(row);
+            db.PveRankBoard.Update(row);
         }
-        await _db.SaveChangesAsync();
     }
 
     public async Task<(List<RankItem> top, RankItem? me)> GetLeaderboardAsync(int periodType, int deviceType, int topN, long? userId)
     {
+        await using var db = await _dbFactory.CreateDbContextAsync();
+
         // 查询当前周期ID
         var now = DateTime.UtcNow;
         var periodId = periodType == 1 ? GetWeekPeriod(now).periodId : GetSeasonPeriod(now).periodId;
@@ -165,7 +172,7 @@ VALUES (s.period_type, s.period_id, s.device_type, s.user_id, s.total_distance_m
             if (top is null)
             {
                 // DB 查询
-                var query = _db.PveRankBoard.AsNoTracking()
+                var query = db.PveRankBoard.AsNoTracking()
                     .Where(x => x.PeriodType == periodType && x.PeriodId == periodId && x.DeviceType == deviceType)
                     .OrderByDescending(x => x.TotalDistanceMeters)
                     .ThenBy(x => x.UpdatedAt);
@@ -206,13 +213,13 @@ VALUES (s.period_type, s.period_id, s.device_type, s.user_id, s.total_distance_m
 
                 if (me is null)
                 {
-                    var my = await _db.PveRankBoard.AsNoTracking()
+                    var my = await db.PveRankBoard.AsNoTracking()
                         .Where(x => x.PeriodType == periodType && x.PeriodId == periodId && x.DeviceType == deviceType && x.UserId == userId.Value)
                         .Select(x => new { x.TotalDistanceMeters })
                         .FirstOrDefaultAsync();
                     if (my != null)
                     {
-                        var greater = await _db.PveRankBoard.AsNoTracking()
+                        var greater = await db.PveRankBoard.AsNoTracking()
                             .Where(x => x.PeriodType == periodType && x.PeriodId == periodId && x.DeviceType == deviceType && x.TotalDistanceMeters > my.TotalDistanceMeters)
                             .CountAsync();
                         me = new RankItem(userId.Value, my.TotalDistanceMeters, greater + 1);
@@ -244,15 +251,17 @@ VALUES (s.period_type, s.period_id, s.device_type, s.user_id, s.total_distance_m
 
     private async Task<(bool success, string message, List<(int itemId,int amount)> rewards)> ClaimAsync(int periodType, int periodId, int deviceType, long userId, List<(int from,int to,List<(int,int)> rewards)> rules)
     {
+        await using var db = await _dbFactory.CreateDbContextAsync();
+
         // 检查是否已发放
-        bool exists = await _db.PveRankRewardGrant.AnyAsync(x => x.PeriodType == periodType && x.PeriodId == periodId && x.DeviceType == deviceType && x.UserId == userId);
+        bool exists = await db.PveRankRewardGrant.AnyAsync(x => x.PeriodType == periodType && x.PeriodId == periodId && x.DeviceType == deviceType && x.UserId == userId);
         if (exists) return (false, "已领取或已发放", new());
 
         // 查询玩家名次
-        var row = await _db.PveRankBoard.AsNoTracking().FirstOrDefaultAsync(x => x.PeriodType == periodType && x.PeriodId == periodId && x.DeviceType == deviceType && x.UserId == userId);
+        var row = await db.PveRankBoard.AsNoTracking().FirstOrDefaultAsync(x => x.PeriodType == periodType && x.PeriodId == periodId && x.DeviceType == deviceType && x.UserId == userId);
         if (row == null || row.TotalDistanceMeters <= 0) return (false, "无排名", new());
 
-        var greater = await _db.PveRankBoard.AsNoTracking()
+        var greater = await db.PveRankBoard.AsNoTracking()
             .Where(x => x.PeriodType == periodType && x.PeriodId == periodId && x.DeviceType == deviceType && x.TotalDistanceMeters > row.TotalDistanceMeters)
             .CountAsync();
         var myRank = greater + 1;
@@ -274,11 +283,11 @@ VALUES (s.period_type, s.period_id, s.device_type, s.user_id, s.total_distance_m
             DeviceType = deviceType,
             UserId = userId,
             Rank = myRank,
-            RewardJson = System.Text.Json.JsonSerializer.Serialize(rule.rewards),
+            RewardJson = JsonSerializer.Serialize(rule.rewards),
             CreatedAt = DateTime.UtcNow
         };
-        _db.PveRankRewardGrant.Add(grant);
-        await _db.SaveChangesAsync();
+        db.PveRankRewardGrant.Add(grant);
+        await db.SaveChangesAsync();
 
         return (true, "ok", rule.rewards);
     }
