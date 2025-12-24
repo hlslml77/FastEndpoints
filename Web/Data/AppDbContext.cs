@@ -37,6 +37,7 @@ public class AppDbContext : DbContext
     public DbSet<Web.Data.Entities.PveRankBoard> PveRankBoard { get; set; }
     public DbSet<Web.Data.Entities.PveRankRewardGrant> PveRankRewardGrant { get; set; }
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -71,6 +72,7 @@ public class AppDbContext : DbContext
             .HasKey(e => new { e.PeriodType, e.PeriodId, e.DeviceType, e.UserId });
         modelBuilder.Entity<Web.Data.Entities.PveRankBoard>()
             .HasIndex(e => new { e.PeriodType, e.PeriodId, e.DeviceType, e.TotalDistanceMeters });
+
     }
 }
 

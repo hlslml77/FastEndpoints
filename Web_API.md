@@ -26,6 +26,9 @@
   - [5.3 保存消息ID列表（/api/travel/stage/save-message）](#toc-travel-stage-save-message)
   - [5.4 获取随机消息ID列表（/api/travel/stage/get-random-message）](#toc-travel-stage-get-random-message)
   - [5.5 获取玩家某关卡的所有节点留言（/api/travel/stage/my-messages）](#toc-travel-stage-my-messages)
+  - [5.6 随机获取玩家信息（/api/travel/random-player）](#toc-travel-random-player)
+  - [5.7 修改关注状态（/api/travel/follow/set）](#toc-travel-follow-set)
+  - [5.8 获取关注状态（/api/travel/follow/status）](#toc-travel-follow-status)
 - [6. 藏品系统（Collection）](#toc-collection)
   - [6.1 获取玩家已拥有的藏品ID列表（/api/collection/my）](#toc-collection-my)
   - [6.2 随机获取藏品（/api/collection/obtain）](#toc-collection-obtain)
@@ -679,6 +682,79 @@ curl -X POST https://host/api/travel/stage/my-messages \
   -d '{"levelId":101, "nodeId":10011}'
 
 ---
+
+<a id="toc-travel-random-player"></a>
+5.6 随机获取玩家信息
+POST /api/travel/random-player
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：随机返回一名除自己以外的玩家信息，以及当前玩家对其的关注状态与双方偶遇次数。
+
+响应体
+{
+  "success": true,            // bool
+  "userInfo": {               // object
+    "userId": 987654,         // long
+    "currentLevel": 5,        // int
+    "currentExperience": 1200 // int
+  },
+  "isFollowed": false,        // bool 当前玩家是否已关注对方
+  "encounterCount": 3         // int 与该玩家的偶遇次数
+}
+
+示例（curl）
+curl -X POST https://host/api/travel/random-player \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" -d '{}'
+
+<a id="toc-travel-follow-set"></a>
+5.7 修改关注状态
+POST /api/travel/follow/set
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：关注或取消关注指定玩家。
+
+请求体
+{
+  "targetUserId": 987654, // long 要关注/取消关注的玩家ID
+  "follow": true          // bool true=关注, false=取消关注
+}
+
+响应体
+{
+  "success": true, // bool
+  "isFollowed": true // bool 修改后是否已关注
+}
+
+示例（curl）
+curl -X POST https://host/api/travel/follow/set \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"targetUserId":987654,"follow":true}'
+
+<a id="toc-travel-follow-status"></a>
+5.8 获取关注状态
+POST /api/travel/follow/status
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：查询当前玩家是否已关注目标玩家。
+
+请求体
+{
+  "targetUserId": 987654 // long
+}
+
+响应体
+{
+  "success": true,   // bool
+  "isFollowed": true // bool 当前是否关注
+}
+
+示例（curl）
+curl -X POST https://host/api/travel/follow/status \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"targetUserId":987654}'
+
+---
+
 
 <a id="toc-collection"></a>
 6. 藏品系统（Collection）

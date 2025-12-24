@@ -338,3 +338,70 @@ public class TravelStageMessage
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
+
+
+/// <summary>
+/// 玩家关注关系表
+/// </summary>
+[Table("player_follow")]
+public class PlayerFollow
+{
+    /// <summary>
+    /// 关注者用户ID（复合主键之一）
+    /// </summary>
+    [Key]
+    [Column("follower_id", Order = 0)]
+    public long FollowerId { get; set; }
+
+    /// <summary>
+    /// 被关注者用户ID（复合主键之一）
+    /// </summary>
+    [Key]
+    [Column("target_user_id", Order = 1)]
+    public long TargetUserId { get; set; }
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+/// <summary>
+/// 玩家偶遇计数表（两人组合）
+/// </summary>
+[Table("player_encounter")]
+public class PlayerEncounter
+{
+    /// <summary>
+    /// 自增主键
+    /// </summary>
+    [Key]
+    [Column("id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+
+    /// <summary>
+    /// 用户A ID（较小）
+    /// </summary>
+    [Column("user_a_id")]
+    public long UserAId { get; set; }
+
+    /// <summary>
+    /// 用户B ID（较大）
+    /// </summary>
+    [Column("user_b_id")]
+    public long UserBId { get; set; }
+
+    /// <summary>
+    /// 偶遇次数
+    /// </summary>
+    [Column("encounter_count")]
+    public int EncounterCount { get; set; } = 0;
+
+    /// <summary>
+    /// 最近更新时间
+    /// </summary>
+    [Column("updated_at")]
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+}
