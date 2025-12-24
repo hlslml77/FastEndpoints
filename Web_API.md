@@ -45,6 +45,10 @@
   - [9.1 获取排行榜（/api/rank/leaderboard）](#toc-rank-leaderboard)
   - [9.2 领取周榜奖励（/api/rank/claim-week）](#toc-rank-claim-week)
   - [9.3 领取赛季奖励（/api/rank/claim-season）](#toc-rank-claim-season)
+- [10. GM 工具（GM）](#toc-gm)
+  - [10.1 发放物品/装备给玩家（/gm/grant-item）](#toc-gm-grant-item)
+  - [10.2 [DEV] 给自己发放物品/装备（/gm/dev/grant-item）](#toc-gm-grant-item-dev)
+
 
 - [调用要点](#toc-notes)
 - [统一错误返回与错误码](#toc-errors)
@@ -1127,6 +1131,59 @@ POST /api/rank/claim-season
 说明
 - 赛季奖励规则来自 Web/Json/PVERank_SeasonReward.json（当前简化为按年）。
 - 幂等防重：同周期+设备+用户仅能成功一次；发放记录写入 pve_rank_reward_grant。
+
+
+<a id="toc-gm"></a>
+10. GM 工具（GM）
+
+<a id="toc-gm-grant-item"></a>
+10.1 发放物品/装备给玩家
+POST /gm/grant-item
+
+- 认证：需要 Bearer Token（admin 角色）
+- 说明：GM 后台或脚本使用，给指定玩家发放道具或装备。若为装备，则按配置随机生成词条数值。
+
+请求体
+```json
+{ "userId": 123456, "itemId": 20001, "amount": 1 }
+```
+
+响应体
+```json
+{ "success": true }
+```
+
+示例（curl）
+```bash
+curl -X POST https://host/gm/grant-item \
+  -H "Authorization: Bearer <adminToken>" \
+  -H "Content-Type: application/json" \
+  -d '{"userId":123456,"itemId":20001,"amount":1}'
+```
+
+<a id="toc-gm-grant-item-dev"></a>
+10.2 [DEV] 给自己发放物品/装备
+POST /gm/dev/grant-item
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：仅用于开发/测试环境。根据令牌中的 userId 给自己发放道具/装备。
+
+请求体
+```json
+{ "itemId": 20001, "amount": 1 }
+```
+
+响应体 同上
+
+示例（curl）
+```bash
+curl -X POST https://host/gm/dev/grant-item \
+  -H "Authorization: Bearer <webToken>" \
+  -H "Content-Type: application/json" \
+  -d '{"itemId":20001,"amount":1}'
+```
+
+---
 
 -------------------------------------------------------------------------------------------------------
 
