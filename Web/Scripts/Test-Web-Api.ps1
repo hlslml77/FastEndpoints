@@ -322,7 +322,7 @@ function Test-TravelSystem($auth) {
 
     # 5.2 Drop point reward
     Info "   [5.2] POST /api/travel/drop-point/reward"
-    $dropReward = Invoke-ApiCall -Uri "$BaseUrl/api/travel/drop-point/reward" -Auth $auth -Method 'Post' -Body @{ levelId=101; distance=600 }
+    $dropReward = Invoke-ApiCall -Uri "$BaseUrl/api/travel/drop-point/reward" -Auth $auth -Method 'Post' -Body @{ levelId=501; distance=600 }
     if ($dropReward) {
         $dpSuccess = if ($dropReward.success) { $dropReward.success } else { $dropReward.Success }
         if ($dpSuccess) {
