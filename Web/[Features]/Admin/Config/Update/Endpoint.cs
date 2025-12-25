@@ -45,7 +45,6 @@ public class Endpoint : Endpoint<Request, Response>
     public override void Configure()
     {
         Post("admin/config/update");
-        Roles(Role.Admin);
         Description(x => x
             .WithTags("Admin", "Config")
             .WithSummary("批量更新 JSON 配表")
