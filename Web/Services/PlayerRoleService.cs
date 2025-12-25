@@ -53,12 +53,13 @@ public class PlayerRoleService : IPlayerRoleService
     }
 
     /// <summary>
-    /// 获取或创建玩家角色
+    /// 获取或创建玩家角色（并在登录时执行每日刷新逻辑）
     /// </summary>
     public async Task<PlayerRole> GetOrCreatePlayerAsync(long userId)
     {
         var player = await _dbContext.PlayerRole.FindAsync(userId);
 
+        // ---------- 首次创建玩家 ----------
         if (player == null)
         {
             // 初始主属性来自 Role_Attribute.json（按 Name 匹配）
@@ -83,19 +84,18 @@ public class PlayerRoleService : IPlayerRoleService
 
             _dbContext.PlayerRole.Add(player);
 
-
-                // 设置玩家初始位置并默认解锁
-                var initLoc = _generalConfigService.GetInitialLocationId();
-                if (initLoc > 0)
+            // 设置玩家初始位置并默认解锁
+            var initLoc = _generalConfigService.GetInitialLocationId();
+            if (initLoc > 0)
+            {
+                player.CurrentLocationId = initLoc;
+                _dbContext.PlayerUnlockedLocation.Add(new Web.Data.Entities.PlayerUnlockedLocation
                 {
-                    player.CurrentLocationId = initLoc;
-                    _dbContext.PlayerUnlockedLocation.Add(new Web.Data.Entities.PlayerUnlockedLocation
-                    {
-                        UserId = userId,
-                        LocationId = initLoc,
-                        UnlockedTime = DateTime.UtcNow
-                    });
-                }
+                    UserId = userId,
+                    LocationId = initLoc,
+                    UnlockedTime = DateTime.UtcNow
+                });
+            }
 
             // 按配置发放初始金币与体力道具
             var goldItemId = _generalConfigService.InitialGoldItemId;     // 默认1000
@@ -112,6 +112,45 @@ public class PlayerRoleService : IPlayerRoleService
 
             Log.Information("Created new player role for user {UserId}. init gold:{GoldId} x{GoldAmt}, stamina:{StaId} x{StaAmt}", userId, goldItemId, goldAmount, staminaItemId, staminaAmount);
         }
+        else
+        {
+            // ---------- 已存在玩家：检查是否跨天 ----------
+            var nowUtc = DateTime.UtcNow;
+            if (player.LastUpdateTime.Date != nowUtc.Date)
+            {
+                const int staminaItemId = 1002; // 景观水晶
+                const int dailyAmount = 100;
+
+                var itemRec = await _dbContext.PlayerItem.FirstOrDefaultAsync(r => r.UserId == userId && r.ItemId == staminaItemId);
+                if (itemRec == null)
+                {
+                    itemRec = new Web.Data.Entities.PlayerItem
+                    {
+                        UserId = userId,
+                        ItemId = staminaItemId,
+                        Amount = dailyAmount,
+                        UpdatedAt = nowUtc
+                    };
+                    _dbContext.PlayerItem.Add(itemRec);
+                }
+                else
+                {
+                    itemRec.Amount = dailyAmount;
+                    itemRec.UpdatedAt = nowUtc;
+                }
+
+                // 也可以在此处清零每日属性点等其他“每日刷新”数据
+                player.TodayAttributePoints = 0;
+
+                Log.Information("Daily refresh for user {UserId}: reset item {ItemId} to {Amount}", userId, staminaItemId, dailyAmount);
+
+                // 不急于 SaveChanges，最后统一保存
+            }
+        }
+
+        // 更新玩家最后活跃时间，并保存所有可能变更
+        player.LastUpdateTime = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
 
         return player;
     }
