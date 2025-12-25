@@ -98,6 +98,11 @@ bld.Services.AddHttpClient("AppService", client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
+// internal self api client for endpoints to call same service (e.g., DingTalkEventsEndpoint)
+bld.Services.AddHttpClient("SelfApi", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 // add redis cache if available; else fall back to memory-only
 static bool CanConnectRedis(string? cs)
 {
