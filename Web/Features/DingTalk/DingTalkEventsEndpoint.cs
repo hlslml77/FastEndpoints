@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -7,6 +8,7 @@ using System.Net.Http.Json;
 
 using Serilog;
 using Web.Services;
+
 namespace Web.Features.DingTalk;
 
 /// <summary>
@@ -21,9 +23,13 @@ namespace Web.Features.DingTalk;
 /// </summary>
 public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
 {
-    // 允许前面有 @机器人 或任意文本；允许 JSON 以 { 或 [ 开头；忽略大小写
+    // 兼容三种输入：
+    //  1) "xxx.json { ... }" 或 "xxx.json [ ... ]"（文件名 + JSON）
+    //  2) "xxx.json http(s)://..."（文件名 + URL）
+    //  3) 仅文件名："xxx.json" 或 "xxx"（用于自动去 GitLab raw 拉取）
+    // 允许前面有 @机器人 或任意文本；忽略大小写。
     private static readonly Regex _contentRegex = new(
-        @"^[\s\S]*?(?<file>[\w\-.]+\.json)\s+(?<json>(\{|\[)[\s\S]+)",
+        @"^[\s\S]*?(?<file>[\w\-.]+)(?:\s+(?<payload>(https?://\S+|(\{|\[)[\s\S]+)))?\s*$",
         RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
     public override void Configure()
@@ -73,16 +79,45 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
         }
 
         var content = cProp.GetString() ?? string.Empty;
-        var match = _contentRegex.Match(content.Trim());
+        var normalized = content.Trim();
+
+        // 额外日志：帮助定位是换行/空格/全角符号/内容缺失导致的匹配失败
+        Log.Information(
+            "[DingTalkEvents] Incoming content (len={Len}). signature={Signature} timestamp={Timestamp} nonce={Nonce} contentPreview={Preview}",
+            normalized.Length,
+            signature,
+            timestamp,
+            nonce,
+            normalized.Length <= 300 ? normalized : normalized[..300]);
+
+        var match = _contentRegex.Match(normalized);
         if (!match.Success)
         {
-            Log.Warning("[DingTalkEvents] Content regex not matched. content={Content} signature={Signature} timestamp={Timestamp} nonce={Nonce}", content, signature, timestamp, nonce);
+            // 注意：这里不要打太长，避免刷屏；但仍保留足够上下文
+            Log.Warning(
+                "[DingTalkEvents] Content regex not matched. signature={Signature} timestamp={Timestamp} nonce={Nonce} contentLen={Len} content={Content}",
+                signature,
+                timestamp,
+                nonce,
+                normalized.Length,
+                normalized.Length <= 2000 ? normalized : normalized[..2000]);
             await SendEncryptedSuccessAsync(timestamp, nonce, ct);
             return;
         }
 
         var fileName = match.Groups["file"].Value;
-        var jsonContentStr = match.Groups["json"].Value.Trim();
+        if (!fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            fileName += ".json";
+
+        var payload = match.Groups["payload"].Success ? match.Groups["payload"].Value.Trim() : string.Empty;
+
+        Log.Information(
+            "[DingTalkEvents] Parsed content. file={File} hasPayload={HasPayload} payloadHead={PayloadHead}",
+            fileName,
+            !string.IsNullOrWhiteSpace(payload),
+            string.IsNullOrWhiteSpace(payload) ? string.Empty : (payload.Length <= 120 ? payload : payload[..120]));
+
+        var jsonContentStr = payload;
 
         // 去掉可能的 ```json ``` 包裹
         if (jsonContentStr.StartsWith("```", StringComparison.Ordinal))
@@ -93,7 +128,161 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
             if (lastFence >= 0) jsonContentStr = jsonContentStr[..lastFence].Trim();
         }
 
-        // 2) 解析 JSON 内容
+        // 2) 解析内容：支持两种格式
+        //   A) 直接在消息里贴 JSON（兼容你原来的逻辑）
+        //   B) 贴 GitLab raw 地址（形式A：.../-/raw/<branch>/path/file.json），服务端拉取后再更新
+
+        // 支持策划只输入文件名：
+        //  - 例如："Item.json"
+        //  - 自动从 GitLab 拉取：
+        //    http://kjgitlab.yijiesudai.com:5013/pitpat/pitpatgame/raw/PitPat-NewWorld/PVEExcel/Json/Item.json
+        // 同时仍兼容：直接贴 raw url、或直接贴 JSON。
+
+        var candidate = jsonContentStr.Trim();
+
+        // 先把“文件名”归一化（优先用正则捕获到的 fileName；candidate 可能为空）
+        var inputName = string.IsNullOrWhiteSpace(fileName) ? candidate : fileName;
+        inputName = inputName.Trim();
+
+        // 如果出现了奇怪的路径（例如用户发了 E:\json\xxx.json），只取最后的文件名
+        var onlyFileName = Path.GetFileName(inputName);
+        if (string.IsNullOrWhiteSpace(onlyFileName))
+            onlyFileName = Path.GetFileName(candidate);
+
+        if (!onlyFileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            onlyFileName += ".json";
+
+        // 判断输入类型：
+        // - candidate 是 URL：用 URL 拉取
+        // - candidate 是 JSON：直接用 JSON
+        // - candidate 为空/不是 JSON：当成“只有文件名”，从 GitLab raw 拉取
+        Uri? url = null;
+        if (!string.IsNullOrWhiteSpace(candidate) && Uri.TryCreate(candidate, UriKind.Absolute, out var u) && (u.Scheme is "http" or "https"))
+        {
+            url = u;
+        }
+        else
+        {
+            var looksLikeJson = !string.IsNullOrWhiteSpace(candidate) && (candidate.StartsWith('{') || candidate.StartsWith('['));
+            if (!looksLikeJson)
+            {
+                // 固定分支：PitPat-NewWorld
+                var branch = "PitPat-NewWorld";
+                var rawUrl = $"http://kjgitlab.yijiesudai.com:5013/pitpat/pitpatgame/raw/{Uri.EscapeDataString(branch)}/PVEExcel/Json/{Uri.EscapeDataString(onlyFileName)}";
+                url = new Uri(rawUrl);
+
+                // fileName 用归一化后的文件名（用于本地落盘更新）
+                fileName = onlyFileName;
+
+                Log.Information("[DingTalkEvents] Auto-fetch from GitLab raw. file={File} url={Url} (candidateEmpty={CandidateEmpty})",
+                    fileName,
+                    url.ToString(),
+                    string.IsNullOrWhiteSpace(candidate));
+            }
+        }
+
+        // 如果最终得到了 URL，就走远程拉取 JSON
+        if (url is not null)
+        {
+            try
+            {
+                var cfg = Resolve<IConfiguration>();
+
+                // GitLab 拉取鉴权（支持三种方式，按优先级：PRIVATE-TOKEN > Bearer > Basic）
+                // 配置：Robot:GitLabToken / Robot:GitLabBearerToken / Robot:GitLabUsername / Robot:GitLabPassword
+                var gitLabToken = cfg["Robot:GitLabToken"];
+                var gitLabBearerToken = cfg["Robot:GitLabBearerToken"];
+                var gitLabUsername = cfg["Robot:GitLabUsername"];
+                var gitLabPassword = cfg["Robot:GitLabPassword"];
+
+                var factory = Resolve<IHttpClientFactory>();
+                var client = factory.CreateClient();
+
+                var authMode = "none";
+
+                if (!string.IsNullOrWhiteSpace(gitLabToken))
+                {
+                    // GitLab Personal Access Token (PAT)
+                    client.DefaultRequestHeaders.Remove("PRIVATE-TOKEN");
+                    client.DefaultRequestHeaders.Add("PRIVATE-TOKEN", gitLabToken);
+                    authMode = "private-token";
+                }
+                else if (!string.IsNullOrWhiteSpace(gitLabBearerToken))
+                {
+                    // OAuth / Access Token
+                    client.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", gitLabBearerToken);
+                    authMode = "bearer";
+                }
+                else if (!string.IsNullOrWhiteSpace(gitLabUsername) && !string.IsNullOrWhiteSpace(gitLabPassword))
+                {
+                    // Basic: username:password
+                    var raw = $"{gitLabUsername}:{gitLabPassword}";
+                    var b64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(raw));
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", b64);
+                    authMode = "basic";
+                }
+
+                Log.Information(
+                    "[DingTalkEvents] GitLab auth mode: {AuthMode} (hasPrivateToken={HasToken} hasBearer={HasBearer} hasBasic={HasBasic})",
+                    authMode,
+                    !string.IsNullOrWhiteSpace(gitLabToken),
+                    !string.IsNullOrWhiteSpace(gitLabBearerToken),
+                    !string.IsNullOrWhiteSpace(gitLabUsername) && !string.IsNullOrWhiteSpace(gitLabPassword));
+
+                using var resp = await client.GetAsync(url, ct);
+                var bodyStr = await resp.Content.ReadAsStringAsync(ct);
+
+                var contentType = resp.Content.Headers.ContentType?.ToString() ?? string.Empty;
+                Log.Information(
+                    "[DingTalkEvents] GitLab fetch done. status={Status} contentType={ContentType} len={Len} url={Url}",
+                    (int)resp.StatusCode,
+                    contentType,
+                    bodyStr?.Length ?? 0,
+                    url.ToString());
+
+                // GitLab 没权限/登录页/错误页经常会返回 HTML（虽然可能还是 200）。这里做硬性校验，避免后面 JSON 解析报 '<'
+                var head = (bodyStr ?? string.Empty).TrimStart();
+                if (!resp.IsSuccessStatusCode)
+                {
+                    Log.Error(
+                        "[DingTalkEvents] GitLab fetch failed. status={Status} url={Url} bodyHead={BodyHead}",
+                        (int)resp.StatusCode,
+                        url.ToString(),
+                        head.Length <= 300 ? head : head[..300]);
+                    await SendEncryptedSuccessAsync(timestamp, nonce, ct);
+                    return;
+                }
+
+                if (head.Length == 0 || head[0] == '<')
+                {
+                    Log.Error(
+                        "[DingTalkEvents] GitLab response is not JSON (maybe HTML login/permission page). url={Url} contentType={ContentType} bodyHead={BodyHead}",
+                        url.ToString(),
+                        contentType,
+                        head.Length <= 500 ? head : head[..500]);
+                    await SendEncryptedSuccessAsync(timestamp, nonce, ct);
+                    return;
+                }
+
+                jsonContentStr = bodyStr;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[DingTalkEvents] Fetch raw json from url failed. fileName={FileName} url={Url}", fileName, url.ToString());
+                await SendEncryptedSuccessAsync(timestamp, nonce, ct);
+                return;
+            }
+        }
+
+        // 解析 JSON 内容
+        if (string.IsNullOrWhiteSpace(jsonContentStr))
+        {
+            Log.Error("[DingTalkEvents] JSON content is empty. fileName={FileName}", fileName);
+            await SendEncryptedSuccessAsync(timestamp, nonce, ct);
+            return;
+        }
+
         JsonElement jsonContent;
         try { jsonContent = JsonSerializer.Deserialize<JsonElement>(jsonContentStr); }
         catch (Exception ex)
@@ -140,9 +329,8 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
             await File.WriteAllBytesAsync(temp, bytes, ct);
 
             // backup existing
-            string? backupPath = null;
             var ts = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-            backupPath = target + "." + ts + ".bak";
+            var backupPath = target + "." + ts + ".bak";
             File.Copy(target, backupPath, overwrite: false);
 
             // atomic replace
@@ -351,7 +539,7 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
         //             HttpContext.Response.StatusCode = 200;
         //             await HttpContext.Response.CompleteAsync();
         //         }
-       
+
     }
 
     private async Task SendEncryptedSuccessAsync(string timestamp, string nonce, CancellationToken ct)
