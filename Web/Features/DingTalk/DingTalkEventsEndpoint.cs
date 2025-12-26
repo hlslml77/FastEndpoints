@@ -551,7 +551,7 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
             var dingMsg = new
             {
                 msgtype = "text",
-                text = new { content = $"全部配置已同步完成 ✅ {DateTime.Now:yyyy-MM-dd HH:mm:ss}" }
+                text = new { content = $"服务器全部配置已热更同步完成 ✅ {DateTime.Now:yyyy-MM-dd HH:mm:ss}" }
             };
             try { await factory.CreateClient().PostAsJsonAsync(groupWebhook, dingMsg, ct); }
             catch (Exception ex) { Log.Error(ex, "[DingTalkEvents] Send ding group message failed for SyncAll"); }
