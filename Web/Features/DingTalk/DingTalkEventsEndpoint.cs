@@ -33,6 +33,11 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
         @"^[\s\S]*?(?<file>[\w\-.]+)(?:\s+(?<payload>(https?://\S+|(\{|\[)[\s\S]+)))?\s*$",
         RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
+    // “全部同步”快捷指令
+    private static readonly Regex _syncAllRegex = new(
+        @"^\s*全部同步\s*$",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
     public override void Configure()
     {
         Post("/dingtalk/events");
@@ -81,6 +86,22 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
 
         var content = cProp.GetString() ?? string.Empty;
         var normalized = content.Trim();
+
+        // 先处理“全部同步”快捷指令
+        if (_syncAllRegex.IsMatch(normalized))
+        {
+            try
+            {
+                await SyncAllFilesAsync(ct);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[DingTalkEvents] SyncAllFilesAsync failed");
+            }
+
+            await SendEncryptedSuccessAsync(timestamp, nonce, ct);
+            return;
+        }
 
         // 额外日志：帮助定位是换行/空格/全角符号/内容缺失导致的匹配失败
         Log.Information(
@@ -408,5 +429,132 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
             nonce,
             encrypt
         }, cancellation: ct);
+    }
+
+    /// <summary>
+    /// 执行“全部同步”逻辑：遍历本地 Json 目录下的所有 .json 文件，
+    /// 依次从固定分支的 GitLab Raw 拉取，同步并热更到服务器。
+    /// </summary>
+    private async Task SyncAllFilesAsync(CancellationToken ct)
+    {
+        const string branch = "PitPat-NewWorld"; // 固定分支，后续如需调整，可考虑放到配置
+        var baseDir = Path.Combine(AppContext.BaseDirectory, "Json");
+        Directory.CreateDirectory(baseDir);
+
+        var files = Directory.GetFiles(baseDir, "*.json", SearchOption.TopDirectoryOnly);
+        if (files.Length == 0)
+        {
+            Log.Warning("[DingTalkEvents] SyncAllFilesAsync: no json files found in {Dir}", baseDir);
+            return;
+        }
+
+        var cfg = Resolve<IConfiguration>();
+        var gitLabToken = cfg["Robot:GitLabToken"];
+        var gitLabBearerToken = cfg["Robot:GitLabBearerToken"];
+        var gitLabUsername = cfg["Robot:GitLabUsername"];
+        var gitLabPassword = cfg["Robot:GitLabPassword"];
+
+        var factory = Resolve<IHttpClientFactory>();
+        var client = factory.CreateClient();
+
+        // 统一鉴权头
+        if (!string.IsNullOrWhiteSpace(gitLabToken))
+        {
+            client.DefaultRequestHeaders.Remove("PRIVATE-TOKEN");
+            client.DefaultRequestHeaders.Add("PRIVATE-TOKEN", gitLabToken);
+        }
+        else if (!string.IsNullOrWhiteSpace(gitLabBearerToken))
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", gitLabBearerToken);
+        }
+        else if (!string.IsNullOrWhiteSpace(gitLabUsername) && !string.IsNullOrWhiteSpace(gitLabPassword))
+        {
+            var raw = $"{gitLabUsername}:{gitLabPassword}";
+            var b64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(raw));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", b64);
+        }
+
+        var projectId = "77"; // PitPatGame 项目ID
+        var baseFull = Path.GetFullPath(baseDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        var jsonOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        foreach (var localPath in files)
+        {
+            var safeFileName = Path.GetFileName(localPath);
+            try
+            {
+                var filePath = Uri.EscapeDataString($"PVEExcel/Json/{safeFileName}");
+                var url = $"http://kjgitlab.yijiesudai.com:5013/api/v4/projects/{projectId}/repository/files/{filePath}/raw?ref={Uri.EscapeDataString(branch)}";
+
+                using var resp = await client.GetAsync(url, ct);
+                var bodyStr = await resp.Content.ReadAsStringAsync(ct);
+
+                var head = (bodyStr ?? string.Empty).TrimStart();
+                if (!resp.IsSuccessStatusCode || head.Length == 0 || head[0] == '<')
+                {
+                    Log.Error("[DingTalkEvents] SyncAllFilesAsync: failed to fetch {File}. status={Status} head={Head}", safeFileName, (int)resp.StatusCode, head.Length <= 200 ? head : head[..200]);
+                    continue;
+                }
+
+                JsonElement jsonElem;
+                try { jsonElem = JsonSerializer.Deserialize<JsonElement>(bodyStr ?? string.Empty); }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "[DingTalkEvents] SyncAllFilesAsync: deserialize failed for {File}", safeFileName);
+                    continue;
+                }
+                if (jsonElem.ValueKind != JsonValueKind.Array)
+                {
+                    Log.Error("[DingTalkEvents] SyncAllFilesAsync: root not array for {File}", safeFileName);
+                    continue;
+                }
+
+                // 写 temp, 备份, 替换
+                var targetFull = Path.GetFullPath(localPath);
+                if (!targetFull.StartsWith(baseFull, StringComparison.OrdinalIgnoreCase))
+                    throw new UnauthorizedAccessException("path traversal detected");
+
+                var temp = localPath + ".tmp-" + Guid.NewGuid().ToString("N");
+                var json = JsonSerializer.Serialize(jsonElem, jsonOptions);
+                var bytes = Encoding.UTF8.GetBytes(json);
+                await File.WriteAllBytesAsync(temp, bytes, ct);
+
+                var ts = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+                var backup = localPath + "." + ts + ".bak";
+                File.Copy(localPath, backup, overwrite: false);
+                File.Move(temp, localPath, overwrite: true);
+                try { File.SetLastWriteTimeUtc(localPath, DateTime.UtcNow); } catch { }
+
+                Log.Information("[DingTalkEvents] SyncAllFilesAsync: updated {File}", safeFileName);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[DingTalkEvents] SyncAllFilesAsync: update failed for {File}", safeFileName);
+            }
+        }
+
+        // 全量更新后统一 reload
+        foreach (var c in Resolve<IEnumerable<IReloadableConfig>>())
+        {
+            try { c.Reload(); }
+            catch (Exception ex) { Log.Error(ex, "[DingTalkEvents] SyncAllFilesAsync reload failed for {Name}", c.Name); }
+        }
+
+        // 钉钉通知
+        var groupWebhook = cfg["Robot:GroupWebhook"];
+        if (!string.IsNullOrWhiteSpace(groupWebhook))
+        {
+            var dingMsg = new
+            {
+                msgtype = "text",
+                text = new { content = $"全部配置已同步完成 ✅ {DateTime.Now:yyyy-MM-dd HH:mm:ss}" }
+            };
+            try { await factory.CreateClient().PostAsJsonAsync(groupWebhook, dingMsg, ct); }
+            catch (Exception ex) { Log.Error(ex, "[DingTalkEvents] Send ding group message failed for SyncAll"); }
+        }
     }
 }
