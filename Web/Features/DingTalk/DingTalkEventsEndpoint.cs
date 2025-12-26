@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Web;
 using FastEndpoints;
 using System.Net.Http.Json;
 
@@ -168,8 +169,14 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
             {
                 // 固定分支：PitPat-NewWorld
                 var branch = "PitPat-NewWorld";
-                var rawUrl = $"http://kjgitlab.yijiesudai.com:5013/pitpat/pitpatgame/raw/{Uri.EscapeDataString(branch)}/PVEExcel/Json/{Uri.EscapeDataString(onlyFileName)}";
-                url = new Uri(rawUrl);
+
+                // 使用 GitLab API 获取文件 raw 内容（最稳定，token 鉴权不会被 SSO/反代拦成登录页 HTML）
+                // GET /api/v4/projects/:id/repository/files/:file_path/raw?ref=:ref
+                // 注意：file_path 需要 URL encode（路径分隔符 / 也要编码成 %2F）
+                var projectIdOrPath = "77"; // 使用数字项目ID最稳定，不受 namespace 变更影响
+                var filePath = Uri.EscapeDataString($"PVEExcel/Json/{onlyFileName}");
+                var apiUrl = $"http://kjgitlab.yijiesudai.com:5013/api/v4/projects/{projectIdOrPath}/repository/files/{filePath}/raw?ref={Uri.EscapeDataString(branch)}";
+                url = new Uri(apiUrl);
 
                 // fileName 用归一化后的文件名（用于本地落盘更新）
                 fileName = onlyFileName;
@@ -234,12 +241,14 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
                 var bodyStr = await resp.Content.ReadAsStringAsync(ct);
 
                 var contentType = resp.Content.Headers.ContentType?.ToString() ?? string.Empty;
+                // 修改日志，添加更多调试信息
                 Log.Information(
-                    "[DingTalkEvents] GitLab fetch done. status={Status} contentType={ContentType} len={Len} url={Url}",
-                    (int)resp.StatusCode,
-                    contentType,
-                    bodyStr?.Length ?? 0,
-                    url.ToString());
+                    "[DingTalkEvents] GitLab 请求详情. url={Url}, authMode={AuthMode}, hasToken={HasToken}, status={Status}",
+                    url,
+                    authMode,
+                    !string.IsNullOrEmpty(gitLabToken) || !string.IsNullOrEmpty(gitLabBearerToken) ||
+                    (!string.IsNullOrEmpty(gitLabUsername) && !string.IsNullOrEmpty(gitLabPassword)),
+                    (int)resp.StatusCode);
 
                 // GitLab 没权限/登录页/错误页经常会返回 HTML（虽然可能还是 200）。这里做硬性校验，避免后面 JSON 解析报 '<'
                 var head = (bodyStr ?? string.Empty).TrimStart();
