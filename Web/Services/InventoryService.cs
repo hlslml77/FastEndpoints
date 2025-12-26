@@ -64,27 +64,25 @@ public class InventoryService : IInventoryService
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
-                // roll ranges helper
-                int? Roll(string? range)
+                // roll stat value from [min,max] array
+                int? Roll(int[]? arr)
                 {
-                    if (string.IsNullOrWhiteSpace(range)) return null;
-                    var sp = range.Split('|');
-                    if (sp.Length != 2) return null;
-                    if (!int.TryParse(sp[0], out var min)) return null;
-                    if (!int.TryParse(sp[1], out var max)) return null;
+                    if (arr == null || arr.Length != 2) return null;
+                    var min = arr[0];
+                    var max = arr[1];
                     if (max < min) (min, max) = (max, min);
                     return _rand.Next(min, max + 1);
                 }
-                rec.Attack = Roll(eqCfg.AttackRange);
-                rec.HP = Roll(eqCfg.HPRange);
-                rec.Defense = Roll(eqCfg.DefenseRange);
-                rec.Critical = Roll(eqCfg.Critical);
-                rec.AttackSpeed = Roll(eqCfg.AttackSpeed);
-                rec.CriticalDamage = Roll(eqCfg.CriticalDamage);
-                rec.UpperLimb = Roll(eqCfg.UpperLimbRange);
-                rec.LowerLimb = Roll(eqCfg.LowerLimbRange);
-                rec.Core = Roll(eqCfg.CoreRange);
-                rec.HeartLungs = Roll(eqCfg.HeartLungsRange);
+                rec.Attack          = Roll(eqCfg.AttackRange);
+                rec.HP              = Roll(eqCfg.HPRange);
+                rec.Defense         = Roll(eqCfg.DefenseRange);
+                rec.Critical        = Roll(eqCfg.Critical);
+                rec.AttackSpeed     = Roll(eqCfg.AttackSpeed);
+                rec.CriticalDamage  = Roll(eqCfg.CriticalDamage);
+                rec.UpperLimb       = Roll(eqCfg.UpperLimbRange);
+                rec.LowerLimb       = Roll(eqCfg.LowerLimbRange);
+                rec.Core            = Roll(eqCfg.CoreRange);
+                rec.HeartLungs      = Roll(eqCfg.HeartLungsRange);
 
                 _db.PlayerEquipmentItem.Add(rec);
             }

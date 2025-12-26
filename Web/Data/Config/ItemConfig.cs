@@ -13,22 +13,25 @@ public class ItemConfig
 
 public class EquipmentConfig
 {
-    public int ID { get; set; }          // 行ID（无业务含义）
-    public int EquipID { get; set; }     // 对应 Item.json 里的 ID（且 PropType=2）
+    /// <summary>
+    /// 装备ID（与 Item.json 里的装备道具ID一致；历史上叫 equipID）
+    /// </summary>
+    public int ID { get; set; }
+
     public int Quality { get; set; }
     public int Part { get; set; }
 
-    // 属性区间（字符串配置如 "3|20" 已在服务中解析成 IntRange）
-    public string? AttackRange { get; set; }
-    public string? HPRange { get; set; }
-    public string? DefenseRange { get; set; }
-    public string? Critical { get; set; }
-    public string? AttackSpeed { get; set; }
-    public string? CriticalDamage { get; set; }
-    public string? UpperLimbRange { get; set; }
-    public string? LowerLimbRange { get; set; }
-    public string? CoreRange { get; set; }
-    public string? HeartLungsRange { get; set; }
+    // 当前 Equipment.json 里这些字段是 [min,max] 数组或 null
+    public int[]? AttackRange { get; set; }
+    public int[]? HPRange { get; set; }
+    public int[]? DefenseRange { get; set; }
+    public int[]? Critical { get; set; }
+    public int[]? AttackSpeed { get; set; }
+    public int[]? CriticalDamage { get; set; }
+    public int[]? UpperLimbRange { get; set; }
+    public int[]? LowerLimbRange { get; set; }
+    public int[]? CoreRange { get; set; }
+    public int[]? HeartLungsRange { get; set; }
 }
 
 public readonly record struct IntRange(int Min, int Max);

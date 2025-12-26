@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Web.Data.Config;
 using Serilog;
-using Microsoft.AspNetCore.Hosting;
+
 
 namespace Web.Services;
 
@@ -19,7 +19,7 @@ public class ItemConfigService : IItemConfigService, IReloadableConfig, IDisposa
     private readonly JsonConfigWatcher _watcher;
 
     private volatile List<ItemConfig> _items = new();
-    private volatile List<EquipmentConfig> _equipments = new();
+    private volatile List<EquipmentConfig> _equipments = new(); // cache of equipment configs
 
     public string Name => "item";
     public DateTime LastReloadTime { get; private set; }
@@ -65,7 +65,7 @@ public class ItemConfigService : IItemConfigService, IReloadableConfig, IDisposa
     public object GetStatus() => new { Name, LastReloadTime, Items = _items.Count, Equipments = _equipments.Count, Dir = _dir };
 
     public ItemConfig? GetItem(int id) => _items.FirstOrDefault(i => i.ID == id);
-    public EquipmentConfig? GetEquipmentByEquipId(int equipId) => _equipments.FirstOrDefault(e => e.EquipID == equipId);
+    public EquipmentConfig? GetEquipmentByEquipId(int equipId) => _equipments.FirstOrDefault(e => e.ID == equipId);
     public IReadOnlyList<ItemConfig> GetAllItems() => _items;
 
     public void Dispose()

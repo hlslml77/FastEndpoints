@@ -1,770 +1,1586 @@
 [
   {
-    "ID": 1,
-    "EquipID": 20001,
+    "ID": 20001,
     "Quality": 1,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "0|5",
+    "Critical": [
+      0,
+      5
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 2,
-    "EquipID": 20002,
+    "ID": 20002,
     "Quality": 2,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "3|8",
+    "Critical": [
+      3,
+      8
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 3,
-    "EquipID": 20003,
+    "ID": 20003,
     "Quality": 3,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "6|11",
+    "Critical": [
+      6,
+      11
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 4,
-    "EquipID": 20011,
+    "ID": 20011,
     "Quality": 1,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "0|5",
+    "AttackSpeed": [
+      0,
+      5
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 5,
-    "EquipID": 20012,
+    "ID": 20012,
     "Quality": 2,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "3|8",
+    "AttackSpeed": [
+      3,
+      8
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 6,
-    "EquipID": 20013,
+    "ID": 20013,
     "Quality": 3,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "6|11",
+    "AttackSpeed": [
+      6,
+      11
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 7,
-    "EquipID": 20021,
+    "ID": 20021,
     "Quality": 1,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 8,
-    "EquipID": 20022,
+    "ID": 20022,
     "Quality": 2,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 9,
-    "EquipID": 20023,
+    "ID": 20023,
     "Quality": 3,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 10,
-    "EquipID": 20031,
+    "ID": 20031,
     "Quality": 1,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "0|5",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      0,
+      5
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 11,
-    "EquipID": 20032,
+    "ID": 20032,
     "Quality": 2,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "3|8",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      3,
+      8
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 12,
-    "EquipID": 20033,
+    "ID": 20033,
     "Quality": 3,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "6|11",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      6,
+      11
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 13,
-    "EquipID": 20041,
+    "ID": 20041,
     "Quality": 1,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "0|5",
+    "Critical": [
+      0,
+      5
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 14,
-    "EquipID": 20042,
+    "ID": 20042,
     "Quality": 2,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "3|8",
+    "Critical": [
+      3,
+      8
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 15,
-    "EquipID": 20043,
+    "ID": 20043,
     "Quality": 3,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "6|11",
+    "Critical": [
+      6,
+      11
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 16,
-    "EquipID": 20051,
+    "ID": 20051,
     "Quality": 1,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "0|5",
+    "AttackSpeed": [
+      0,
+      5
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 17,
-    "EquipID": 20052,
+    "ID": 20052,
     "Quality": 2,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "3|8",
+    "AttackSpeed": [
+      3,
+      8
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 18,
-    "EquipID": 20053,
+    "ID": 20053,
     "Quality": 3,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "6|11",
+    "AttackSpeed": [
+      6,
+      11
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 19,
-    "EquipID": 20061,
+    "ID": 20061,
     "Quality": 1,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 20,
-    "EquipID": 20062,
+    "ID": 20062,
     "Quality": 2,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 21,
-    "EquipID": 20063,
+    "ID": 20063,
     "Quality": 3,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 22,
-    "EquipID": 20071,
+    "ID": 20071,
     "Quality": 1,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "0|5",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      0,
+      5
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 23,
-    "EquipID": 20072,
+    "ID": 20072,
     "Quality": 2,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "3|8",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      3,
+      8
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 24,
-    "EquipID": 20073,
+    "ID": 20073,
     "Quality": 3,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "6|11",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      6,
+      11
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 25,
-    "EquipID": 20081,
+    "ID": 20081,
     "Quality": 1,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "0|5",
+    "Critical": [
+      0,
+      5
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 26,
-    "EquipID": 20082,
+    "ID": 20082,
     "Quality": 2,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "3|8",
+    "Critical": [
+      3,
+      8
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 27,
-    "EquipID": 20083,
+    "ID": 20083,
     "Quality": 3,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "6|11",
+    "Critical": [
+      6,
+      11
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 28,
-    "EquipID": 20091,
+    "ID": 20091,
     "Quality": 1,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "0|5",
+    "AttackSpeed": [
+      0,
+      5
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 29,
-    "EquipID": 20092,
+    "ID": 20092,
     "Quality": 2,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "3|8",
+    "AttackSpeed": [
+      3,
+      8
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 30,
-    "EquipID": 20093,
+    "ID": 20093,
     "Quality": 3,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "6|11",
+    "AttackSpeed": [
+      6,
+      11
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 31,
-    "EquipID": 20101,
+    "ID": 20101,
     "Quality": 1,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 32,
-    "EquipID": 20102,
+    "ID": 20102,
     "Quality": 2,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 33,
-    "EquipID": 20103,
+    "ID": 20103,
     "Quality": 3,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 34,
-    "EquipID": 20111,
+    "ID": 20111,
     "Quality": 1,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "0|5",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      0,
+      5
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 35,
-    "EquipID": 20112,
+    "ID": 20112,
     "Quality": 2,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "3|8",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      3,
+      8
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 36,
-    "EquipID": 20113,
+    "ID": 20113,
     "Quality": 3,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "6|11",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      6,
+      11
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 37,
-    "EquipID": 20121,
+    "ID": 20121,
     "Quality": 1,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "0|5",
+    "Critical": [
+      0,
+      5
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 38,
-    "EquipID": 20122,
+    "ID": 20122,
     "Quality": 2,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "3|8",
+    "Critical": [
+      3,
+      8
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 39,
-    "EquipID": 20123,
+    "ID": 20123,
     "Quality": 3,
     "Part": 1,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": "6|11",
+    "Critical": [
+      6,
+      11
+    ],
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 40,
-    "EquipID": 20131,
+    "ID": 20131,
     "Quality": 1,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "0|5",
+    "AttackSpeed": [
+      0,
+      5
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 41,
-    "EquipID": 20132,
+    "ID": 20132,
     "Quality": 2,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "3|8",
+    "AttackSpeed": [
+      3,
+      8
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 42,
-    "EquipID": 20133,
+    "ID": 20133,
     "Quality": 3,
     "Part": 2,
-    "AttackRange": "3|20",
+    "AttackRange": [
+      3,
+      20
+    ],
     "HPRange": null,
     "DefenseRange": null,
     "Critical": null,
-    "AttackSpeed": "6|11",
+    "AttackSpeed": [
+      6,
+      11
+    ],
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 43,
-    "EquipID": 20141,
+    "ID": 20141,
     "Quality": 1,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 44,
-    "EquipID": 20142,
+    "ID": 20142,
     "Quality": 2,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 45,
-    "EquipID": 20143,
+    "ID": 20143,
     "Quality": 3,
     "Part": 3,
     "AttackRange": null,
-    "HPRange": "3|20",
-    "DefenseRange": "1|10",
+    "HPRange": [
+      3,
+      20
+    ],
+    "DefenseRange": [
+      1,
+      10
+    ],
     "Critical": null,
     "AttackSpeed": null,
     "CriticalDamage": null,
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 46,
-    "EquipID": 20151,
+    "ID": 20151,
     "Quality": 1,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "0|5",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      0,
+      5
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 47,
-    "EquipID": 20152,
+    "ID": 20152,
     "Quality": 2,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "3|8",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      3,
+      8
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   },
   {
-    "ID": 48,
-    "EquipID": 20153,
+    "ID": 20153,
     "Quality": 3,
     "Part": 4,
     "AttackRange": null,
-    "HPRange": "3|20",
+    "HPRange": [
+      3,
+      20
+    ],
     "DefenseRange": null,
     "Critical": null,
     "AttackSpeed": null,
-    "CriticalDamage": "6|11",
-    "UpperLimbRange": "1|5",
-    "LowerLimbRange": "1|5",
-    "CoreRange": "1|5",
-    "HeartLungsRange": "1|5"
+    "CriticalDamage": [
+      6,
+      11
+    ],
+    "UpperLimbRange": [
+      1,
+      5
+    ],
+    "LowerLimbRange": [
+      1,
+      5
+    ],
+    "CoreRange": [
+      1,
+      5
+    ],
+    "HeartLungsRange": [
+      1,
+      5
+    ]
   }
 ]
