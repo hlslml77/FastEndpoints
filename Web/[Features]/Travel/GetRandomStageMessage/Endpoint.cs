@@ -121,32 +121,26 @@ public class Endpoint : Endpoint<GetRandomStageMessageRequest, GetRandomStageMes
                 return;
             }
 
-            // 查询当前用户在该关卡+节点自己保存过的所有ID集合
-            var ownContents = await _dbContext.TravelStageMessage
-                .Where(m => m.StageId == req.LevelId && m.NodeId == req.NodeId && m.UserId == userId)
-                .Select(m => m.MessageContent)
-                .ToListAsync(ct);
+            // 需求：随机时就排除当前用户自己保存/发布的留言
+            var candidateMessages = messages
+                .Where(m => m.UserId != userId)
+                .ToList();
 
-            var ownSavedIds = new HashSet<int>();
-            foreach (var content in ownContents)
+            if (candidateMessages.Count == 0)
             {
-                try
+                // 只有自己的留言（或没有可用留言）时返回空对象
+                await HttpContext.Response.SendAsync(new GetRandomStageMessageResponse
                 {
-                    var list = JsonSerializer.Deserialize<List<int>>(content);
-                    if (list != null)
-                    {
-                        foreach (var id in list)
-                            ownSavedIds.Add(id);
-                    }
-                }
-                catch
-                {
-                    // ignore malformed json
-                }
+                    Success = true,
+                    UserId = 0,
+                    MessageIDList = new List<int>(),
+                    CreatedAt = DateTime.MinValue
+                }, 200, cancellation: ct);
+                return;
             }
 
             // 随机选择一条留言
-            var randomMessage = messages[_rand.Next(0, messages.Count)];
+            var randomMessage = candidateMessages[_rand.Next(0, candidateMessages.Count)];
 
             // 从 MessageContent 反序列化出 IdList
             List<int>? idList = null;
@@ -159,11 +153,7 @@ public class Endpoint : Endpoint<GetRandomStageMessageRequest, GetRandomStageMes
                 idList = new List<int>();
             }
 
-            // 需求：去掉自己保存过的消息ID
-            if (ownSavedIds.Count > 0 && idList is not null)
-            {
-                idList = idList.Where(id => !ownSavedIds.Contains(id)).ToList();
-            }
+            
 
             await HttpContext.Response.SendAsync(new GetRandomStageMessageResponse
             {
