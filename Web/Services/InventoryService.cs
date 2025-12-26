@@ -58,8 +58,8 @@ public class InventoryService : IInventoryService
                 {
                     UserId = userId,
                     EquipId = itemId,
-                    Quality = itemCfg.Quality,
-                    Part = itemCfg.Part,
+                    Quality = eqCfg.Quality,
+                    Part = eqCfg.Part,
                     IsEquipped = false,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
