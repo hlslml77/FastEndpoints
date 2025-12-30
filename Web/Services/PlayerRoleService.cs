@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Web.Data;
 using Web.Data.Entities;
 using Serilog;
+using Web.Data.Config;
 
 namespace Web.Services;
 
@@ -249,9 +250,11 @@ public class PlayerRoleService : IPlayerRoleService
         // 距离单位：与 Role_Sport.json 保持一致（当前为“米”），不再转换为公里
         var dist = _configService.GetSportDistribution(deviceType, distance);
 
+        // 如果找不到对应分配表，默认视为 0 加成，但经验仍可获得，不再抛异常导致 400
         if (dist == null)
         {
-            throw new ArgumentException($"Invalid sport distribution: deviceType={deviceType} at {distance}m");
+            Log.Warning("No sport distribution matched for deviceType={DeviceType}, distance={Distance}m, treat as zero attribute gain.", deviceType, distance);
+            dist = new SportDistributionResult();
         }
 
         // 1. 根据分配表增加对应主属性，并累计今日属性点（按总和限制）
