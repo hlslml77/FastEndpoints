@@ -124,7 +124,7 @@ public class InventoryService : IInventoryService
                     if (randCfg != null)
                     {
                         var possible = new List<string>();
-                        // random attribute is chosen from the seed's configured ranges in Equipment-Random.
+                        // random attribute is chosen from the seed's configured ranges in Equipment_Random.
                         // It is allowed to be the same type as a fixed attribute.
                         if (randCfg.AttackRange is { Length: 2 }) possible.Add("Attack");
                         if (randCfg.HPRange is { Length: 2 }) possible.Add("HP");

@@ -50,7 +50,7 @@ var newRandoms = new List<EquipmentRandomConfig>();
             {
                 var items = JsonSerializer.Deserialize<List<ItemConfig>>(File.ReadAllText(itemPath), _opts);
                 if (items != null) newItems.AddRange(items);
-var randomPath = Path.Combine(_dir, "Equipment-Random.json");
+var randomPath = Path.Combine(_dir, "Equipment_Random.json");
                 if (File.Exists(randomPath))
                 {
                     var rands = JsonSerializer.Deserialize<List<EquipmentRandomConfig>>(File.ReadAllText(randomPath), _opts);
