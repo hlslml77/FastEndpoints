@@ -716,12 +716,8 @@ POST /api/travel/random-player
 
 响应体
 {
-  "success": true,            // bool
-  "userInfo": {               // object
-    "userId": 987654,         // long
-    "currentLevel": 5,        // int
-    "currentExperience": 1200 // int
-  },
+  "success": true,            // bool              // object
+  "userId": 987654,           // long
   "isFollowed": false,        // bool 当前玩家是否已关注对方
   "encounterCount": 3         // int 与该玩家的偶遇次数
 }
