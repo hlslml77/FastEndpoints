@@ -56,29 +56,33 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
             // 即时计算副属性（不落库）
             var sec = _roleGrowthService.ComputeSecondary(player);
 
+            var attributes = new List<Web.Data.PlayerAttributeType>
+            {
+                new() { Type = 0,   Value = (double)player.AttrUpperLimb },   // UpperLimb
+                new() { Type = 1,   Value = (double)player.AttrLowerLimb },   // LowerLimb
+                new() { Type = 2,   Value = (double)player.AttrCore },        // CoreRange
+                new() { Type = 3,   Value = (double)player.AttrHeartLungs },  // HeartLungs
+                new() { Type = 100, Value = (double)sec.Attack },             // Attack
+                new() { Type = 101, Value = (double)sec.HP },                 // HP
+                new() { Type = 102, Value = (double)sec.Defense },            // Defense
+                new() { Type = 103, Value = (double)sec.Critical },           // Critical
+                new() { Type = 104, Value = (double)sec.AttackSpeed },        // AttackSpeed
+                new() { Type = 105, Value = (double)sec.CriticalDamage },     // CriticalDamage
+                new() { Type = 106, Value = (double)sec.Efficiency },         // Efficiency
+                new() { Type = 107, Value = (double)sec.Energy },             // Energy
+                new() { Type = 108, Value = (double)sec.Speed }               // Speed
+            };
+
             var response = new PlayerRoleResponse
             {
                 UserId = player.UserId,
                 CurrentLevel = player.CurrentLevel,
                 CurrentExperience = player.CurrentExperience,
                 ExperienceToNextLevel = nextLevelExp,
-                UpperLimb = player.AttrUpperLimb,
-                LowerLimb = player.AttrLowerLimb,
-                Core = player.AttrCore,
-                HeartLungs = player.AttrHeartLungs,
                 TodayAttributePoints = player.TodayAttributePoints,
                 AvailableAttributePoints = config.DailyAttributePointsLimit - player.TodayAttributePoints,
-                SpeedBonus = sec.Speed,
-                SecAttack = sec.Attack,
-                SecHP = sec.HP,
-                SecDefense = sec.Defense,
-                SecAttackSpeed = sec.AttackSpeed,
-                SecCritical = sec.Critical,
-                SecCriticalDamage = sec.CriticalDamage,
-                SecSpeed = sec.Speed,
-                SecEfficiency = sec.Efficiency,
-                SecEnergy = sec.Energy,
-                LastUpdateTime = player.LastUpdateTime
+                LastUpdateTime = player.LastUpdateTime,
+                Attributes = attributes
             };
 
             await HttpContext.Response.SendAsync(response, 200, cancellation: ct);

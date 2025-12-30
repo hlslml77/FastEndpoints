@@ -72,6 +72,11 @@ public class PlayerRoleResponse
     public decimal SecEnergy { get; set; }
 
     /// <summary>
+    /// 统一属性数组，见 PlayerAttributeType 枚举说明
+    /// </summary>
+    public List<Web.Data.PlayerAttributeType>? Attributes { get; set; }
+
+    /// <summary>
     /// 最后更新时间
     /// </summary>
     public DateTime LastUpdateTime { get; set; }

@@ -163,24 +163,27 @@ POST /api/role/get-player
   "currentLevel": 5,               // int
   "currentExperience": 1200,       // int
   "experienceToNextLevel": 1500,   // int
-  "upperLimb": 12,                 // int
-  "lowerLimb": 11,                 // int
-  "core": 10,                      // int
-  "heartLungs": 9,                 // int
   "todayAttributePoints": 4,       // int
   "availableAttributePoints": 6,   // int
-  "speedBonus": 0.23,              // double 等同于 secSpeed
-  "secAttack": 1.75,               // double
-  "secHP": 0.50,                   // double
-  "secDefense": 0.40,              // double
-  "secAttackSpeed": 0.30,          // double
-  "secCritical": 0.20,             // double
-  "secCriticalDamage": 0.35,       // double
-  "secSpeed": 0.23,                // double
-  "secEfficiency": 0.10,           // double
-  "secEnergy": 0.15,               // double
-  "lastUpdateTime": "2025-01-01T00:00:00Z" // DateTime (ISO 8601)
+  "lastUpdateTime": "2025-01-01T00:00:00Z", // DateTime (ISO 8601)
+  "attributes": [
+    { "type": 0,   "value": 12 },    // UpperLimb
+    { "type": 1,   "value": 11 },    // LowerLimb
+    { "type": 2,   "value": 10 },    // CoreRange
+    { "type": 3,   "value": 9  },    // HeartLungs
+    { "type": 100, "value": 1.75 },  // Attack
+    { "type": 101, "value": 0.50 },  // Hp
+    { "type": 102, "value": 0.40 },  // Defense
+    { "type": 103, "value": 0.20 },  // Critical
+    { "type": 104, "value": 0.30 },  // AttackSpeed
+    { "type": 105, "value": 0.35 },  // CriticalDamage
+    { "type": 106, "value": 0.10 },  // Efficiency
+    { "type": 107, "value": 0.15 },  // Energy
+    { "type": 108, "value": 0.23 }   // Speed
+  ]
 }
+
+备注：服务端仍可能同时返回旧字段（upperLimb/secAttack...）用于兼容；客户端推荐以 attributes 为准。
 
 示例（curl）
 curl -X POST https://host/api/role/get-player \
