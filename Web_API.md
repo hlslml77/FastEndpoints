@@ -755,23 +755,29 @@ curl -X POST https://host/api/travel/follow/set \
 POST /api/travel/follow/status
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：查询当前玩家是否已关注目标玩家。
-
-请求体
+- 说明：查询当前玩家是否已关注目标玩家（支持批量）。当同时传入 `targetUserIds` 数组时，将返回一个字典，表示各玩家的关注状态；如只传单个 `targetUserId` 字段，则保持向后兼容。
+请求体（批量查询）
 {
-  "targetUserId": 987654 // long
+  "targetUserIds": [987654, 123456] // long[] 最多 100 个
+}
+响应体（批量查询）
+{
+  "success": true,             // bool
+  "status": {                  // object  key=targetUserId, value=isFollowed
+    "987654": true,
+    "123456": false
+  }
 }
 
-响应体
-{
-  "success": true,   // bool
-  "isFollowed": true // bool 当前是否关注
-}
-
-示例（curl）
+示例（curl，单个）
 curl -X POST https://host/api/travel/follow/status \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
   -d '{"targetUserId":987654}'
+
+示例（curl，批量）
+curl -X POST https://host/api/travel/follow/status \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"targetUserIds":[987654,123456]}'
 
 ---
 
