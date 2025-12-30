@@ -84,7 +84,57 @@ public class InventoryService : IInventoryService
                 rec.Core            = Roll(eqCfg.CoreRange);
                 rec.HeartLungs      = Roll(eqCfg.HeartLungsRange);
 
-                _db.PlayerEquipmentItem.Add(rec);
+                    // random sub attribute
+                    var randCfg = _cfg.GetRandomConfig(eqCfg.Random);
+                    if (randCfg != null)
+                    {
+                        var possible = new List<string>();
+                        if (randCfg.AttackRange != null) possible.Add("Attack");
+                        if (randCfg.HPRange != null) possible.Add("HP");
+                        if (randCfg.DefenseRange != null) possible.Add("Defense");
+                        if (randCfg.AttackSpeedRange != null) possible.Add("AttackSpeed");
+                        if (randCfg.CriticalRange != null) possible.Add("Critical");
+                        if (randCfg.CriticalDamageRange != null) possible.Add("CriticalDamage");
+                        if (randCfg.EfficiencyRange != null) possible.Add("Efficiency");
+                        if (randCfg.EnergyRange != null) possible.Add("Energy");
+                        if (randCfg.SpeedRange != null) possible.Add("Speed");
+                        if (possible.Count > 0)
+                        {
+                            var chosen = possible[_rand.Next(possible.Count)];
+                            double RollD(double[] arr)
+                            {
+                                var min = arr[0]; var max = arr[1]; if (max < min) (min, max) = (max, min); return _rand.NextDouble() * (max - min) + min;
+                            }
+                            switch (chosen)
+                            {
+                                case "Attack": rec.Attack ??= _rand.Next((int)randCfg.AttackRange![0], (int)randCfg.AttackRange![1] + 1); break;
+                                case "HP": rec.HP ??= _rand.Next((int)randCfg.HPRange![0], (int)randCfg.HPRange![1] + 1); break;
+                                case "Defense": rec.Defense ??= _rand.Next((int)randCfg.DefenseRange![0], (int)randCfg.DefenseRange![1] + 1); break;
+                                case "AttackSpeed": rec.AttackSpeed ??= (int)Math.Round(RollD(randCfg.AttackSpeedRange!)); break;
+                                case "Critical": rec.Critical ??= (int)Math.Round(RollD(randCfg.CriticalRange!)); break;
+                                case "CriticalDamage": rec.CriticalDamage ??= (int)Math.Round(RollD(randCfg.CriticalDamageRange!)); break;
+                                case "Efficiency": rec.Efficiency ??= RollD(randCfg.EfficiencyRange!); break;
+                                case "Energy": rec.Energy ??= RollD(randCfg.EnergyRange!); break;
+                                case "Speed": rec.Speed ??= RollD(randCfg.SpeedRange!); break;
+                            }
+                        }
+                    }
+
+                    // weapon special attribute chance 20%
+                    if (eqCfg.Part == 1)
+                    {
+                        if (_rand.NextDouble() < 0.2)
+                        {
+                            var entries = _cfg.GetAllEntryConfigs();
+                            if (entries.Count > 0)
+                            {
+                                var entry = entries[_rand.Next(entries.Count)];
+                                rec.SpecialEntryId = entry.ID;
+                            }
+                        }
+                    }
+
+                    _db.PlayerEquipmentItem.Add(rec);
             }
         }
         else

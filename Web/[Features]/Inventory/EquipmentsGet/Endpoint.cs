@@ -1,9 +1,16 @@
 using FastEndpoints;
 using System.Security.Claims;
 using Web.Services;
+using Web.Data;
 using Serilog;
 
 namespace InventoryApi.EquipmentsGet;
+
+public class AttrDto
+{
+    public int Type { get; set; }
+    public double Value { get; set; }
+}
 
 public class ResponseEquipment
 {
@@ -11,22 +18,19 @@ public class ResponseEquipment
     public int EquipId { get; set; }
     public int Quality { get; set; }
     public int Part { get; set; }
-    public int? Attack { get; set; }
-    public int? HP { get; set; }
-    public int? Defense { get; set; }
-    public int? Critical { get; set; }
-    public int? AttackSpeed { get; set; }
-    public int? CriticalDamage { get; set; }
-    public int? UpperLimb { get; set; }
-    public int? LowerLimb { get; set; }
-    public int? Core { get; set; }
-    public int? HeartLungs { get; set; }
+    public List<AttrDto> Attrs { get; set; } = new();
+    public int? SpecialEntryId { get; set; }
     public bool IsEquipped { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
 
-public class Endpoint : EndpointWithoutRequest<List<ResponseEquipment>>
+public class EquipmentsResponse
+{
+    public List<ResponseEquipment> Equipments { get; set; } = new();
+}
+
+public class Endpoint : EndpointWithoutRequest<EquipmentsResponse>
 {
     private readonly IInventoryService _svc;
     public Endpoint(IInventoryService svc) { _svc = svc; }
@@ -52,26 +56,48 @@ public class Endpoint : EndpointWithoutRequest<List<ResponseEquipment>>
         try
         {
             var eqs = await _svc.GetEquipmentsAsync(userId, ct);
-            var resp = eqs.Select(e => new ResponseEquipment
+            var resp = new EquipmentsResponse
             {
-                Id = e.Id,
-                EquipId = e.EquipId,
-                Quality = e.Quality,
-                Part = e.Part,
-                Attack = e.Attack,
-                HP = e.HP,
-                Defense = e.Defense,
-                Critical = e.Critical,
-                AttackSpeed = e.AttackSpeed,
-                CriticalDamage = e.CriticalDamage,
-                UpperLimb = e.UpperLimb,
-                LowerLimb = e.LowerLimb,
-                Core = e.Core,
-                HeartLungs = e.HeartLungs,
-                IsEquipped = e.IsEquipped,
-                CreatedAt = e.CreatedAt,
-                UpdatedAt = e.UpdatedAt
-            }).ToList();
+                Equipments = eqs.Select(e =>
+                {
+                    var dto = new ResponseEquipment
+                    {
+                        Id = e.Id,
+                        EquipId = e.EquipId,
+                        Quality = e.Quality,
+                        Part = e.Part,
+                        SpecialEntryId = e.SpecialEntryId,
+                        IsEquipped = e.IsEquipped,
+                        CreatedAt = e.CreatedAt,
+                        UpdatedAt = e.UpdatedAt
+                    };
+
+                    void AddInt(int? val, int type)
+                    {
+                        if (val.HasValue) dto.Attrs.Add(new AttrDto { Type = type, Value = val.Value });
+                    }
+                    void AddDouble(double? val, int type)
+                    {
+                        if (val.HasValue) dto.Attrs.Add(new AttrDto { Type = type, Value = val.Value });
+                    }
+
+                    AddInt(e.Attack, (int)EquipBuffType.Attack);
+                    AddInt(e.HP, (int)EquipBuffType.Hp);
+                    AddInt(e.Defense, (int)EquipBuffType.Defense);
+                    AddInt(e.Critical, (int)EquipBuffType.Critical);
+                    AddInt(e.AttackSpeed, (int)EquipBuffType.AttackSpeed);
+                    AddInt(e.CriticalDamage, (int)EquipBuffType.CriticalDamage);
+                    AddInt(e.UpperLimb, (int)PlayerBuffType.UpperLimb);
+                    AddInt(e.LowerLimb, (int)PlayerBuffType.LowerLimb);
+                    AddInt(e.Core, (int)PlayerBuffType.CoreRange);
+                    AddInt(e.HeartLungs, (int)PlayerBuffType.HeartLungs);
+                    AddDouble(e.Efficiency, (int)EquipBuffType.Efficiency);
+                    AddDouble(e.Energy, (int)EquipBuffType.Energy);
+                    AddDouble(e.Speed, (int)EquipBuffType.Speed);
+
+                    return dto;
+                }).ToList()
+            };
 
             await HttpContext.Response.SendAsync(resp, 200, cancellation: ct);
         }

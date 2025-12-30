@@ -32,6 +32,29 @@ public class EquipmentConfig
     public int[]? LowerLimbRange { get; set; }
     public int[]? CoreRange { get; set; }
     public int[]? HeartLungsRange { get; set; }
+public int Random { get; set; }
+}
+public class EquipmentRandomConfig
+{
+    public int ID { get; set; }
+    public int RandomGroup { get; set; }
+    public double[]? AttackRange { get; set; }
+    public double[]? HPRange { get; set; }
+    public double[]? DefenseRange { get; set; }
+    public double[]? AttackSpeedRange { get; set; }
+    public double[]? CriticalRange { get; set; }
+    public double[]? CriticalDamageRange { get; set; }
+    public double[]? EfficiencyRange { get; set; }
+    public double[]? EnergyRange { get; set; }
+    public double[]? SpeedRange { get; set; }
+}
+
+public class EquipmentEntryConfig
+{
+    public int ID { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public double Value { get; set; }
+    public string Description { get; set; } = string.Empty;
 }
 
 public readonly record struct IntRange(int Min, int Max);

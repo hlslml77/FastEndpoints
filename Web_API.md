@@ -51,12 +51,27 @@
 - [11. 新手引导（Tutorial）](#toc-tutorial)
   - [11.1 设置步骤（/api/tutorial/set-step）](#toc-tutorial-set-step)
   - [11.2 获取步骤（/api/tutorial/get-step）](#toc-tutorial-get-step)
-
-
-
 - [调用要点](#toc-notes)
 - [统一错误返回与错误码](#toc-errors)
+## 属性枚举（客户端常量）
 
+### PlayerAttributeType
+| 数值 | 枚举名 | 含义 |
+|------|--------|------|
+| 0    | UpperLimb   | 上肢力量 |
+| 1    | LowerLimb   | 下肢力量 |
+| 2    | CoreRange   | 核心控制 |
+| 3    | HeartLungs  | 心肺功能 |
+| 100 | Attack         | 攻击力 |
+| 101 | Hp             | 生命力 |
+| 102 | Defense        | 防御力 |
+| 103 | Critical       | 暴击率 |
+| 104 | AttackSpeed    | 攻击速度 |
+| 105 | CriticalDamage | 暴击伤害 |
+| 106 | Efficiency     | 产出效率 |
+| 107 | Energy         | 能量储存上限 |
+| 108 | Speed          | 平均速度 |
+| 200 | Experience     | 经验获取效率 |
 
 
 <a id="toc-basics"></a>
@@ -456,36 +471,37 @@ POST /api/inventory/equipments
 - 认证：需要 Bearer Token（权限 web_access）
 - 请求体（POST）：可为空 {}
 
-响应示例（按更新时间倒序）
-[
-  {
-    "id": 101,                         // long
-    "equipId": 20001,                  // int
-    "quality": 3,                      // int
-    "part": 1,                         // int
-    "attack": 15,                      // int?
-    "hp": 120,                         // int?
-    "defense": null,                   // int?
-    "critical": 2,                     // int?
-    "attackSpeed": 1,                  // int?
-    "criticalDamage": 5,               // int?
-    "upperLimb": 1,                    // int?
-    "lowerLimb": 0,                    // int?
-    "core": 0,                         // int?
-    "heartLungs": 0,                   // int?
-    "isEquipped": true,                // bool
-    "createdAt": "2025-01-01T00:00:00Z", // DateTime (ISO 8601)
-    "updatedAt": "2025-01-01T01:00:00Z"  // DateTime (ISO 8601)
-  }
-]
-
 示例（curl）
 curl -X GET https://host/api/inventory/equipments \
   -H "Authorization: Bearer <webToken>"
 
 curl -X POST https://host/api/inventory/equipments \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" -d '{}'
-
+响应示例
+```json
+{
+  "equipments": [
+    {
+      "id": 101,            // long 装备实例ID
+      "equipId": 20001,     // int  配置ID
+      "quality": 3,         // int  品质
+      "part": 1,            // int  装备部位
+      "attrs": [            // 属性数组，只包含有值的属性
+        { "type": 100, "value": 15   },  // 攻击力 (参考 EquipBuffType 枚举)
+        { "type": 101, "value": 120  },  // 生命值
+        { "type": 103, "value": 2    },  // 暴击率
+        { "type": 104, "value": 1    },  // 攻击速度
+        { "type": 105, "value": 5    },  // 暴击伤害
+        { "type": 106, "value": 4.5  },  // 产出效率
+        { "type": 0, "value": 1      }   // 上肢力量 (参考 PlayerBuffType 枚举)
+      ],
+      "specialEntryId": 3,  // int? 武器特殊词条ID (参考 EquipmentEntry.json)
+      "isEquipped": true,   // bool 是否已装备
+      "createdAt": "2025-01-01T00:00:00Z",  // DateTime 创建时间
+      "updatedAt": "2025-01-01T01:00:00Z"   // DateTime 更新时间
+    }
+  ]
+}
 <a id="toc-inventory-equip"></a>
 4.3 穿戴指定装备
 POST /api/inventory/equip

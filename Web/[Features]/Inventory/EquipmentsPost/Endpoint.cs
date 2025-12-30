@@ -4,7 +4,9 @@ using Web.Services;
 
 namespace InventoryApi.EquipmentsPost;
 
-public class Endpoint : EndpointWithoutRequest<List<InventoryApi.EquipmentsGet.ResponseEquipment>>
+using Web.Data;
+
+public class Endpoint : EndpointWithoutRequest<InventoryApi.EquipmentsGet.EquipmentsResponse>
 {
     private readonly IInventoryService _svc;
     private readonly ILogger<Endpoint> _logger;
@@ -31,26 +33,48 @@ public class Endpoint : EndpointWithoutRequest<List<InventoryApi.EquipmentsGet.R
         try
         {
             var eqs = await _svc.GetEquipmentsAsync(userId, ct);
-            var resp = eqs.Select(e => new InventoryApi.EquipmentsGet.ResponseEquipment
+            var resp = new InventoryApi.EquipmentsGet.EquipmentsResponse
             {
-                Id = e.Id,
-                EquipId = e.EquipId,
-                Quality = e.Quality,
-                Part = e.Part,
-                Attack = e.Attack,
-                HP = e.HP,
-                Defense = e.Defense,
-                Critical = e.Critical,
-                AttackSpeed = e.AttackSpeed,
-                CriticalDamage = e.CriticalDamage,
-                UpperLimb = e.UpperLimb,
-                LowerLimb = e.LowerLimb,
-                Core = e.Core,
-                HeartLungs = e.HeartLungs,
-                IsEquipped = e.IsEquipped,
-                CreatedAt = e.CreatedAt,
-                UpdatedAt = e.UpdatedAt
-            }).ToList();
+                Equipments = eqs.Select(e =>
+                {
+                    var dto = new InventoryApi.EquipmentsGet.ResponseEquipment
+                    {
+                        Id = e.Id,
+                        EquipId = e.EquipId,
+                        Quality = e.Quality,
+                        Part = e.Part,
+                        SpecialEntryId = e.SpecialEntryId,
+                        IsEquipped = e.IsEquipped,
+                        CreatedAt = e.CreatedAt,
+                        UpdatedAt = e.UpdatedAt
+                    };
+
+                    void AddInt(int? val, int type)
+                    {
+                        if (val.HasValue) dto.Attrs.Add(new InventoryApi.EquipmentsGet.AttrDto { Type = type, Value = val.Value });
+                    }
+                    void AddDouble(double? val, int type)
+                    {
+                        if (val.HasValue) dto.Attrs.Add(new InventoryApi.EquipmentsGet.AttrDto { Type = type, Value = val.Value });
+                    }
+
+                    AddInt(e.Attack, (int)EquipBuffType.Attack);
+                    AddInt(e.HP, (int)EquipBuffType.Hp);
+                    AddInt(e.Defense, (int)EquipBuffType.Defense);
+                    AddInt(e.Critical, (int)EquipBuffType.Critical);
+                    AddInt(e.AttackSpeed, (int)EquipBuffType.AttackSpeed);
+                    AddInt(e.CriticalDamage, (int)EquipBuffType.CriticalDamage);
+                    AddInt(e.UpperLimb, (int)PlayerBuffType.UpperLimb);
+                    AddInt(e.LowerLimb, (int)PlayerBuffType.LowerLimb);
+                    AddInt(e.Core, (int)PlayerBuffType.CoreRange);
+                    AddInt(e.HeartLungs, (int)PlayerBuffType.HeartLungs);
+                    AddDouble(e.Efficiency, (int)EquipBuffType.Efficiency);
+                    AddDouble(e.Energy, (int)EquipBuffType.Energy);
+                    AddDouble(e.Speed, (int)EquipBuffType.Speed);
+
+                    return dto;
+                }).ToList()
+            };
 
             await HttpContext.Response.SendAsync(resp, 200, cancellation: ct);
         }

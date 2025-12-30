@@ -9,28 +9,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      0,
-      5
+    "CriticalRange": [
+      0.0,
+      5.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20002,
@@ -42,28 +27,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      3,
-      8
+    "CriticalRange": [
+      3.0,
+      8.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20003,
@@ -75,28 +45,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      6,
-      11
+    "CriticalRange": [
+      6.0,
+      11.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20011,
@@ -108,28 +63,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      0,
-      5
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      0.0,
+      5.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20012,
@@ -141,28 +81,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      3,
-      8
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      3.0,
+      8.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20013,
@@ -174,28 +99,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      6,
-      11
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      6.0,
+      11.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20021,
@@ -210,25 +120,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20022,
@@ -243,25 +138,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20023,
@@ -276,25 +156,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20031,
@@ -306,28 +171,13 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      0,
-      5
+      0.0,
+      5.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20032,
@@ -339,28 +189,13 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      3,
-      8
+      3.0,
+      8.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20033,
@@ -372,28 +207,13 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      6,
-      11
+      6.0,
+      11.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20041,
@@ -405,28 +225,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      0,
-      5
+    "CriticalRange": [
+      0.0,
+      5.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20042,
@@ -438,28 +243,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      3,
-      8
+    "CriticalRange": [
+      3.0,
+      8.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20043,
@@ -471,28 +261,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      6,
-      11
+    "CriticalRange": [
+      6.0,
+      11.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20051,
@@ -504,28 +279,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      0,
-      5
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      0.0,
+      5.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20052,
@@ -537,28 +297,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      3,
-      8
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      3.0,
+      8.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20053,
@@ -570,28 +315,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      6,
-      11
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      6.0,
+      11.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20061,
@@ -606,25 +336,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20062,
@@ -639,25 +354,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20063,
@@ -672,25 +372,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20071,
@@ -702,28 +387,13 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      0,
-      5
+      0.0,
+      5.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20072,
@@ -735,28 +405,13 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      3,
-      8
+      3.0,
+      8.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20073,
@@ -768,28 +423,13 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      6,
-      11
+      6.0,
+      11.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20081,
@@ -801,28 +441,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      0,
-      5
+    "CriticalRange": [
+      0.0,
+      5.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20082,
@@ -834,28 +459,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      3,
-      8
+    "CriticalRange": [
+      3.0,
+      8.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20083,
@@ -867,28 +477,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      6,
-      11
+    "CriticalRange": [
+      6.0,
+      11.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20091,
@@ -900,28 +495,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      0,
-      5
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      0.0,
+      5.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20092,
@@ -933,28 +513,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      3,
-      8
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      3.0,
+      8.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20093,
@@ -966,28 +531,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      6,
-      11
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      6.0,
+      11.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20101,
@@ -1002,25 +552,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20102,
@@ -1035,25 +570,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20103,
@@ -1068,25 +588,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20111,
@@ -1098,28 +603,13 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      0,
-      5
+      0.0,
+      5.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20112,
@@ -1131,28 +621,13 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      3,
-      8
+      3.0,
+      8.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20113,
@@ -1164,28 +639,13 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      6,
-      11
+      6.0,
+      11.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20121,
@@ -1197,28 +657,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      0,
-      5
+    "CriticalRange": [
+      0.0,
+      5.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20122,
@@ -1230,28 +675,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      3,
-      8
+    "CriticalRange": [
+      3.0,
+      8.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20123,
@@ -1263,28 +693,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": [
-      6,
-      11
+    "CriticalRange": [
+      6.0,
+      11.0
     ],
-    "AttackSpeed": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20131,
@@ -1296,28 +711,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      0,
-      5
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      0.0,
+      5.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20132,
@@ -1329,28 +729,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      3,
-      8
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      3.0,
+      8.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20133,
@@ -1362,28 +747,13 @@
     ],
     "HPRange": null,
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": [
-      6,
-      11
+    "CriticalRange": null,
+    "AttackSpeedRange": [
+      6.0,
+      11.0
     ],
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20141,
@@ -1398,25 +768,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20142,
@@ -1431,25 +786,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20143,
@@ -1464,25 +804,10 @@
       1,
       10
     ],
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": null,
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   },
   {
     "ID": 20151,
@@ -1494,28 +819,13 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      0,
-      5
+      0.0,
+      5.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 1
   },
   {
     "ID": 20152,
@@ -1527,28 +837,13 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      3,
-      8
+      3.0,
+      8.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 2
   },
   {
     "ID": 20153,
@@ -1560,27 +855,12 @@
       20
     ],
     "DefenseRange": null,
-    "Critical": null,
-    "AttackSpeed": null,
+    "CriticalRange": null,
+    "AttackSpeedRange": null,
     "CriticalDamage": [
-      6,
-      11
+      6.0,
+      11.0
     ],
-    "UpperLimbRange": [
-      1,
-      5
-    ],
-    "LowerLimbRange": [
-      1,
-      5
-    ],
-    "CoreRange": [
-      1,
-      5
-    ],
-    "HeartLungsRange": [
-      1,
-      5
-    ]
+    "Random": 3
   }
 ]

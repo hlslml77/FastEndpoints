@@ -9,12 +9,16 @@ public interface IItemConfigService
 {
     ItemConfig? GetItem(int id);
     EquipmentConfig? GetEquipmentByEquipId(int equipId);
+    EquipmentRandomConfig? GetRandomConfig(int randomGroup);
+    IReadOnlyList<EquipmentEntryConfig> GetAllEntryConfigs();
     IReadOnlyList<ItemConfig> GetAllItems();
 }
 
 public class ItemConfigService : IItemConfigService, IReloadableConfig, IDisposable
 {
     private readonly string _dir;
+private volatile List<EquipmentRandomConfig> _randomConfigs = new();
+    private volatile List<EquipmentEntryConfig> _entryConfigs = new();
     private readonly JsonSerializerOptions _opts = new() { PropertyNameCaseInsensitive = true, AllowTrailingCommas = true, ReadCommentHandling = JsonCommentHandling.Skip, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString };
     private readonly JsonConfigWatcher _watcher;
 
@@ -31,9 +35,13 @@ public class ItemConfigService : IItemConfigService, IReloadableConfig, IDisposa
         _watcher = new JsonConfigWatcher(_dir, "*.json", () => Reload());
     }
 
+public EquipmentRandomConfig? GetRandomConfig(int randomGroup) => _randomConfigs.FirstOrDefault(r => r.RandomGroup == randomGroup);
+    public IReadOnlyList<EquipmentEntryConfig> GetAllEntryConfigs() => _entryConfigs;
     public void Reload()
     {
         var newItems = new List<ItemConfig>();
+var newRandoms = new List<EquipmentRandomConfig>();
+            var newEntries = new List<EquipmentEntryConfig>();
         var newEquips = new List<EquipmentConfig>();
         try
         {
@@ -42,6 +50,19 @@ public class ItemConfigService : IItemConfigService, IReloadableConfig, IDisposa
             {
                 var items = JsonSerializer.Deserialize<List<ItemConfig>>(File.ReadAllText(itemPath), _opts);
                 if (items != null) newItems.AddRange(items);
+var randomPath = Path.Combine(_dir, "Equipment-Random.json");
+                if (File.Exists(randomPath))
+                {
+                    var rands = JsonSerializer.Deserialize<List<EquipmentRandomConfig>>(File.ReadAllText(randomPath), _opts);
+                    if (rands != null) newRandoms.AddRange(rands);
+                }
+
+                var entryPath = Path.Combine(_dir, "EquipmentEntry.json");
+                if (File.Exists(entryPath))
+                {
+                    var entries = JsonSerializer.Deserialize<List<EquipmentEntryConfig>>(File.ReadAllText(entryPath), _opts);
+                    if (entries != null) newEntries.AddRange(entries);
+                }
             }
 
             var equipPath = Path.Combine(_dir, "Equipment.json");
@@ -52,6 +73,8 @@ public class ItemConfigService : IItemConfigService, IReloadableConfig, IDisposa
             }
 
             _items = newItems;
+_randomConfigs = newRandoms;
+            _entryConfigs = newEntries;
             _equipments = newEquips;
             LastReloadTime = DateTime.UtcNow;
             Log.Information("Item configs reloaded. Items={ItemCount}, Equipments={EquipCount}", _items.Count, _equipments.Count);

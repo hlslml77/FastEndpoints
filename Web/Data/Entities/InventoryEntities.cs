@@ -71,6 +71,18 @@ public class PlayerEquipmentItem
     [Column("heart_lungs")]
     public int? HeartLungs { get; set; }
 
+    [Column("efficiency")]
+    public double? Efficiency { get; set; }
+
+    [Column("energy")]
+    public double? Energy { get; set; }
+
+    [Column("speed")]
+    public double? Speed { get; set; }
+
+    [Column("special_entry_id")]
+    public int? SpecialEntryId { get; set; }
+
     [Column("is_equipped")]
     public bool IsEquipped { get; set; }
 
