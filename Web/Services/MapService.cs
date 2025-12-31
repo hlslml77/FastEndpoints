@@ -223,11 +223,15 @@ public class MapService : IMapService
 
         if (progress != null)
         {
-            progress.DistanceMeters = distanceMeters;
+            // 传入的 distanceMeters 表示本次新增的行进距离，而并非累计总距离
+            // 因此需要在原有进度上进行累加，而不是直接覆盖。
+            // 这样便允许客户端将一次长跑拆分为多次上报，也能正确触发后续的解锁、能量累积逻辑。
+
+            progress.DistanceMeters += distanceMeters;
             progress.CreatedAt = DateTime.UtcNow;
             Log.Information(
-                "Updated map progress for user {UserId}: {Start} -> {End}, Distance: {Distance}m",
-                userId, startLocationId, endLocationId, distanceMeters);
+                "Updated map progress for user {UserId}: {Start} -> {End}, +{Delta}m (total={Total}m)",
+                userId, startLocationId, endLocationId, distanceMeters, progress.DistanceMeters);
         }
         else
         {
@@ -241,13 +245,13 @@ public class MapService : IMapService
             };
             _dbContext.PlayerMapProgress.Add(progress);
             Log.Information(
-                "Saved new map progress for user {UserId}: {Start} -> {End}, Distance: {Distance}m",
+                "Saved new map progress for user {UserId}: {Start} -> {End}, Distance: {Distance}m (first record)",
                 userId, startLocationId, endLocationId, distanceMeters);
         }
 
         // 若跑步距离达到起点->终点所需距离，则更新当前点位为终点，并增加该点位人数
         var required = GetRequiredDistanceFromStartToEnd(startLocationId, endLocationId);
-        if (required.HasValue && distanceMeters >= required.Value)
+            if (required.HasValue && progress.DistanceMeters >= required.Value)
         {
             await SetCurrentLocationAsync(userId, endLocationId);
             // 增加终点位置的人数统计
@@ -263,10 +267,10 @@ public class MapService : IMapService
         {
             var req = (decimal)requiredDist.Value;
             var prevExcess = Math.Max(0m, previousDistance - req);
-            var newExcess = Math.Max(0m, distanceMeters - req);
+            var newExcess = Math.Max(0m, progress.DistanceMeters - req);
             addEnergy = Math.Max(0m, newExcess - prevExcess);
 
-            if (distanceMeters >= req)
+                if (progress.DistanceMeters >= req)
             {
                 // 检查是否已经解锁过
                 var alreadyUnlocked = await _dbContext.PlayerUnlockedLocation
