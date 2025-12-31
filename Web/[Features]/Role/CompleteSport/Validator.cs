@@ -15,10 +15,10 @@ public class Validator : Validator<CompleteSportRequest>
             .GreaterThanOrEqualTo(0).WithMessage("A valid DeviceType is required.");
 
         RuleFor(x => x.Distance)
-            .GreaterThan(0).WithMessage("Distance must be a positive number.");
+            .GreaterThanOrEqualTo(0).WithMessage("Distance must be a non-negative number.");
 
         RuleFor(x => x.Calorie)
-            .GreaterThan(0).WithMessage("Calorie must be a positive number.");
+            .GreaterThanOrEqualTo(0).WithMessage("Calorie must be a non-negative number.");
     }
 }
 
