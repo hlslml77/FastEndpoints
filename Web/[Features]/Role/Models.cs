@@ -55,21 +55,7 @@ public class PlayerRoleResponse
     /// </summary>
     public int AvailableAttributePoints { get; set; }
 
-    /// <summary>
-    /// 速度加成（等同于 SecSpeed）
-    /// </summary>
-    public decimal SpeedBonus { get; set; }
-
-    // 九项副属性（即时计算，不落库）
-    public decimal SecAttack { get; set; }
-    public decimal SecHP { get; set; }
-    public decimal SecDefense { get; set; }
-    public decimal SecAttackSpeed { get; set; }
-    public decimal SecCritical { get; set; }
-    public decimal SecCriticalDamage { get; set; }
-    public decimal SecSpeed { get; set; }
-    public decimal SecEfficiency { get; set; }
-    public decimal SecEnergy { get; set; }
+    
 
     /// <summary>
     /// 统一属性数组，见 PlayerAttributeType 枚举说明
