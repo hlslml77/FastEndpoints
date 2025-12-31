@@ -35,7 +35,8 @@ private volatile List<EquipmentRandomConfig> _randomConfigs = new();
         _watcher = new JsonConfigWatcher(_dir, "*.json", () => Reload());
     }
 
-public EquipmentRandomConfig? GetRandomConfig(int randomGroup) => _randomConfigs.FirstOrDefault(r => r.RandomGroup == randomGroup);
+// Random sub-attribute seed in Equipment.json now directly indexes by ID of Equipment_Random
+    public EquipmentRandomConfig? GetRandomConfig(int randomSeed) => _randomConfigs.FirstOrDefault(r => r.ID == randomSeed);
     public IReadOnlyList<EquipmentEntryConfig> GetAllEntryConfigs() => _entryConfigs;
     public void Reload()
     {
