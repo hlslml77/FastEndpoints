@@ -58,19 +58,10 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
 
             var attributes = new List<Web.Data.PlayerAttributeType>
             {
-                new() { Type = 0,   Value = (double)player.AttrUpperLimb },   // UpperLimb
-                new() { Type = 1,   Value = (double)player.AttrLowerLimb },   // LowerLimb
-                new() { Type = 2,   Value = (double)player.AttrCore },        // CoreRange
-                new() { Type = 3,   Value = (double)player.AttrHeartLungs },  // HeartLungs
-                new() { Type = 100, Value = (double)sec.Attack },             // Attack
-                new() { Type = 101, Value = (double)sec.HP },                 // HP
-                new() { Type = 102, Value = (double)sec.Defense },            // Defense
-                new() { Type = 103, Value = (double)sec.Critical },           // Critical
-                new() { Type = 104, Value = (double)sec.AttackSpeed },        // AttackSpeed
-                new() { Type = 105, Value = (double)sec.CriticalDamage },     // CriticalDamage
-                new() { Type = 106, Value = (double)sec.Efficiency },         // Efficiency
-                new() { Type = 107, Value = (double)sec.Energy },             // Energy
-                new() { Type = 108, Value = (double)sec.Speed }               // Speed
+                new() { Type = 1,   Value = (double)player.AttrUpperLimb },   // UpperLimb
+                new() { Type = 2,   Value = (double)player.AttrLowerLimb },   // LowerLimb
+                new() { Type = 3,   Value = (double)player.AttrCore },        // CoreRange
+                new() { Type = 4,   Value = (double)player.AttrHeartLungs }   // HeartLungs
             };
 
             var response = new PlayerRoleResponse

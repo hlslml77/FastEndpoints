@@ -58,20 +58,20 @@
 ### PlayerAttributeType
 | 数值 | 枚举名 | 含义 |
 |------|--------|------|
-| 0    | UpperLimb   | 上肢力量 |
-| 1    | LowerLimb   | 下肢力量 |
-| 2    | CoreRange   | 核心控制 |
-| 3    | HeartLungs  | 心肺功能 |
+| 1    | UpperLimb   | 上肢力量 |
+| 2    | LowerLimb   | 下肢力量 |
+| 3    | CoreRange   | 核心控制 |
+| 4    | HeartLungs  | 心肺功能 |
 | 100 | Attack         | 攻击力 |
 | 101 | Hp             | 生命力 |
 | 102 | Defense        | 防御力 |
 | 103 | Critical       | 暴击率 |
 | 104 | AttackSpeed    | 攻击速度 |
 | 105 | CriticalDamage | 暴击伤害 |
-| 106 | Efficiency     | 产出效率 |
-| 107 | Energy         | 能量储存上限 |
-| 108 | Speed          | 平均速度 |
-| 200 | Experience     | 经验获取效率 |
+| 106 | Speed          | 平均速度 |
+| 107 | Efficiency     | 产出效率 |
+| 108 | Energy         | 能量储存上限 |
+| 109 | Experience     | 经验获取效率 |
 
 
 <a id="toc-basics"></a>
@@ -167,19 +167,10 @@ POST /api/role/get-player
   "availableAttributePoints": 6,   // int
   "lastUpdateTime": "2025-01-01T00:00:00Z", // DateTime (ISO 8601)
   "attributes": [
-    { "type": 0,   "value": 12 },    // UpperLimb
-    { "type": 1,   "value": 11 },    // LowerLimb
-    { "type": 2,   "value": 10 },    // CoreRange
-    { "type": 3,   "value": 9  },    // HeartLungs
-    { "type": 100, "value": 1.75 },  // Attack
-    { "type": 101, "value": 0.50 },  // Hp
-    { "type": 102, "value": 0.40 },  // Defense
-    { "type": 103, "value": 0.20 },  // Critical
-    { "type": 104, "value": 0.30 },  // AttackSpeed
-    { "type": 105, "value": 0.35 },  // CriticalDamage
-    { "type": 106, "value": 0.10 },  // Efficiency
-    { "type": 107, "value": 0.15 },  // Energy
-    { "type": 108, "value": 0.23 }   // Speed
+    { "type": 1   "value": 12 },    // UpperLimb
+    { "type": 2,   "value": 11 },    // LowerLimb
+    { "type": 3,   "value": 10 },    // CoreRange
+    { "type": 4,   "value": 9  },    // HeartLungs
   ]
 }
 
@@ -211,7 +202,6 @@ POST /api/role/complete-sport
 
 <a id="toc-map"></a>
 3. 地图系统（MapSystem）
-
 <a id="toc-map-save-progress"></a>
 3.1 保存地图进度
 POST /api/map/save-progress
