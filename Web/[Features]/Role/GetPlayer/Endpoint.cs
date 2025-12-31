@@ -48,9 +48,6 @@ public class Endpoint : Endpoint<EmptyRequest, PlayerRoleResponse>
             var config = _configService.GetRoleConfig();
             var nextLevelExp = _configService.GetExperienceForLevel(player.CurrentLevel);
 
-            // 即时计算九项副属性（不落库）
-            var sec = _roleGrowthService.ComputeSecondary(player);
-
             var attributes = new List<Web.Data.PlayerAttributeType>
             {
                 new() { Type = 1,   Value = (double)player.AttrUpperLimb },   // UpperLimb

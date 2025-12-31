@@ -14,8 +14,8 @@ public interface IPlayerRoleService
     Task<PlayerRole> GetOrCreatePlayerAsync(long userId);
     Task<PlayerRole> CompleteSportAsync(long userId, int deviceType, decimal distance, int calorie);
 
-    // 即时计算副属性（不落库）
-    SecondaryAttributes ComputeSecondary(PlayerRole player);
+    // 即时计算副属性（不落库，包含已穿戴装备提供的副属性加成）
+    Task<SecondaryAttributes> ComputeSecondaryAsync(long userId, PlayerRole player, CancellationToken ct = default);
 }
 
 public class SecondaryAttributes
@@ -39,6 +39,9 @@ public class PlayerRoleService : IPlayerRoleService
     private readonly IGeneralConfigService _generalConfigService;
     private readonly IPveRankService _pveRankService;
 
+    // 需要直接查询已穿戴装备以叠加装备副属性
+    private readonly AppDbContext _db;
+
     public PlayerRoleService(
         AppDbContext dbContext,
         IRoleConfigService configService,
@@ -51,6 +54,7 @@ public class PlayerRoleService : IPlayerRoleService
         _inventoryService = inventoryService;
         _generalConfigService = generalConfigService;
         _pveRankService = pveRankService;
+        _db = dbContext;
     }
 
     /// <summary>
@@ -195,10 +199,11 @@ public class PlayerRoleService : IPlayerRoleService
     }
 
     /// <summary>
-    /// 即时计算副属性，不落库
+    /// 即时计算副属性，不落库（包含：主属性换算 + 已穿戴装备提供的副属性加成）
     /// </summary>
-    public SecondaryAttributes ComputeSecondary(PlayerRole player)
+    public async Task<SecondaryAttributes> ComputeSecondaryAsync(long userId, PlayerRole player, CancellationToken ct = default)
     {
+        // 1) 由主属性换算得到基础副属性
         var defs = _configService.GetAttributeDefs();
 
         decimal attack = 0, hp = 0, defense = 0, atkSpd = 0, critical = 0, critDmg = 0, speed = 0, eff = 0, energy = 0;
@@ -223,6 +228,24 @@ public class PlayerRoleService : IPlayerRoleService
             speed += pts * def.Speed;
             eff += pts * def.Efficiency;
             energy += pts * def.Energy;
+        }
+
+        // 2) 叠加装备副属性（只影响副属性，不改主属性）
+        var equips = await _db.PlayerEquipmentItem
+            .Where(x => x.UserId == userId && x.IsEquipped)
+            .ToListAsync(ct);
+
+        foreach (var e in equips)
+        {
+            attack += e.Attack ?? 0;
+            hp += e.HP ?? 0;
+            defense += e.Defense ?? 0;
+            atkSpd += e.AttackSpeed ?? 0;
+            critical += e.Critical ?? 0;
+            critDmg += e.CriticalDamage ?? 0;
+            speed += (decimal)(e.Speed ?? 0);
+            eff += (decimal)(e.Efficiency ?? 0);
+            energy += (decimal)(e.Energy ?? 0);
         }
 
         return new SecondaryAttributes

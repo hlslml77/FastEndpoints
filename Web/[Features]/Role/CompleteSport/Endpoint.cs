@@ -53,8 +53,7 @@ public class Endpoint : Endpoint<CompleteSportRequest, PlayerRoleResponse>
             var config = _configService.GetRoleConfig();
             var nextLevelExp = _configService.GetExperienceForLevel(player.CurrentLevel);
 
-            // 即时计算副属性（不落库）
-            var sec = _roleGrowthService.ComputeSecondary(player);
+            
 
             var attributes = new List<Web.Data.PlayerAttributeType>
             {
