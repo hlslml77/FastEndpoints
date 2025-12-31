@@ -35,7 +35,7 @@ private volatile List<EquipmentRandomConfig> _randomConfigs = new();
         _watcher = new JsonConfigWatcher(_dir, "*.json", () => Reload());
     }
 
-// Random sub-attribute seed in Equipment.json now directly indexes by ID of Equipment_Random
+// Random sub-attribute seed in Equipment.json now directly indexes by ID of EquipmentRandom
     public EquipmentRandomConfig? GetRandomConfig(int randomSeed) => _randomConfigs.FirstOrDefault(r => r.ID == randomSeed);
     public IReadOnlyList<EquipmentEntryConfig> GetAllEntryConfigs() => _entryConfigs;
     public void Reload()
@@ -51,7 +51,7 @@ var newRandoms = new List<EquipmentRandomConfig>();
             {
                 var items = JsonSerializer.Deserialize<List<ItemConfig>>(File.ReadAllText(itemPath), _opts);
                 if (items != null) newItems.AddRange(items);
-var randomPath = Path.Combine(_dir, "Equipment_Random.json");
+var randomPath = Path.Combine(_dir, "EquipmentRandom.json");
                 if (File.Exists(randomPath))
                 {
                     var rands = JsonSerializer.Deserialize<List<EquipmentRandomConfig>>(File.ReadAllText(randomPath), _opts);

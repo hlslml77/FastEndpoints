@@ -21,34 +21,34 @@ public class EquipmentConfig
     public int Quality { get; set; }
     public int Part { get; set; }
 
-    // NOTE: 最新 Equipment.json 中存在小数（如 0.0 / 5.0），因此这里必须用 double[]
-    // 读取后在生成装备实例时再按需要转 int。
-    public double[]? AttackRange { get; set; }
-    public double[]? HPRange { get; set; }
-    public double[]? DefenseRange { get; set; }
-    public double[]? Critical { get; set; }
-    public double[]? AttackSpeed { get; set; }
-    public double[]? CriticalDamage { get; set; }
-    public double[]? UpperLimbRange { get; set; }
-    public double[]? LowerLimbRange { get; set; }
-    public double[]? CoreRange { get; set; }
-    public double[]? HeartLungsRange { get; set; }
+    // 这些字段在最新 JSON 中为整型区间 [min,max]
+    public int[]? AttackRange { get; set; }
+    public int[]? HPRange { get; set; }
+    public int[]? DefenseRange { get; set; }
+    public int[]? CriticalRange { get; set; }
+    public int[]? AttackSpeedRange { get; set; }
+    public int[]? CriticalDamage { get; set; }
+    public int[]? UpperLimbRange { get; set; }
+    public int[]? LowerLimbRange { get; set; }
+    public int[]? CoreRange { get; set; }
+    public int[]? HeartLungsRange { get; set; }
 
     public int Random { get; set; }
 }
 public class EquipmentRandomConfig
 {
     public int ID { get; set; }
-    public int RandomGroup { get; set; }
-    public double[]? AttackRange { get; set; }
-    public double[]? HPRange { get; set; }
-    public double[]? DefenseRange { get; set; }
-    public double[]? AttackSpeedRange { get; set; }
-    public double[]? CriticalRange { get; set; }
-    public double[]? CriticalDamageRange { get; set; }
-    public double[]? EfficiencyRange { get; set; }
-    public double[]? EnergyRange { get; set; }
-    public double[]? SpeedRange { get; set; }
+
+    // 这些字段在最新 JSON 中为整型区间 [min,max]
+    public int[]? AttackRange { get; set; }
+    public int[]? HPRange { get; set; }
+    public int[]? DefenseRange { get; set; }
+    public int[]? AttackSpeedRange { get; set; }
+    public int[]? CriticalRange { get; set; }
+    public int[]? CriticalDamageRange { get; set; }
+    public int[]? EfficiencyRange { get; set; }
+    public int[]? EnergyRange { get; set; }
+    public int[]? SpeedRange { get; set; }
 }
 
 public class EquipmentEntryConfig

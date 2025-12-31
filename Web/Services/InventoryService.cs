@@ -74,22 +74,13 @@ public class InventoryService : IInventoryService
                 };
 
                 // roll stat value from [min,max] array
-                int? RollI(double[]? arr)
-                {
-                    if (arr is null || arr.Length != 2) return null;
-                    var min = (int)Math.Round(arr[0]);
-                    var max = (int)Math.Round(arr[1]);
-                    if (max < min) (min, max) = (max, min);
-                    return _rand.Next(min, max + 1);
-                }
-
-                double? RollD(double[]? arr)
+                int? RollI(int[]? arr)
                 {
                     if (arr is null || arr.Length != 2) return null;
                     var min = arr[0];
                     var max = arr[1];
                     if (max < min) (min, max) = (max, min);
-                    return _rand.NextDouble() * (max - min) + min;
+                    return _rand.Next(min, max + 1);
                 }
 
                 // roll the two fixed attributes based on equipment part
@@ -98,12 +89,12 @@ public class InventoryService : IInventoryService
                     // Weapon (攻击力 + 暴击率)
                     case 1:
                         rec.Attack = RollI(eqCfg.AttackRange);
-                        rec.Critical = RollI(eqCfg.Critical);
+                        rec.Critical = RollI(eqCfg.CriticalRange);
                         break;
                     // Gloves (攻击力 + 攻速)
                     case 2:
                         rec.Attack = RollI(eqCfg.AttackRange);
-                        rec.AttackSpeed = RollI(eqCfg.AttackSpeed);
+                        rec.AttackSpeed = RollI(eqCfg.AttackSpeedRange);
                         break;
                     // Armor/Top (生命值 + 防御)
                     case 3:
@@ -124,7 +115,7 @@ public class InventoryService : IInventoryService
                     if (randCfg != null)
                     {
                         var possible = new List<string>();
-                        // random attribute is chosen from the seed's configured ranges in Equipment_Random.
+                        // random attribute is chosen from the seed's configured ranges in EquipmentRandom.
                         // It is allowed to be the same type as a fixed attribute.
                         if (randCfg.AttackRange is { Length: 2 }) possible.Add("Attack");
                         if (randCfg.HPRange is { Length: 2 }) possible.Add("HP");
@@ -151,34 +142,22 @@ public class InventoryService : IInventoryService
                                     rec.Defense ??= RollI(randCfg.DefenseRange) ?? rec.Defense;
                                     break;
                                 case "AttackSpeed":
-                                    if (rec.AttackSpeed is null)
-                                    {
-                                        var v = RollD(randCfg.AttackSpeedRange);
-                                        if (v is not null) rec.AttackSpeed = (int)Math.Round(v.Value);
-                                    }
+                                    rec.AttackSpeed ??= RollI(randCfg.AttackSpeedRange) ?? rec.AttackSpeed;
                                     break;
                                 case "Critical":
-                                    if (rec.Critical is null)
-                                    {
-                                        var v = RollD(randCfg.CriticalRange);
-                                        if (v is not null) rec.Critical = (int)Math.Round(v.Value);
-                                    }
+                                    rec.Critical ??= RollI(randCfg.CriticalRange) ?? rec.Critical;
                                     break;
                                 case "CriticalDamage":
-                                    if (rec.CriticalDamage is null)
-                                    {
-                                        var v = RollD(randCfg.CriticalDamageRange);
-                                        if (v is not null) rec.CriticalDamage = (int)Math.Round(v.Value);
-                                    }
+                                    rec.CriticalDamage ??= RollI(randCfg.CriticalDamageRange) ?? rec.CriticalDamage;
                                     break;
                                 case "Efficiency":
-                                    rec.Efficiency ??= RollD(randCfg.EfficiencyRange);
+                                    rec.Efficiency ??= RollI(randCfg.EfficiencyRange);
                                     break;
                                 case "Energy":
-                                    rec.Energy ??= RollD(randCfg.EnergyRange);
+                                    rec.Energy ??= RollI(randCfg.EnergyRange);
                                     break;
                                 case "Speed":
-                                    rec.Speed ??= RollD(randCfg.SpeedRange);
+                                    rec.Speed ??= RollI(randCfg.SpeedRange);
                                     break;
                             }
                         }

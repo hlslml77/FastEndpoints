@@ -932,7 +932,7 @@ curl -X GET "https://host/api/admin/config/reload?file=Item.json" \
 curl -X POST https://host/api/admin/config/reload \
 
 <a id="toc-admin-update"></a>
-7.3 批量更新配置文件（Web/Json/*.json）
+7.3 批量更新配置文件（Web/Json *.json）
 POST /api/admin/config/update
 
 - 认证：需要 Bearer Token（admin 角色）

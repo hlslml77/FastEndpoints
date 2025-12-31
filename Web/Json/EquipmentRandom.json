@@ -1,7 +1,6 @@
 [
   {
     "ID": 1,
-    "RandomGroup": 1,
     "AttackRange": [
       0,
       5
@@ -16,26 +15,25 @@
     ],
     "AttackSpeedRange": null,
     "CriticalRange": [
-      0.0,
-      5.0
+      0,
+      5000
     ],
     "CriticalDamageRange": null,
     "EfficiencyRange": [
-      0.0,
-      5.0
+      0,
+      5000
     ],
     "EnergyRange": [
-      0.0,
-      5.0
+      0,
+      5000
     ],
     "SpeedRange": [
-      0.0,
-      5.0
+      0,
+      5000
     ]
   },
   {
     "ID": 2,
-    "RandomGroup": 2,
     "AttackRange": [
       3,
       8
@@ -49,56 +47,55 @@
       8
     ],
     "AttackSpeedRange": [
-      3.0,
-      8.0
+      3000,
+      8000
     ],
     "CriticalRange": [
-      3.0,
-      8.0
+      3000,
+      8000
     ],
     "CriticalDamageRange": [
-      3.0,
-      8.0
+      3000,
+      8000
     ],
     "EfficiencyRange": [
-      3.0,
-      8.0
+      3000,
+      8000
     ],
     "EnergyRange": [
-      3.0,
-      8.0
+      3000,
+      8000
     ],
     "SpeedRange": [
-      3.0,
-      8.0
+      3000,
+      8000
     ]
   },
   {
     "ID": 3,
-    "RandomGroup": 3,
     "AttackRange": null,
     "HPRange": null,
     "DefenseRange": null,
     "AttackSpeedRange": null,
     "CriticalRange": [
-      6.0,
-      11.0
+      6000,
+      11000
     ],
     "CriticalDamageRange": [
-      6.0,
-      11.0
+      6000,
+      11000
     ],
     "EfficiencyRange": [
-      6.0,
-      11.0
+      6000,
+      11000
     ],
     "EnergyRange": [
-      6.0,
-      11.0
+      6000,
+      11000
     ],
     "SpeedRange": [
-      6.0,
-      11.0
+      6000,
+      11000
     ]
   }
 ]
