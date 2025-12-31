@@ -355,23 +355,45 @@ POST /api/map/monster/reward
 
 - 认证：需要 Bearer Token（权限 web_access）
 - 策划表：Web/Json/Monster.json
-- 说明：客户端传入怪物ID（配置表的 ID 字段），服务端将按该配置的 Reward 列表逐条发放奖励。每项为 [itemId, amount]。
+- 说明：
+  - 支持一次请求发多个怪物ID：使用 `monsterIds` 数组（int[]），或兼容旧参数 `monsterId`（int）。
+  - 服务端会读取各怪物配置的 `Reward` 列表，并将相同 `itemId` 的数量合并后一次性发放。
+  - 对于请求中不存在或无有效奖励的怪物ID，会跳过并返回 `failedMonsterIds` 数组而不会导致整单失败。
+  - 当所有怪物ID均失败时返回 404。
 
-请求体
+请求体（多 ID 示例）
+```json
 {
-  "monsterId": 1000 // int
+  "monsterIds": [1000, 1001, 1002]
 }
+```
+请求体（兼容旧版）
+```json
+{
+  "monsterId": 1000
+}
+```
 
 响应体
+```json
 {
   "success": true,
-  "rewards": [ { "itemId": 1000, "amount": 1 }, { "itemId": 1001, "amount": 1 } ]
+  "rewards": [
+    { "itemId": 1000, "amount": 2 },
+    { "itemId": 1001, "amount": 3 }
+  ],
+  "failedMonsterIds": [1003]
 }
+```
+- `success` 为 `true` 表示至少成功发放了一条奖励。
+- `failedMonsterIds` 为未找到配置或无有效奖励的怪物ID列表（可能为空）。
 
 示例（curl）
+```bash
 curl -X POST https://host/api/map/monster/reward \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
-  -d '{"monsterId":1000}'
+  -d '{"monsterIds":[1000,1001]}'
+```
 
 说明：该接口已从自动 Swagger 文档中排除（仅在本文档说明使用）。
 

@@ -4,17 +4,38 @@ using System.Security.Claims;
 using Web.Data;
 using Web.Services;
 
+
 namespace MapSystem.GrantMonsterReward;
 
 public class Request
 {
-    public int MonsterId { get; set; }
+    /// <summary>
+    /// 单个怪物ID（兼容旧客户端；若同时传 MonsterIds 则两者会合并去重）
+    /// </summary>
+    public int? MonsterId { get; set; }
+
+    /// <summary>
+    /// 多个怪物ID列表
+    /// </summary>
+    public List<int>? MonsterIds { get; set; }
 }
 
 public class Response
 {
+    /// <summary>
+    /// 是否至少成功发放了一条奖励
+    /// </summary>
     public bool Success { get; set; }
+
+    /// <summary>
+    /// 合并后的奖励列表
+    /// </summary>
     public List<MapSystem.RewardItem> Rewards { get; set; } = new();
+
+    /// <summary>
+    /// 请求中未找到配置的 MonsterId 列表
+    /// </summary>
+    public List<int> FailedMonsterIds { get; set; } = new();
 }
 
 public class Endpoint : Endpoint<Request, Response>
@@ -50,7 +71,14 @@ public class Endpoint : Endpoint<Request, Response>
             return;
         }
 
-        if (req.MonsterId <= 0)
+        // 收集怪物 ID
+        var monsterIds = new List<int>();
+        if (req.MonsterIds != null && req.MonsterIds.Count > 0)
+            monsterIds.AddRange(req.MonsterIds.Where(id => id > 0));
+        if (req.MonsterId.HasValue && req.MonsterId.Value > 0)
+            monsterIds.Add(req.MonsterId.Value);
+
+        if (monsterIds.Count == 0)
         {
             var errorBody = new { statusCode = 400, code = ErrorCodes.Common.BadRequest, message = "MonsterId 无效" };
             await HttpContext.Response.SendAsync(errorBody, 400, cancellation: ct);
@@ -59,17 +87,28 @@ public class Endpoint : Endpoint<Request, Response>
 
         try
         {
-            var cfg = _monsterCfg.GetById(req.MonsterId);
-            if (cfg is null)
-            {
-                var errorBody = new { statusCode = 404, code = ErrorCodes.Common.NotFound, message = "未找到对应怪物配置" };
-                await HttpContext.Response.SendAsync(errorBody, 404, cancellation: ct);
-                return;
-            }
+            // 先把多个怪物的奖励汇总（同 itemId 合并数量），再一次性下发
+            var rewardDict = new Dictionary<int, int>();
+            var failedMonsterIds = new List<int>();
+            var hasValidRewards = false;
 
-            var rewards = new List<MapSystem.RewardItem>();
-            if (cfg.Reward != null && cfg.Reward.Count > 0)
+            foreach (var monsterId in monsterIds.Distinct())
             {
+                var cfg = _monsterCfg.GetById(monsterId);
+                if (cfg is null)
+                {
+                    failedMonsterIds.Add(monsterId);
+                    continue;
+                }
+
+                if (cfg.Reward == null || cfg.Reward.Count == 0)
+                {
+                    // 没有配置奖励的也计入失败
+                    failedMonsterIds.Add(monsterId);
+                    continue;
+                }
+
+                var hasValidReward = false;
                 foreach (var pair in cfg.Reward)
                 {
                     if (pair == null || pair.Count < 2) continue;
@@ -77,12 +116,42 @@ public class Endpoint : Endpoint<Request, Response>
                     var amount = pair[1];
                     if (itemId <= 0 || amount <= 0) continue;
 
-                    await _inventory.GrantItemAsync(userId, itemId, amount, ct);
-                    rewards.Add(new MapSystem.RewardItem { ItemId = itemId, Amount = amount });
+                    rewardDict[itemId] = rewardDict.TryGetValue(itemId, out var old) ? old + amount : amount;
+                    hasValidReward = true;
+                }
+
+                if (!hasValidReward)
+                {
+                    // 有配置但奖励项都无效的也计入失败
+                    failedMonsterIds.Add(monsterId);
+                }
+                else
+                {
+                    hasValidRewards = true;
                 }
             }
 
-            await HttpContext.Response.SendAsync(new Response { Success = true, Rewards = rewards }, 200, cancellation: ct);
+            if (!hasValidRewards && failedMonsterIds.Count > 0)
+            {
+                // 所有请求的怪物ID都无效
+                var errorBody = new { statusCode = 404, code = ErrorCodes.Common.NotFound, message = "未找到有效的怪物配置" };
+                await HttpContext.Response.SendAsync(errorBody, 404, cancellation: ct);
+                return;
+            }
+
+            var rewards = new List<MapSystem.RewardItem>();
+            foreach (var (itemId, amount) in rewardDict)
+            {
+                await _inventory.GrantItemAsync(userId, itemId, amount, ct);
+                rewards.Add(new MapSystem.RewardItem { ItemId = itemId, Amount = amount });
+            }
+
+            await HttpContext.Response.SendAsync(new Response
+            {
+                Success = rewards.Count > 0,  // 只要成功发放了奖励就算成功
+                Rewards = rewards,
+                FailedMonsterIds = failedMonsterIds
+            }, 200, cancellation: ct);
         }
         catch (ArgumentException ex)
         {
