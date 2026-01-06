@@ -24,6 +24,16 @@ public interface IGeneralConfigService : IReloadableConfig, IDisposable
     /// </summary>
     (int min, int max) GetRobotDisplayRange();
 
+    /// <summary>
+    /// 体力上限（WorldConfig ID=14）。未配置则默认为 120。
+    /// </summary>
+    int GetStaminaMax();
+
+    /// <summary>
+    /// 体力恢复间隔（分钟）（WorldConfig ID=15）。未配置则默认为 30 分钟。
+    /// </summary>
+    int GetStaminaRecoverIntervalMinutes();
+
         /// <summary>
         /// 玩家初始点（WorldConfig.json ID=7 的 Value1）。未配置或非法时返回 0。
         /// </summary>
@@ -130,6 +140,26 @@ public class GeneralConfigService : IGeneralConfigService
             return (min, max);
         }
         return (0, 0);
+    }
+
+    /// <summary>
+    /// 体力上限（WorldConfig ID=14）。未配置则默认为 120。
+    /// </summary>
+    public int GetStaminaMax()
+    {
+        var e = FindByIdOrDesc(14, "体力上限");
+        var val = e?.Value1 ?? 120;
+        return val > 0 ? val : 120;
+    }
+
+    /// <summary>
+    /// 体力恢复间隔（分钟）（WorldConfig ID=15）。未配置则默认为 30 分钟。
+    /// </summary>
+    public int GetStaminaRecoverIntervalMinutes()
+    {
+        var e = FindByIdOrDesc(15, "回复1点体力");
+        var val = e?.Value1 ?? 30;
+        return val > 0 ? val : 30;
     }
 
     public int GetInitialLocationId()

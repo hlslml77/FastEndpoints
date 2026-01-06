@@ -119,37 +119,44 @@ public class PlayerRoleService : IPlayerRoleService
         }
         else
         {
-            // ---------- 已存在玩家：检查是否跨天 ----------
+            // ---------- Existing player: regenerate stamina ----------
             var nowUtc = DateTime.UtcNow;
-            if (player.LastUpdateTime.Date != nowUtc.Date)
-            {
-                const int staminaItemId = 1002; // 景观水晶
-                const int dailyAmount = 100;
 
-                var itemRec = await _dbContext.PlayerItem.FirstOrDefaultAsync(r => r.UserId == userId && r.ItemId == staminaItemId);
-                if (itemRec == null)
+            var staminaItemId = _generalConfigService.InitialStaminaItemId;
+            var maxStamina = _generalConfigService.GetStaminaMax();
+            var intervalMinutes = _generalConfigService.GetStaminaRecoverIntervalMinutes();
+            if (intervalMinutes <= 0) intervalMinutes = 30;
+
+            var itemRec = await _dbContext.PlayerItem.FirstOrDefaultAsync(r => r.UserId == userId && r.ItemId == staminaItemId);
+            if (itemRec == null)
+            {
+                itemRec = new Web.Data.Entities.PlayerItem
                 {
-                    itemRec = new Web.Data.Entities.PlayerItem
-                    {
-                        UserId = userId,
-                        ItemId = staminaItemId,
-                        Amount = dailyAmount,
-                        UpdatedAt = nowUtc
-                    };
-                    _dbContext.PlayerItem.Add(itemRec);
-                }
-                else
+                    UserId = userId,
+                    ItemId = staminaItemId,
+                    Amount = 0,
+                    UpdatedAt = nowUtc
+                };
+                _dbContext.PlayerItem.Add(itemRec);
+            }
+
+            var minutesPassed = (nowUtc - player.LastUpdateTime).TotalMinutes;
+            var recoverPoints = (int)(minutesPassed / intervalMinutes);
+            if (recoverPoints > 0 && itemRec.Amount < maxStamina)
+            {
+                var newAmount = Math.Min(maxStamina, itemRec.Amount + recoverPoints);
+                if (newAmount != itemRec.Amount)
                 {
-                    itemRec.Amount = dailyAmount;
+                    Log.Information("Stamina regen for user {UserId}: +{Added} (from {Old} to {New})", userId, newAmount - itemRec.Amount, itemRec.Amount, newAmount);
+                    itemRec.Amount = newAmount;
                     itemRec.UpdatedAt = nowUtc;
                 }
+            }
 
-                // 也可以在此处清零每日属性点等其他“每日刷新”数据
+            // Daily reset of attribute points if crossed day boundary
+            if (player.LastUpdateTime.Date != nowUtc.Date)
+            {
                 player.TodayAttributePoints = 0;
-
-                Log.Information("Daily refresh for user {UserId}: reset item {ItemId} to {Amount}", userId, staminaItemId, dailyAmount);
-
-                // 不急于 SaveChanges，最后统一保存
             }
         }
 
