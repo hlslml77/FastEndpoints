@@ -29,6 +29,11 @@ public interface IGeneralConfigService : IReloadableConfig, IDisposable
         /// </summary>
         int GetInitialLocationId();
 
+        /// <summary>
+        /// 藏品抽取/合成消耗的碎片数量（WorldConfig.json ID=16 的 Value1）。未配置或非法时返回 3。
+        /// </summary>
+        int GetCollectionObtainCost();
+
 }
 
 public class GeneralConfigService : IGeneralConfigService
@@ -132,6 +137,13 @@ public class GeneralConfigService : IGeneralConfigService
         var e = FindByIdOrDesc(7, "玩家初始点");
         var id = e?.Value1 ?? 0;
         return id > 0 ? id : 0;
+    }
+
+    public int GetCollectionObtainCost()
+    {
+        var e = FindByIdOrDesc(16, "碎片合成");
+        var cost = e?.Value1 ?? 3;
+        return cost > 0 ? cost : 3;
     }
 
     public void Dispose()

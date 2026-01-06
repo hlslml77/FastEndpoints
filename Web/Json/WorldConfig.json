@@ -7,19 +7,17 @@
     "Value3": null,
     "Value4": null,
     "Value5": null,
-    "Value6": null,
-    "Value7": null
+    "Value6": null
   },
   {
     "ID": 2,
     "Desc": "初始体力",
-    "Value1": 9,
+    "Value1": 10000,
     "Value2": 0.0,
     "Value3": null,
     "Value4": null,
     "Value5": null,
-    "Value6": null,
-    "Value7": null
+    "Value6": null
   },
   {
     "ID": 3,
@@ -29,8 +27,7 @@
     "Value3": null,
     "Value4": null,
     "Value5": null,
-    "Value6": null,
-    "Value7": null
+    "Value6": null
   },
   {
     "ID": 4,
@@ -40,8 +37,7 @@
     "Value3": null,
     "Value4": null,
     "Value5": null,
-    "Value6": null,
-    "Value7": null
+    "Value6": null
   },
   {
     "ID": 5,
@@ -54,8 +50,7 @@
       10
     ],
     "Value5": null,
-    "Value6": null,
-    "Value7": null
+    "Value6": null
   },
   {
     "ID": 6,
@@ -65,8 +60,7 @@
     "Value3": null,
     "Value4": null,
     "Value5": null,
-    "Value6": null,
-    "Value7": null
+    "Value6": null
   },
   {
     "ID": 7,
@@ -76,8 +70,7 @@
     "Value3": null,
     "Value4": null,
     "Value5": null,
-    "Value6": null,
-    "Value7": null
+    "Value6": null
   },
   {
     "ID": 8,
@@ -87,8 +80,7 @@
     "Value3": null,
     "Value4": null,
     "Value5": null,
-    "Value6": null,
-    "Value7": null
+    "Value6": null
   },
   {
     "ID": 9,
@@ -98,7 +90,76 @@
     "Value3": null,
     "Value4": null,
     "Value5": null,
-    "Value6": null,
-    "Value7": null
+    "Value6": null
+  },
+  {
+    "ID": 10,
+    "Desc": "上肢力量影响的副属性范围",
+    "Value1": 0,
+    "Value2": 0.0,
+    "Value3": "影响攻击力/攻击速度/暴击伤害属性",
+    "Value4": null,
+    "Value5": null,
+    "Value6": null
+  },
+  {
+    "ID": 11,
+    "Desc": "下肢力量影响的副属性范围",
+    "Value1": 0,
+    "Value2": 0.0,
+    "Value3": "影响攻击力/防御力/平均速度",
+    "Value4": null,
+    "Value5": null,
+    "Value6": null
+  },
+  {
+    "ID": 12,
+    "Desc": "核心控制影响的副属性范围",
+    "Value1": 0,
+    "Value2": 0.0,
+    "Value3": "影响生命值/暴击率/产出效率属性",
+    "Value4": null,
+    "Value5": null,
+    "Value6": null
+  },
+  {
+    "ID": 13,
+    "Desc": "心肺功能影响的副属性范围",
+    "Value1": 0,
+    "Value2": 0.0,
+    "Value3": "影响生命值/攻击速度暴击伤害/能量储存上限属性",
+    "Value4": null,
+    "Value5": null,
+    "Value6": null
+  },
+  {
+    "ID": 14,
+    "Desc": "体力上限",
+    "Value1": 120,
+    "Value2": 0.0,
+    "Value3": null,
+    "Value4": null,
+    "Value5": null,
+    "Value6": null
+  },
+  {
+    "ID": 15,
+    "Desc": "每x分钟回复1点体力",
+    "Value1": 30,
+    "Value2": 0.0,
+    "Value3": null,
+    "Value4": null,
+    "Value5": null,
+    "Value6": null
+  },
+  {
+    "ID": 16,
+    "Desc": "纪念品碎片合成数量消耗",
+    "Value1": 3,
+    "Value2": 0.0,
+    "Value3": "消耗三个，失败后返还一半，向下取整",
+    "Value4": null,
+    "Value5": null,
+    "Value6": null
   }
 ]
