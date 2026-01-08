@@ -29,7 +29,7 @@ public class EndpointFollowSet : Endpoint<FollowSetRequest, FollowSetResponse>
 
     public override async Task HandleAsync(FollowSetRequest req, CancellationToken ct)
     {
-        var res = await _client.PostAsJsonAsync("/social/follow/set", req, ct);
+        var res = await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(_client, "/social/follow/set", req, ct);
         if (!res.IsSuccessStatusCode)
         {
             await HttpContext.Response.SendAsync(new FollowSetResponse { Success = false }, (int)res.StatusCode, cancellation: ct);

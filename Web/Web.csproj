@@ -20,6 +20,7 @@
 
     <ItemGroup>
         <PackageReference Include="FastEndpoints" />
+        <PackageReference Include="Serilog" />
         <PackageReference Include="Serilog.AspNetCore" />
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.File" />
@@ -29,6 +30,9 @@
 
         <PackageReference Include="MySqlConnector" />
         <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
+<PackageReference Include="aliyun-log-dotnetcore-sdk" />
+<PackageReference Include="Serilog.Sinks.PeriodicBatching" />
+
     </ItemGroup>
 
     <!--<PropertyGroup>

@@ -52,7 +52,7 @@ public class EndpointFollowStatus : Endpoint<FollowStatusRequest, FollowStatusRe
         var isBatch = req.TargetUserIds is { Count: > 0 } && (req.TargetUserIds.Count > 1 || !req.TargetUserId.HasValue);
 
         // 约定：如果 APP 服务已支持批量，直接透传；否则回退到本服务循环查询单个接口并聚合
-        var res = await _client.PostAsJsonAsync("/social/follow/status", req, ct);
+        var res = await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(_client, "/social/follow/status", req, ct);
 
         if (res.IsSuccessStatusCode)
         {
@@ -72,7 +72,7 @@ public class EndpointFollowStatus : Endpoint<FollowStatusRequest, FollowStatusRe
         var dict = new Dictionary<long, bool>(req.TargetUserIds!.Count);
         foreach (var uid in req.TargetUserIds.Distinct())
         {
-            var oneRes = await _client.PostAsJsonAsync("/social/follow/status", new { targetUserId = uid }, ct);
+            var oneRes = await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(_client, "/social/follow/status", new { targetUserId = uid }, ct);
             if (!oneRes.IsSuccessStatusCode)
             {
                 await HttpContext.Response.SendAsync(new FollowStatusResponse { Success = false }, (int)oneRes.StatusCode, cancellation: ct);

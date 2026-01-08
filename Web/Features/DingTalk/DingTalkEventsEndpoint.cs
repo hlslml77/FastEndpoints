@@ -393,7 +393,7 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
                 try
                 {
                     var factory = Resolve<IHttpClientFactory>();
-                    await factory.CreateClient().PostAsJsonAsync(webhook, dingMsg, ct);
+                    await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(factory.CreateClient(), webhook, dingMsg, ct);
                 }
                 catch (Exception ex)
                 {
@@ -553,7 +553,7 @@ public sealed class DingTalkEventsEndpoint : EndpointWithoutRequest
                 msgtype = "text",
                 text = new { content = $"服务器全部配置已热更同步完成 ✅ {DateTime.Now:yyyy-MM-dd HH:mm:ss}" }
             };
-            try { await factory.CreateClient().PostAsJsonAsync(groupWebhook, dingMsg, ct); }
+            try { await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(factory.CreateClient(), groupWebhook, dingMsg, ct); }
             catch (Exception ex) { Log.Error(ex, "[DingTalkEvents] Send ding group message failed for SyncAll"); }
         }
     }

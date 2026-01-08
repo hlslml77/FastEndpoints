@@ -22,20 +22,46 @@ using Web.PipelineBehaviors.PreProcessors;
 using Web.PipelineBehaviors.PostProcessors;
 using Web.Services;
 
+
 // 禁用 wwwroot 目录（纯 API 项目不需要静态文件）
 var bld = WebApplication.CreateBuilder(new WebApplicationOptions
 {
     Args = args,
     WebRootPath = string.Empty
 });
-// configure Serilog for console + rolling file
+// 1. Enable Serilog Self-Logging for troubleshooting the sink
+Serilog.Debugging.SelfLog.Enable(Console.Error);
+
+// configure Serilog (console + file + Aliyun SLS)
 bld.Logging.ClearProviders();
-Log.Logger = new LoggerConfiguration()
+var serilogConfig = new LoggerConfiguration()
     .ReadFrom.Configuration(bld.Configuration)
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .WriteTo.File("Logs/web-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
-    .CreateLogger();
+    .WriteTo.File("Logs/web-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7);
+
+// optional: push logs to Aliyun SLS (aliyun-log-dotnetcore-sdk)
+var slsOpt = bld.Configuration.GetAliyunSlsOptions();
+if (slsOpt is not null
+    && !string.IsNullOrWhiteSpace(slsOpt.Endpoint)
+    && !string.IsNullOrWhiteSpace(slsOpt.AccessKeyId)
+    && !string.IsNullOrWhiteSpace(slsOpt.AccessKeySecret)
+    && !string.IsNullOrWhiteSpace(slsOpt.Project)
+    && !string.IsNullOrWhiteSpace(slsOpt.LogStore))
+{
+    serilogConfig.WriteTo.AliyunSls(slsOpt);
+    Console.WriteLine("--> Aliyun SLS sink configured.");
+}
+else
+{
+    Console.WriteLine("--> Aliyun SLS sink NOT configured (missing settings).");
+}
+
+Log.Logger = serilogConfig.CreateLogger();
+
+// 2. Add a test log message to verify the sink is working
+Log.Warning("SLS TEST: This is a test warning message sent at {Timestamp}", DateTime.UtcNow);
+
 bld.Host.UseSerilog(Log.Logger, dispose: true);
 
 
