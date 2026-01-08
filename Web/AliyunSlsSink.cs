@@ -63,13 +63,19 @@ public sealed class AliyunSlsBatchedSink : Serilog.Sinks.PeriodicBatching.IBatch
             {
                 var resp = await _client.PostLogStoreLogsAsync(_opt.LogStore, logGroup);
                 resp.EnsureSuccess();
-                return;
+                return; // success
             }
-            catch (Exception ex) when (attempt < maxRetries)
+            catch (Exception ex)
             {
+                if (attempt >= maxRetries)
+                {
+                    // give up after retries; write to self log but do NOT throw further
+                    SelfLog.WriteLine($"AliyunSLS send failed after {attempt + 1} attempts. err={ex.Message}");
+                    return;
+                }
+
                 var delayMs = BackoffMs(attempt);
-                SelfLog.WriteLine(
-                    $"AliyunSLS send failed (will retry). attempt={attempt + 1}/{maxRetries + 1} err={ex.Message} delayMs={delayMs}");
+                SelfLog.WriteLine($"AliyunSLS send failed (will retry). attempt={attempt + 1}/{maxRetries + 1} err={ex.Message} delayMs={delayMs}");
                 await Task.Delay(delayMs);
             }
         }

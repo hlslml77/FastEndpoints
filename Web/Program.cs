@@ -41,15 +41,15 @@ var serilogConfig = new LoggerConfiguration()
     .WriteTo.File("Logs/web-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7);
 
 // optional: push logs to Aliyun SLS (aliyun-log-dotnetcore-sdk)
-var slsOpt = bld.Configuration.GetAliyunSlsOptions();
-if (slsOpt is not null
-    && !string.IsNullOrWhiteSpace(slsOpt.Endpoint)
-    && !string.IsNullOrWhiteSpace(slsOpt.AccessKeyId)
-    && !string.IsNullOrWhiteSpace(slsOpt.AccessKeySecret)
-    && !string.IsNullOrWhiteSpace(slsOpt.Project)
-    && !string.IsNullOrWhiteSpace(slsOpt.LogStore))
+var aliyunSlsOptions = bld.Configuration.GetAliyunSlsOptions();
+if (aliyunSlsOptions is not null
+    && !string.IsNullOrWhiteSpace(aliyunSlsOptions.Endpoint)
+    && !string.IsNullOrWhiteSpace(aliyunSlsOptions.AccessKeyId)
+    && !string.IsNullOrWhiteSpace(aliyunSlsOptions.AccessKeySecret)
+    && !string.IsNullOrWhiteSpace(aliyunSlsOptions.Project)
+    && !string.IsNullOrWhiteSpace(aliyunSlsOptions.LogStore))
 {
-    serilogConfig.WriteTo.AliyunSls(slsOpt);
+    serilogConfig.WriteTo.AliyunSls(aliyunSlsOptions);
     Console.WriteLine("--> Aliyun SLS sink configured.");
 }
 else
