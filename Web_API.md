@@ -20,6 +20,7 @@
   - [4.2 查询玩家装备清单（GET/POST /api/inventory/equipments）](#toc-inventory-equipments)
   - [4.3 穿戴指定装备（/api/inventory/equip）](#toc-inventory-equip)
   - [4.4 卸下指定装备（/api/inventory/unequip）](#toc-inventory-unequip)
+  - [4.5 查询道具状态（/api/inventory/item-status）](#toc-inventory-item-status)
 - [5. 旅行系统（Travel）](#toc-travel)
   - [5.1 事件奖励（/api/travel/event/reward）](#toc-travel-event-reward)
   - [5.2 距离掉落奖励（/api/travel/drop-point/reward）](#toc-travel-drop-point-reward)
@@ -552,6 +553,42 @@ curl -X POST https://host/api/inventory/unequip \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
   -d '{"equipmentRecordId":101}'
 
+<a id="toc-inventory-item-status"></a>
+4.5 查询道具状态（支持体力下次恢复时间）
+POST /api/inventory/item-status
+
+- 认证：需要 Bearer Token（权限 web_access）
+- 说明：客户端批量查询指定 itemId 的当前数量。当请求的 itemId 为“体力道具”（1002）等可自动恢复类型时，响应还会包含 `nextRefreshTime` 字段，表示服务器预计的下次自动 +1 时间（ISO 8601）。当数量已达上限或道具不自动恢复时，该字段为 `0001-01-01T00:00:00Z`（DateTime.MinValue）。
+
+请求体
+```json
+{
+  "itemIds": [1002, 8000, 8001]
+}
+```
+- `itemIds`：int[]，要查询的道具 ID 列表，最多 100 个；为空或缺省时返回空数组。
+
+响应体
+```json
+[
+  { "itemId": 1002, "amount": 87, "nextRefreshTime": "2026-01-07T09:32:00Z" },
+  { "itemId": 8000, "amount": 15, "nextRefreshTime": "0001-01-01T00:00:00Z" },
+  { "itemId": 8001, "amount": 0,  "nextRefreshTime": "0001-01-01T00:00:00Z" }
+]
+```
+字段说明
+| 字段 | 类型 | 含义 |
+|------|------|------|
+| itemId | int | 道具 ID |
+| amount | long | 当前拥有数量（不存在视为 0）|
+| nextRefreshTime | DateTime | 下次 +1 的服务器 UTC 时间（仅自动恢复型道具有效）|
+
+示例（curl）
+```bash
+curl -X POST https://host/api/inventory/item-status \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"itemIds":[1002,8000]}'
+```
 ---
 
 <a id="toc-travel"></a>
