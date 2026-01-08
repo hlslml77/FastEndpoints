@@ -65,6 +65,11 @@ public class SaveMapProgressResponse
     /// 玩家当前存储能量总值（米）
     /// </summary>
     public decimal StoredEnergyMeters { get; set; }
+
+    /// <summary>
+    /// 本次下发的奖励列表（对应 FirstReward），若无奖励则为空数组
+    /// </summary>
+    public List<RewardItem> Rewards { get; set; } = new();
 }
 
 
@@ -108,6 +113,11 @@ public class UnlockWithEnergyResponse
     /// 本次解锁的点位ID列表（若无解锁则为空）。当解锁终点时包含终点；若终点配置了 SurroundingPoints，则一并包含其周边点位。
     /// </summary>
     public List<int> UnlockedLocationIds { get; set; } = new();
+
+    /// <summary>
+    /// 本次下发的奖励列表（对应 FirstReward），若无奖励则为空数组
+    /// </summary>
+    public List<RewardItem> Rewards { get; set; } = new();
 }
 
 /// <summary>

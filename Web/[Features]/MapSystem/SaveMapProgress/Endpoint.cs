@@ -1,5 +1,6 @@
 using Web.Services;
 using FastEndpoints;
+using System.Linq;
 using System.Security.Claims;
 using Serilog;
 
@@ -47,7 +48,7 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
                 return;
             }
 
-            var (progress, unlockedIds, storedEnergy) = await _mapService.SaveMapProgressAsync(
+            var (progress, unlockedIds, storedEnergy, rewardsRaw) = await _mapService.SaveMapProgressAsync(
                 userId,
                 req.StartLocationId,
                 req.EndLocationId,
@@ -62,7 +63,8 @@ public class Endpoint : Endpoint<SaveMapProgressRequest, SaveMapProgressResponse
                 DistanceMeters = progress.DistanceMeters,
                 CreatedAt = progress.CreatedAt,
                 UnlockedLocationIds = unlockedIds ?? new List<int>(),
-                StoredEnergyMeters = storedEnergy
+                StoredEnergyMeters = storedEnergy,
+                Rewards = rewardsRaw?.Select(r => new RewardItem { ItemId = r[0], Amount = r[1] }).ToList() ?? new List<RewardItem>()
             };
 
             await HttpContext.Response.SendAsync(response, 200, cancellation: ct);

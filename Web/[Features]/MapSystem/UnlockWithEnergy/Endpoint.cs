@@ -1,5 +1,6 @@
 using Web.Services;
 using FastEndpoints;
+using System.Linq;
 using System.Security.Claims;
 using Serilog;
 
@@ -47,14 +48,15 @@ public class Endpoint : Endpoint<UnlockWithEnergyRequest, UnlockWithEnergyRespon
                 return;
             }
 
-            var (ok, used, remain, unlockedIds) = await _mapService.UnlockWithEnergyAsync(userId, req.StartLocationId, req.EndLocationId);
+            var (ok, used, remain, unlockedIds, rewardsRaw) = await _mapService.UnlockWithEnergyAsync(userId, req.StartLocationId, req.EndLocationId);
 
             var resp = new UnlockWithEnergyResponse
             {
                 IsUnlocked = ok,
                 UsedEnergyMeters = used,
                 StoredEnergyMeters = remain,
-                UnlockedLocationIds = unlockedIds ?? new List<int>()
+                UnlockedLocationIds = unlockedIds ?? new List<int>(),
+                Rewards = rewardsRaw?.Select(r => new RewardItem { ItemId = r[0], Amount = r[1] }).ToList() ?? new List<RewardItem>()
             };
 
             await HttpContext.Response.SendAsync(resp, 200, cancellation: ct);

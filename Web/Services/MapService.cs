@@ -12,9 +12,9 @@ namespace Web.Services;
 public interface IMapService
 {
     /// <summary>
-    /// 保存地图进度，返回进度记录、本次解锁的点位ID列表以及最新存储能量（米）
+    /// 保存地图进度，返回进度记录、本次解锁的点位ID列表、最新存储能量（米）以及本次下发的奖励
     /// </summary>
-    Task<(PlayerMapProgress Progress, List<int> UnlockedLocationIds, decimal StoredEnergyMeters)> SaveMapProgressAsync(long userId, int startLocationId, int endLocationId, decimal distanceMeters);
+    Task<(PlayerMapProgress Progress, List<int> UnlockedLocationIds, decimal StoredEnergyMeters, List<List<int>>? Rewards)> SaveMapProgressAsync(long userId, int startLocationId, int endLocationId, decimal distanceMeters);
 
     /// <summary>
     /// 访问地图点位，返回是否首次访问和奖励信息以及是否消耗了道具
@@ -22,9 +22,9 @@ public interface IMapService
     Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId, bool isCompleted, bool needConsume);
 
     /// <summary>
-    /// 使用存储能量解锁终点
+    /// 使用存储能量解锁终点，返回是否解锁、消耗能量、剩余能量、本次解锁的点位ID以及本次下发的奖励
     /// </summary>
-    Task<(bool IsUnlocked, decimal UsedEnergy, decimal StoredEnergyMeters, List<int> UnlockedLocationIds)> UnlockWithEnergyAsync(long userId, int startLocationId, int endLocationId);
+    Task<(bool IsUnlocked, decimal UsedEnergy, decimal StoredEnergyMeters, List<int> UnlockedLocationIds, List<List<int>>? GrantedRewards)> UnlockWithEnergyAsync(long userId, int startLocationId, int endLocationId);
 
     /// <summary>
     /// 获取玩家已解锁的点位列表
@@ -208,7 +208,8 @@ public class MapService : IMapService
 
 
 
-    public async Task<(PlayerMapProgress Progress, List<int> UnlockedLocationIds, decimal StoredEnergyMeters)> SaveMapProgressAsync(
+// 首次奖励 FirstReward 改为在解锁终点时下发，方法返回值新增 Rewards
+    public async Task<(PlayerMapProgress Progress, List<int> UnlockedLocationIds, decimal StoredEnergyMeters, List<List<int>>? Rewards)> SaveMapProgressAsync(
         long userId,
         int startLocationId,
         int endLocationId,
@@ -225,8 +226,6 @@ public class MapService : IMapService
         {
             // 传入的 distanceMeters 表示本次新增的行进距离，而并非累计总距离
             // 因此需要在原有进度上进行累加，而不是直接覆盖。
-            // 这样便允许客户端将一次长跑拆分为多次上报，也能正确触发后续的解锁、能量累积逻辑。
-
             progress.DistanceMeters += distanceMeters;
             progress.CreatedAt = DateTime.UtcNow;
             Log.Information(
@@ -251,7 +250,7 @@ public class MapService : IMapService
 
         // 若跑步距离达到起点->终点所需距离，则更新当前点位为终点，并增加该点位人数
         var required = GetRequiredDistanceFromStartToEnd(startLocationId, endLocationId);
-            if (required.HasValue && progress.DistanceMeters >= required.Value)
+        if (required.HasValue && progress.DistanceMeters >= required.Value)
         {
             await SetCurrentLocationAsync(userId, endLocationId);
             // 增加终点位置的人数统计
@@ -262,6 +261,8 @@ public class MapService : IMapService
         var unlockedList = new List<int>();
         var endLocationConfig = _mapConfigService.GetMapConfigByLocationId(endLocationId);
         decimal addEnergy = 0m;
+        List<List<int>>? rewards = null;
+
         var requiredDist = GetRequiredDistanceFromStartToEnd(startLocationId, endLocationId);
         if (requiredDist.HasValue && requiredDist.Value > 0)
         {
@@ -270,7 +271,7 @@ public class MapService : IMapService
             var newExcess = Math.Max(0m, progress.DistanceMeters - req);
             addEnergy = Math.Max(0m, newExcess - prevExcess);
 
-                if (progress.DistanceMeters >= req)
+            if (progress.DistanceMeters >= req)
             {
                 // 检查是否已经解锁过
                 var alreadyUnlocked = await _dbContext.PlayerUnlockedLocation
@@ -295,8 +296,7 @@ public class MapService : IMapService
                             if (!unlockedList.Contains(pid)) unlockedList.Add(pid);
 
                             // 将周边点位也写入已解锁表（若尚未解锁）
-                            var spAlready = await _dbContext.PlayerUnlockedLocation
-                                .AnyAsync(u => u.UserId == userId && u.LocationId == pid);
+                            var spAlready = await _dbContext.PlayerUnlockedLocation.AnyAsync(u => u.UserId == userId && u.LocationId == pid);
                             if (!spAlready)
                             {
                                 _dbContext.PlayerUnlockedLocation.Add(new PlayerUnlockedLocation
@@ -307,6 +307,20 @@ public class MapService : IMapService
                                 });
                             }
                         }
+                    }
+
+                    // 首次奖励
+                    if (endLocationConfig?.FirstReward != null)
+                    {
+                        rewards = new List<List<int>>(endLocationConfig.FirstReward);
+                        foreach (var r in rewards)
+                        {
+                            if (r.Count >= 2 && r[1] > 0)
+                            {
+                                await _inventoryService.GrantItemAsync(userId, r[0], r[1]);
+                            }
+                        }
+                        Log.Information("Granted first rewards ({Count}) to user {UserId} for unlocking location {LocationId}", rewards.Count, userId, endLocationId);
                     }
 
                     Log.Information(
@@ -331,7 +345,7 @@ public class MapService : IMapService
 
         await _dbContext.SaveChangesAsync();
 
-        return (progress, unlockedList, player.StoredEnergyMeters);
+        return (progress, unlockedList, player.StoredEnergyMeters, rewards);
     }
 
     public async Task<MapLocationVisitResult> VisitMapLocationAsync(long userId, int locationId, bool isCompleted, bool needConsume)
@@ -445,11 +459,7 @@ public class MapService : IMapService
         await _dbContext.SaveChangesAsync();
 
         List<List<int>>? rewards = null;
-        if (isFirstVisit && mapConfig.FirstReward != null)
-        {
-            rewards ??= new List<List<int>>();
-            rewards.AddRange(mapConfig.FirstReward);
-        }
+        // 首次奖励 FirstReward 改为在解锁终点时下发（save-progress/unlock-with-energy 接口），此处不再发放
         if (isCompleted && mapConfig.FixedReward != null)
         {
             rewards ??= new List<List<int>>();
@@ -505,12 +515,13 @@ public class MapService : IMapService
             .ToListAsync();
     }
 
-    public async Task<(bool IsUnlocked, decimal UsedEnergy, decimal StoredEnergyMeters, List<int> UnlockedLocationIds)> UnlockWithEnergyAsync(long userId, int startLocationId, int endLocationId)
+    public async Task<(bool IsUnlocked, decimal UsedEnergy, decimal StoredEnergyMeters, List<int> UnlockedLocationIds, List<List<int>>? GrantedRewards)> UnlockWithEnergyAsync(long userId, int startLocationId, int endLocationId)
     {
         var endConfig = _mapConfigService.GetMapConfigByLocationId(endLocationId);
         var unlockedList = new List<int>();
+        List<List<int>>? rewards = null;
 
-        async Task AddUnlockRecordsAsync()
+        async Task AddUnlockRecordsAndRewardsAsync()
         {
             // 终点本身
             _dbContext.PlayerUnlockedLocation.Add(new PlayerUnlockedLocation
@@ -528,8 +539,7 @@ public class MapService : IMapService
                 foreach (var pid in sp)
                 {
                     if (!unlockedList.Contains(pid)) unlockedList.Add(pid);
-                    var spAlready = await _dbContext.PlayerUnlockedLocation
-                        .AnyAsync(u => u.UserId == userId && u.LocationId == pid);
+                    var spAlready = await _dbContext.PlayerUnlockedLocation.AnyAsync(u => u.UserId == userId && u.LocationId == pid);
                     if (!spAlready)
                     {
                         _dbContext.PlayerUnlockedLocation.Add(new PlayerUnlockedLocation
@@ -541,6 +551,20 @@ public class MapService : IMapService
                     }
                 }
             }
+
+            // 首次奖励
+            if (endConfig?.FirstReward != null)
+            {
+                rewards = new List<List<int>>(endConfig.FirstReward);
+                foreach (var r in rewards)
+                {
+                    if (r.Count >= 2 && r[1] > 0)
+                    {
+                        await _inventoryService.GrantItemAsync(userId, r[0], r[1]);
+                    }
+                }
+                Log.Information("Granted first rewards ({Count}) to user {UserId} for unlocking location {LocationId} via energy", rewards.Count, userId, endLocationId);
+            }
         }
 
         // 基于起点配置的 TheNextPointDistance 判断所需距离
@@ -551,11 +575,11 @@ public class MapService : IMapService
             var already = await _dbContext.PlayerUnlockedLocation.AnyAsync(u => u.UserId == userId && u.LocationId == endLocationId);
             if (!already)
             {
-                await AddUnlockRecordsAsync();
+                await AddUnlockRecordsAndRewardsAsync();
                 await _dbContext.SaveChangesAsync();
             }
             var player0 = await _playerRoleService.GetOrCreatePlayerAsync(userId);
-            return (true, 0m, player0.StoredEnergyMeters, unlockedList);
+            return (true, 0m, player0.StoredEnergyMeters, unlockedList, rewards);
         }
 
         var req = (decimal)requiredDist.Value;
@@ -567,11 +591,11 @@ public class MapService : IMapService
             var already = await _dbContext.PlayerUnlockedLocation.AnyAsync(u => u.UserId == userId && u.LocationId == endLocationId);
             if (!already)
             {
-                await AddUnlockRecordsAsync();
+                await AddUnlockRecordsAndRewardsAsync();
                 await _dbContext.SaveChangesAsync();
             }
             var player1 = await _playerRoleService.GetOrCreatePlayerAsync(userId);
-            return (true, 0m, player1.StoredEnergyMeters, unlockedList);
+            return (true, 0m, player1.StoredEnergyMeters, unlockedList, rewards);
         }
 
         var need = req - current;
@@ -583,16 +607,16 @@ public class MapService : IMapService
             var already = await _dbContext.PlayerUnlockedLocation.AnyAsync(u => u.UserId == userId && u.LocationId == endLocationId);
             if (!already)
             {
-                await AddUnlockRecordsAsync();
+                await AddUnlockRecordsAndRewardsAsync();
             }
             await _dbContext.SaveChangesAsync();
             Log.Information("User {UserId} unlocked location {LocationId} from start {Start} by spending stored energy {Used}m, remain {Remain}m", userId, endLocationId, startLocationId, need, player.StoredEnergyMeters);
-            return (true, need, player.StoredEnergyMeters, unlockedList);
+            return (true, need, player.StoredEnergyMeters, unlockedList, rewards);
         }
 
         // 能量不足，返回未解锁
         Log.Information("User {UserId} insufficient stored energy to unlock {LocationId} from start {Start}. Need {Need}m, have {Have}m", userId, endLocationId, startLocationId, need, player.StoredEnergyMeters);
-        return (false, 0m, player.StoredEnergyMeters, unlockedList);
+        return (false, 0m, player.StoredEnergyMeters, unlockedList, null);
     }
 
 

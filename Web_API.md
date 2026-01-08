@@ -231,7 +231,8 @@ POST /api/map/save-progress
   "distanceMeters": 850.5,        // double, 单位: 米
   "createdAt": "2025-01-01T00:00:00Z", // DateTime (ISO 8601)
   "unlockedLocationIds": [10012, 10010501], // int[], 本次解锁提示列表：包含终点以及其 SurroundingPoints（若配置），未解锁则为空数组
-  "storedEnergyMeters": 120.0     // double, 当前玩家“存储能量”（米），最大 10000
+  "storedEnergyMeters": 120.0,    // double, 当前玩家“存储能量”（米），最大 10000
+  "rewards": [{ "itemId": 8000, "amount": 10 }] // List<Reward>, 本次下发的首次奖励（若有）
 }
 
 <a id="toc-map-visit-location"></a>
