@@ -71,7 +71,7 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
 
                 // APP side requires appToken in header
                 if (req != null && !string.IsNullOrWhiteSpace(req.AppToken))
-                    httpReq.Headers.TryAddWithoutValidation("appToken", req.AppToken);
+                    httpReq.Headers.TryAddWithoutValidation("token", req.AppToken);
 
                 var appResp = await _appClient.SendAsync(httpReq, ct);
                 if (appResp.IsSuccessStatusCode)

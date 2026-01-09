@@ -47,7 +47,7 @@ public class Endpoint : Endpoint<FeedEnergyRequest, FeedEnergyResponse>
 
                 // APP side requires appToken in header
                 if (!string.IsNullOrWhiteSpace(req.AppToken))
-                    appHttpReq.Headers.TryAddWithoutValidation("appToken", req.AppToken);
+                    appHttpReq.Headers.TryAddWithoutValidation("token", req.AppToken);
 
                 // keep forwarding web Authorization too (if APP also checks it)
                 if (HttpContext.Request.Headers.TryGetValue("Authorization", out var authHdr))
