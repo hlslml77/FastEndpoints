@@ -434,10 +434,13 @@ curl -X POST https://host/api/map/feed-energy \
 POST /api/map/device-distance
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：返回玩家距能量上限还可存储的能量（米），以及按四个设备类型分别还能灌输的最大距离（米）。
+- 额外要求：调用该接口时，客户端必须提供 `appToken`，服务端会将其放到请求头 `appToken` 中转发给 APP 服务。
+- 说明：服务端会调用 APP 接口查询各设备最多还能灌输的距离，并将 APP 返回结构转换为：
+  - deviceDistances: [{ deviceType, distanceMeters }]
 
-请求体：空对象 {} 或不传
+请求体
 {
+  "appToken": "..." // string, APP认证令牌（必填）
 }
 
 响应体
@@ -452,8 +455,9 @@ POST /api/map/device-distance
 }
 
 示例（curl）
-curl -X POST https://host/api/map/energy-capacity \
-  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" -d '{}'
+curl -X POST https://host/api/map/device-distance \
+  -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
+  -d '{"appToken":"<appToken>"}'
 
 
 ---
