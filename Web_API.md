@@ -325,7 +325,8 @@ POST /api/map/unlock-with-energy
   "isUnlocked": true,          // bool, 本次是否成功解锁
   "usedEnergyMeters": 240.0,   // double, 本次消耗的能量（米），不足则为 0
   "storedEnergyMeters": 760.0, // double, 玩家当前剩余“存储能量”（米）
-  "unlockedLocationIds": [10012, 10010501] // int[], 本次解锁提示列表：包含终点以及其 SurroundingPoints（若配置），未解锁则为空数组
+  "unlockedLocationIds": [10012, 10010501], // int[], 本次解锁提示列表：包含终点以及其 SurroundingPoints（若配置），未解锁则为空数组
+  "rewards": [{ "itemId": 8000, "amount": 10 }] //首次通关奖励
 }
 
 <a id="toc-map-location-info"></a>
