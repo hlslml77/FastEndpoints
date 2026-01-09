@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace MapSystem.FeedStoredEnergy;
 
@@ -12,12 +13,22 @@ public class FeedEnergyRequest
     /// <summary>
     /// 设备类型：0=跑步机,1=划船机,2=单车,3=手环/无设备
     /// </summary>
+    [Required(ErrorMessage = "设备类型不能为空")]
+    [Range(0, 3, ErrorMessage = "无效的设备类型")]
     public int DeviceType { get; set; }
 
     /// <summary>
     /// 本次上传的运动距离（米）
     /// </summary>
+    [Required(ErrorMessage = "运动距离不能为空")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "运动距离必须大于0")]
     public decimal DistanceMeters { get; set; }
+
+    /// <summary>
+    /// APP服务认证令牌
+    /// </summary>
+    [Required(ErrorMessage = "APP认证令牌不能为空")]
+    public string AppToken { get; set; } = string.Empty;
 }
 
 public class FeedEnergyResponse

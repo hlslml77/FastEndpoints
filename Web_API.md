@@ -407,14 +407,15 @@ curl -X POST https://host/api/map/monster/reward \
 POST /api/map/feed-energy
 
 - 认证：需要 Bearer Token（权限 web_access）
-- 说明：客户端上传本次运动的设备类型（deviceType）与距离（distanceMeters，单位米）。服务端按设备效率倍率（跑步1.2、划船2.0、单车1.5、手环/无设备1.0）将距离折算为能量并累加到玩家的 "存储能量"（上限 10000 米）。当存储能量已满时，只会注入差值。
+- 额外要求：调用该接口时，客户端必须提供 `appToken`，服务端会将其放到请求头 `appToken` 中转发给 APP 服务。
+- 说明：客户端上传本次运动的设备类型（deviceType）与距离（distanceMeters，单位米）。服务端会先调用 APP 的灌注接口（成功=HTTP 200）后，再按设备效率倍率（跑步1.2、划船2.0、单车1.5、手环/无设备1.0）将距离折算为能量并累加到玩家的 "存储能量"（上限 10000 米）。当存储能量已满时，只会注入差值。
 - 设备类型：0=跑步, 1=划船, 2=单车, 3=手环/无设备
-
 
 请求体
 {
-  "deviceType": 0,      // int
-  "distanceMeters": 1200 // double, 单位: 米
+  "deviceType": 0,       // int
+  "distanceMeters": 1200, // double, 单位: 米
+  "appToken": "..."     // string, APP认证令牌（必填）
 }
 
 响应体
@@ -426,7 +427,7 @@ POST /api/map/feed-energy
 示例（curl）
 curl -X POST https://host/api/map/feed-energy \
   -H "Authorization: Bearer <webToken>" -H "Content-Type: application/json" \
-  -d '{"deviceType":0,"distanceMeters":1200}'
+  -d '{"deviceType":0,"distanceMeters":1200,"appToken":"<appToken>"}'
 
 <a id="toc-map-device-distance"></a>
 3.8 查询设备可灌输距离
