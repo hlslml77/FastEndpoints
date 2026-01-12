@@ -378,7 +378,8 @@ app.UseRequestLocalization(
 
            c.Endpoints.RoutePrefix = "api";
            c.Endpoints.ShortNames = false;
-           c.Endpoints.PrefixNameWithFirstTag = true;
+           // 禁用按首个 Tag 自动前缀，避免路由多出 "mapsystem/"
+           c.Endpoints.PrefixNameWithFirstTag = false;
            c.Endpoints.Filter = ep => ep.EndpointTags?.Contains("exclude") is not true;
            c.Endpoints.Configurator =
                ep =>

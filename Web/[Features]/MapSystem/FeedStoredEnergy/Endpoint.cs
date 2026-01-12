@@ -17,7 +17,7 @@ public class Endpoint : Endpoint<FeedEnergyRequest, FeedEnergyResponse>
     private readonly HttpClient _appClient;
     private readonly IConfiguration _cfg;
 
-    private string AppFeedEnergyPath => _cfg["AppService:FeedEnergyPath"] ?? "/api/map/feed-energy";
+    private const string AppFeedEnergyPath = "/game/activity/world/upload";
 
     public Endpoint(IMapService mapService, IHttpClientFactory httpClientFactory, IConfiguration cfg)
     {

@@ -18,7 +18,7 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
     private readonly HttpClient _appClient;
     private readonly IConfiguration _cfg;
 
-    private string AppDeviceDistancePath => _cfg["AppService:DeviceDistancePath"] ?? "/api/map/device-distance";
+    private const string AppDeviceDistancePath = "/game/activity/world/user/itemInfo";
 
     public Endpoint(IMapService mapService, IHttpClientFactory httpClientFactory, IConfiguration cfg)
     {
