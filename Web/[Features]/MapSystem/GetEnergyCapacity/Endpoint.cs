@@ -117,8 +117,25 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
         {
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
-            if (!root.TryGetProperty("code", out var codeEl) || codeEl.GetInt32() != 200)
+            // 允许 "code" 字段为数字或字符串两种格式
+            if (!root.TryGetProperty("code", out var codeEl))
                 return null;
+
+            int codeVal;
+            switch (codeEl.ValueKind)
+            {
+                case JsonValueKind.Number:
+                    codeVal = codeEl.GetInt32();
+                    break;
+                case JsonValueKind.String when int.TryParse(codeEl.GetString(), out var tmpCode):
+                    codeVal = tmpCode;
+                    break;
+                default:
+                    return null;
+            }
+            if (codeVal != 200)
+                return null;
+
             if (!root.TryGetProperty("data", out var dataEl))
                 return null;
 
