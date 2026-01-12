@@ -51,10 +51,8 @@ public class Endpoint : Endpoint<FeedEnergyRequest, FeedEnergyResponse>
             // 2) forward request to external APP service first
             using (var appHttpReq = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, AppFeedEnergyPath))
             {
-                appHttpReq.Content = JsonContent.Create(new { deviceType = req.DeviceType, distanceMeters = req.DistanceMeters });
-
-                // attach userid in header as required
-                appHttpReq.Headers.TryAddWithoutValidation("userid", userId.ToString());
+                // 按新协议，将 userId 放在 JSON Body 中（替代 header）
+                appHttpReq.Content = JsonContent.Create(new { userId, deviceType = req.DeviceType, distanceMeters = req.DistanceMeters });
 
                 // keep forwarding web Authorization too (if APP also checks it)
                 if (HttpContext.Request.Headers.TryGetValue("Authorization", out var authHdr))

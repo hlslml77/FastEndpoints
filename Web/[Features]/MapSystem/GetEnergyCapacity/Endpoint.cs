@@ -62,10 +62,9 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
             {
                 using var httpReq = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, AppDeviceDistancePath)
                 {
-                    Content = JsonContent.Create(new { })
+                    // 按新协议，将 userId 放在请求体
+                    Content = JsonContent.Create(new { userId })
                 };
-                // attach userid in header only
-                httpReq.Headers.TryAddWithoutValidation("userid", userId.ToString());
 
                 // 转发 Authorization 头（若有需要验证）
                 if (HttpContext.Request.Headers.TryGetValue("Authorization", out var authHdr))
