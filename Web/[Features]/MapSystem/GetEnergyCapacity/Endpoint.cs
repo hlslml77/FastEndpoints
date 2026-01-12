@@ -62,16 +62,14 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
             {
                 using var httpReq = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, AppDeviceDistancePath)
                 {
-                    Content = JsonContent.Create(new { userId })
+                    Content = JsonContent.Create(new { })
                 };
+                // attach userid in header only
+                httpReq.Headers.TryAddWithoutValidation("userid", userId.ToString());
 
                 // 转发 Authorization 头（若有需要验证）
                 if (HttpContext.Request.Headers.TryGetValue("Authorization", out var authHdr))
                     httpReq.Headers.TryAddWithoutValidation("Authorization", authHdr.ToString());
-
-                // APP side requires appToken in header
-                if (req != null && !string.IsNullOrWhiteSpace(req.AppToken))
-                    httpReq.Headers.TryAddWithoutValidation("token", req.AppToken);
 
                 var appResp = await _appClient.SendAsync(httpReq, ct);
                 if (appResp.IsSuccessStatusCode)

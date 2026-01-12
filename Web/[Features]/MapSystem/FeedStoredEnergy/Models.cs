@@ -23,12 +23,6 @@ public class FeedEnergyRequest
     [Required(ErrorMessage = "运动距离不能为空")]
     [Range(0.01, double.MaxValue, ErrorMessage = "运动距离必须大于0")]
     public decimal DistanceMeters { get; set; }
-
-    /// <summary>
-    /// APP服务认证令牌
-    /// </summary>
-    [Required(ErrorMessage = "APP认证令牌不能为空")]
-    public string AppToken { get; set; } = string.Empty;
 }
 
 public class FeedEnergyResponse

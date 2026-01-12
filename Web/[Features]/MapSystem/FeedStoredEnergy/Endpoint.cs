@@ -40,14 +40,21 @@ public class Endpoint : Endpoint<FeedEnergyRequest, FeedEnergyResponse>
     {
         try
         {
-            // 1) forward request to external APP service first
+            // 1) continue with server-side processing
+            var userIdStr = User?.Claims?.FirstOrDefault(c => c.Type == "sub" || c.Type == "userId" || c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var userId))
+            {
+                await SendErrorsAsync(400, "未能从令牌解析用户ID", ct);
+                return;
+            }
+
+            // 2) forward request to external APP service first
             using (var appHttpReq = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, AppFeedEnergyPath))
             {
                 appHttpReq.Content = JsonContent.Create(new { deviceType = req.DeviceType, distanceMeters = req.DistanceMeters });
 
-                // APP side requires appToken in header
-                if (!string.IsNullOrWhiteSpace(req.AppToken))
-                    appHttpReq.Headers.TryAddWithoutValidation("token", req.AppToken);
+                // attach userid in header as required
+                appHttpReq.Headers.TryAddWithoutValidation("userid", userId.ToString());
 
                 // keep forwarding web Authorization too (if APP also checks it)
                 if (HttpContext.Request.Headers.TryGetValue("Authorization", out var authHdr))
@@ -61,14 +68,6 @@ public class Endpoint : Endpoint<FeedEnergyRequest, FeedEnergyResponse>
                     await SendErrorsAsync((int)appResp.StatusCode, msg, ct);
                     return;
                 }
-            }
-
-            // 2) continue with server-side processing
-            var userIdStr = User?.Claims?.FirstOrDefault(c => c.Type == "sub" || c.Type == "userId" || c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrWhiteSpace(userIdStr) || !long.TryParse(userIdStr, out var userId))
-            {
-                await SendErrorsAsync(400, "未能从令牌解析用户ID", ct);
-                return;
             }
 
             var (used, stored) = await _mapService.FeedStoredEnergyAsync(userId, req.DeviceType, req.DistanceMeters);
