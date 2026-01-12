@@ -130,14 +130,38 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
             // 说明：APP 每次返回一个设备类型的“可灌输最大距离”。
 
             // 设备主类型映射：0=跑步机, 1/2=单车, 3=划船机
-            if (!dataEl.TryGetProperty("equipmentMainType", out var typeEl) || typeEl.ValueKind != JsonValueKind.Number)
+            if (!dataEl.TryGetProperty("equipmentMainType", out var typeEl))
+                return null;
+            if (!dataEl.TryGetProperty("importRunMileAge", out var distEl))
                 return null;
 
-            if (!dataEl.TryGetProperty("importRunMileAge", out var distEl) || distEl.ValueKind != JsonValueKind.Number)
-                return null;
+            int equipmentMainType;
+            decimal distanceMeters;
 
-            var equipmentMainType = typeEl.GetInt32();
-            var distanceMeters = distEl.GetDecimal();
+            // 兼容字符串与数值两种格式
+            switch (typeEl.ValueKind)
+            {
+                case JsonValueKind.Number:
+                    equipmentMainType = typeEl.GetInt32();
+                    break;
+                case JsonValueKind.String when int.TryParse(typeEl.GetString(), out var tmpInt):
+                    equipmentMainType = tmpInt;
+                    break;
+                default:
+                    return null;
+            }
+
+            switch (distEl.ValueKind)
+            {
+                case JsonValueKind.Number:
+                    distanceMeters = distEl.GetDecimal();
+                    break;
+                case JsonValueKind.String when decimal.TryParse(distEl.GetString(), out var tmpDec):
+                    distanceMeters = tmpDec;
+                    break;
+                default:
+                    return null;
+            }
 
             var resp = new EnergyCapacityResponse();
 
