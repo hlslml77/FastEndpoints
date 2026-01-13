@@ -89,11 +89,9 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
 
             if (respBody == null)
             {
-                // fallback：使用内部逻辑计算
-                var (remain, dict) = await _mapService.GetFeedCapacityAsync(userId);
-                respBody = new EnergyCapacityResponse { RemainingEnergyMeters = remain };
-                foreach (var kv in dict)
-                    respBody.DeviceDistances.Add(new DeviceDistanceInfo { DeviceType = kv.Key, DistanceMeters = kv.Value });
+                // 禁用内部回退逻辑，接口必须返回 APP 数据
+                await SendErrorsAsync(502, "未能获取APP数据", ct);
+                return;
             }
 
             await HttpContext.Response.SendAsync(respBody, 200, cancellation: ct);
