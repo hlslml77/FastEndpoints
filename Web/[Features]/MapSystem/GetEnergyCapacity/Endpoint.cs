@@ -74,6 +74,7 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
                 if (appResp.IsSuccessStatusCode)
                 {
                     var json = await appResp.Content.ReadAsStringAsync(ct);
+                    Log.Information("app json = ", json);
                     respBody = ParseAppResponse(json);
                 }
                 else
@@ -134,17 +135,30 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
             if (!root.TryGetProperty("data", out var dataEl))
                 return null;
 
-            // APP 侧字段示例（按当前 APP 文档）：
-            // data: {
-            //   "equipmentMainType": 0,
-            //   "importRunMileAge": 1166.7
+            // APP 侧示例：
+            // "data": {
+            //   "importRunData": [ {
+            //       "equipmentMainType": 0,
+            //       "importRunMillage": 16920.0
+            //   } ]
             // }
-            // 说明：APP 每次返回一个设备类型的“可灌输最大距离”。
+            // 我们只读取数组第一个元素。
 
-            // 设备主类型映射：0=跑步机, 1/2=单车, 3=划船机
-            if (!dataEl.TryGetProperty("equipmentMainType", out var typeEl))
+            if (!dataEl.TryGetProperty("importRunData", out var runDataEl) ||
+                runDataEl.ValueKind != JsonValueKind.Array ||
+                runDataEl.GetArrayLength() == 0)
                 return null;
-            if (!dataEl.TryGetProperty("importRunMileAge", out var distEl))
+
+            var firstItem = runDataEl[0];
+            if (!firstItem.TryGetProperty("equipmentMainType", out var typeEl))
+                return null;
+            // 字段有两种拼写，做兼容
+            JsonElement distEl;
+            if (firstItem.TryGetProperty("importRunMillage", out var _dist1))
+                distEl = _dist1;
+            else if (firstItem.TryGetProperty("importRunMileAge", out var _dist2))
+                distEl = _dist2;
+            else
                 return null;
 
             int equipmentMainType;
