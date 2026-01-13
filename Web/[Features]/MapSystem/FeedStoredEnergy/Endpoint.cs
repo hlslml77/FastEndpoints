@@ -62,7 +62,9 @@ private class AppFeedEnergyResult
             using (var appHttpReq = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, AppFeedEnergyPath))
             {
                 // 按新协议，将 userId 放在 JSON Body 中（替代 header）
-                appHttpReq.Content = JsonContent.Create(new { userId, deviceType = req.DeviceType, distanceMeters = req.DistanceMeters });
+                // 按 APP 协议字段名：equipmentMainType & importDistance，并转换设备类型编码
+                    var mainType = ConvertToAppMainType(req.DeviceType);
+                    appHttpReq.Content = JsonContent.Create(new { userId, equipmentMainType = mainType, importDistance = req.DistanceMeters });
 
                 // keep forwarding web Authorization too (if APP also checks it)
                 if (HttpContext.Request.Headers.TryGetValue("Authorization", out var authHdr))
@@ -114,10 +116,25 @@ private class AppFeedEnergyResult
         {
             Log.Error(ex, "FeedEnergy failed");
             await SendErrorsAsync(500, "服务器内部错误", ct);
+
         }
     }
 
     private Task SendErrorsAsync(int status, string message, CancellationToken ct)
         => HttpContext.Response.SendAsync(new { statusCode = status, code = Web.Data.ErrorCodes.Common.BadRequest, message }, status, cancellation: ct);
+/// <summary>
+    /// 将 Web 设备类型转换为 APP 主设备类型编码
+    /// </summary>
+    private static int ConvertToAppMainType(int deviceType)
+    {
+        return deviceType switch
+        {
+            0 => 0, // 跑步 -> TREADMILL
+            1 => 3, // 划船 -> ROWING
+            2 => 2, // 单车 -> BICYCLE
+            3 => 4, // 手环 -> BRACELET
+            _ => deviceType
+        };
+    }
 }
 
