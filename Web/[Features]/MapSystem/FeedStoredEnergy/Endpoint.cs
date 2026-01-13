@@ -27,8 +27,13 @@ public class Endpoint : Endpoint<FeedEnergyRequest, FeedEnergyResponse>
     }
 private class AppFeedEnergyResult
     {
-        public string? code { get; set; }
+        public int code { get; set; }
         public string? msg  { get; set; }
+        public DataInfo? data { get; set; }
+        public class DataInfo
+        {
+            public int isUploadSuccess { get; set; }
+        }
     }
 
     public override void Configure()
@@ -72,13 +77,13 @@ private class AppFeedEnergyResult
                     return;
                 }
 
-                // 解析 APP 返回内容，确保业务 code == "200"
+                // 解析 APP 返回内容，确保业务 code==200 且 data.isUploadSuccess==1
                 try
                 {
                     var appData = await appResp.Content.ReadFromJsonAsync<AppFeedEnergyResult>(cancellationToken: ct);
-                    if (appData?.code != "200")
+                    if (appData is null || appData.code != 200 || appData.data?.isUploadSuccess != 1)
                     {
-                        var msg = $"APP 返回 code={appData?.code}, msg={appData?.msg}";
+                        var msg = $"APP 返回 code={appData?.code}, isUploadSuccess={appData?.data?.isUploadSuccess}, msg={appData?.msg}";
                         Log.Warning("FeedEnergy - app business failed: {Msg}", msg);
                         await SendErrorsAsync(502, msg, ct);
                         return;
