@@ -74,7 +74,7 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
                 if (appResp.IsSuccessStatusCode)
                 {
                     var json = await appResp.Content.ReadAsStringAsync(ct);
-                    Log.Information("app json = ", json);
+                    Log.Information("app json = {Json}", json);
                     respBody = ParseAppResponse(json);
                 }
                 else
