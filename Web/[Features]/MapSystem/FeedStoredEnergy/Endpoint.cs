@@ -17,13 +17,18 @@ public class Endpoint : Endpoint<FeedEnergyRequest, FeedEnergyResponse>
     private readonly HttpClient _appClient;
     private readonly IConfiguration _cfg;
 
-    private const string AppFeedEnergyPath = "/game/activity/world/upload";
+    private const string AppFeedEnergyPath = "/game/activity/world3/upload";
 
     public Endpoint(IMapService mapService, IHttpClientFactory httpClientFactory, IConfiguration cfg)
     {
         _mapService = mapService;
         _appClient = httpClientFactory.CreateClient("AppService");
         _cfg = cfg;
+    }
+private class AppFeedEnergyResult
+    {
+        public string? code { get; set; }
+        public string? msg  { get; set; }
     }
 
     public override void Configure()
@@ -64,6 +69,25 @@ public class Endpoint : Endpoint<FeedEnergyRequest, FeedEnergyResponse>
                     var msg = $"APP 服务响应 {appResp.StatusCode}";
                     Log.Warning("FeedEnergy - call APP failed: {Status}", appResp.StatusCode);
                     await SendErrorsAsync((int)appResp.StatusCode, msg, ct);
+                    return;
+                }
+
+                // 解析 APP 返回内容，确保业务 code == "200"
+                try
+                {
+                    var appData = await appResp.Content.ReadFromJsonAsync<AppFeedEnergyResult>(cancellationToken: ct);
+                    if (appData?.code != "200")
+                    {
+                        var msg = $"APP 返回 code={appData?.code}, msg={appData?.msg}";
+                        Log.Warning("FeedEnergy - app business failed: {Msg}", msg);
+                        await SendErrorsAsync(502, msg, ct);
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "FeedEnergy - parse APP response failed");
+                    await SendErrorsAsync(502, "APP 响应格式错误", ct);
                     return;
                 }
             }
