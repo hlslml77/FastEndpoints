@@ -142,71 +142,72 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
             //       "importRunMillage": 16920.0
             //   } ]
             // }
-            // 我们只读取数组第一个元素。
+            // 我们读取 importRunData 数组的所有元素（可能有 4 种设备）。
 
             if (!dataEl.TryGetProperty("importRunData", out var runDataEl) ||
                 runDataEl.ValueKind != JsonValueKind.Array ||
                 runDataEl.GetArrayLength() == 0)
                 return null;
 
-            var firstItem = runDataEl[0];
-            if (!firstItem.TryGetProperty("equipmentMainType", out var typeEl))
-                return null;
-            // 字段有两种拼写，做兼容
-            JsonElement distEl;
-            if (firstItem.TryGetProperty("importRunMillage", out var _dist1))
-                distEl = _dist1;
-            else if (firstItem.TryGetProperty("importRunMileAge", out var _dist2))
-                distEl = _dist2;
-            else
-                return null;
-
-            int equipmentMainType;
-            decimal distanceMeters;
-
-            // 兼容字符串与数值两种格式
-            switch (typeEl.ValueKind)
-            {
-                case JsonValueKind.Number:
-                    equipmentMainType = typeEl.GetInt32();
-                    break;
-                case JsonValueKind.String when int.TryParse(typeEl.GetString(), out var tmpInt):
-                    equipmentMainType = tmpInt;
-                    break;
-                default:
-                    return null;
-            }
-
-            switch (distEl.ValueKind)
-            {
-                case JsonValueKind.Number:
-                    distanceMeters = distEl.GetDecimal();
-                    break;
-                case JsonValueKind.String when decimal.TryParse(distEl.GetString(), out var tmpDec):
-                    distanceMeters = tmpDec;
-                    break;
-                default:
-                    return null;
-            }
-
             var resp = new EnergyCapacityResponse();
 
-            int deviceType = equipmentMainType switch
+            foreach (var item in runDataEl.EnumerateArray())
             {
-                0 => 0,
-                1 => 2,
-                2 => 2,
-                3 => 1,
-                _ => 3 // 兜底：未知设备按 3（手环/无设备）处理
-            };
+                if (!item.TryGetProperty("equipmentMainType", out var typeEl))
+                    continue;
 
-            resp.DeviceDistances.Add(new DeviceDistanceInfo
-            {
-                DeviceType = deviceType,
-                DistanceMeters = distanceMeters
-            });
+                // 字段有两种拼写，做兼容
+                JsonElement distEl;
+                if (item.TryGetProperty("importRunMillage", out var _dist1))
+                    distEl = _dist1;
+                else if (item.TryGetProperty("importRunMileAge", out var _dist2))
+                    distEl = _dist2;
+                else
+                    continue;
 
-            // resp 已在上方构建（单设备类型一条记录）
+                int equipmentMainType;
+                decimal distanceMeters;
+
+                // 兼容字符串与数值两种格式
+                switch (typeEl.ValueKind)
+                {
+                    case JsonValueKind.Number:
+                        equipmentMainType = typeEl.GetInt32();
+                        break;
+                    case JsonValueKind.String when int.TryParse(typeEl.GetString(), out var tmpInt):
+                        equipmentMainType = tmpInt;
+                        break;
+                    default:
+                        continue;
+                }
+
+                switch (distEl.ValueKind)
+                {
+                    case JsonValueKind.Number:
+                        distanceMeters = distEl.GetDecimal();
+                        break;
+                    case JsonValueKind.String when decimal.TryParse(distEl.GetString(), out var tmpDec):
+                        distanceMeters = tmpDec;
+                        break;
+                    default:
+                        continue;
+                }
+
+                int deviceType = equipmentMainType switch
+                {
+                    0 => 0,
+                    1 => 2,
+                    2 => 2,
+                    3 => 1,
+                    _ => 3 // 兜底：未知设备按 3（手环/无设备）处理
+                };
+
+                resp.DeviceDistances.Add(new DeviceDistanceInfo
+                {
+                    DeviceType = deviceType,
+                    DistanceMeters = distanceMeters
+                });
+            }
 
             // 计算剩余能量：取距离 * 效率的最小值（近似），如无数据则为 0
             if (resp.DeviceDistances.Count > 0)
@@ -219,6 +220,7 @@ public class Endpoint : Endpoint<EnergyCapacityRequest, EnergyCapacityResponse>
                     .Min();
                 resp.RemainingEnergyMeters = Math.Round(min, 3, MidpointRounding.AwayFromZero);
             }
+
             return resp;
         }
         catch (Exception ex)
