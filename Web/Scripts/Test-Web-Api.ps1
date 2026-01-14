@@ -1,8 +1,12 @@
 param(
-  [string]$BaseUrl = "http://localhost:9005",
+  [string]$BaseUrl = "121.41.80.211:9005",
   [string]$UserId = "123456",
   [string]$AdminKey = "8f1f0b3a4a9d2f6c7e1a3b5d8c9e0f1246a7b8c9d0e1f2a3b4c5d6e7f8090a1"
 )
+# Ensure BaseUrl has http/https scheme; default to http if missing
+if ($BaseUrl -and $BaseUrl -notmatch '^(http|https)://') {
+    $BaseUrl = "http://$BaseUrl"
+}
 
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -15,11 +19,21 @@ try { [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false) } 
 try { if ($PSStyle) { $PSStyle.OutputRendering = 'Host' } } catch {}
 $env:DOTNET_SYSTEM_CONSOLE_ALLOW_ANSI_COLOR_REDIRECTION = '1'
 
+# Increase concurrent HTTP connections and reduce latency for remote testing
+# Ensure System.Net.Http is available for HttpClient (PowerShell 5)
+try { Add-Type -AssemblyName System.Net.Http -ErrorAction Stop } catch {}
+[System.Net.ServicePointManager]::DefaultConnectionLimit = 50  # allow up to 50 parallel connections per host
+[System.Net.ServicePointManager]::Expect100Continue = $false   # skip 100-Continue handshake which can add delay
 $LogPath = Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'api-test-run.txt'
 Set-Content -Path $LogPath -Value ("==== Test started at {0} ====" -f ([DateTime]::UtcNow.ToString('u')))
 
 # Test statistics
 $script:TestStats = @{ Passed = 0; Failed = 0; Skipped = 0 }
+$script:ApiSeq = 0
+function Log($msg){
+    $t = Sanitize $msg
+    Add-Content -Path $LogPath -Value $t
+}
 
 function Sanitize([string]$s) {
     if ($null -eq $s) { return '' }
@@ -34,31 +48,85 @@ function Ok($msg){ $t = Sanitize $msg; $t = ("OK " + $t.Trim()); Write-Host $t -
 function Warn($msg){ $t = Sanitize $msg; $t = ("WARN " + $t.Trim()); Write-Host $t -ForegroundColor Yellow; Add-Content -Path $LogPath -Value $t; $script:TestStats.Skipped++ }
 function Err($msg){ $t = Sanitize $msg; $t = ("FAIL " + $t.Trim()); Write-Host $t -ForegroundColor Red; Add-Content -Path $LogPath -Value $t; $script:TestStats.Failed++ }
 
-function Invoke-ApiCall($Uri, $Auth, $Method, $Body, $SkipErrorHandling = $false) {
-    $params = @{
-        Uri = $Uri
-        Method = $Method
-        Headers = $Auth
-        ContentType = 'application/json'
+function Measure-NetworkLatency {
+    param (
+        [string]$Url
+    )
+    Step "Measuring network latency to $Url"
+    $curl_path = Get-Command curl.exe -ErrorAction SilentlyContinue
+    if (-not $curl_path) {
+        Err "curl.exe not found in PATH. Please install curl or ensure it's in your system's PATH."
+        return
     }
-    if ($Body) { $params.Body = ($Body | ConvertTo-Json -Compress) }
+
+    # Note: Use `n for newline in PowerShell strings
+    $timing_format = "dns_lookup:    %{time_namelookup}s`n"
+    $timing_format += "tcp_connect:   %{time_connect}s`n"
+    $timing_format += "tls_handshake: %{time_appconnect}s`n"
+    $timing_format += "pretransfer:   %{time_pretransfer}s`n"
+    $timing_format += "starttransfer: %{time_starttransfer}s`n"
+    $timing_format += "--------------------------`n"
+    $timing_format += "total_time:    %{time_total}s`n"
+
     try {
-        return Invoke-RestMethod @params
+        # Use & to execute the command
+        $result = & curl.exe -o NUL -s -w $timing_format "$($Url)/api/ping"
+        Info "Curl timing results:"
+        Info $result
+    } catch {
+        Err "Failed to run curl.exe: $($_.Exception.Message)"
+    }
+}
+
+# New HTTP client shared across requests to reuse TCP/TLS connections and avoid handshake latency
+if (-not $script:HttpClient) {
+    $handler = New-Object System.Net.Http.HttpClientHandler
+    $handler.AllowAutoRedirect = $true
+    $handler.MaxConnectionsPerServer = 50
+
+    # Disable Nagle's algorithm for lower latency on small packets
+    [System.Net.ServicePointManager]::FindServicePoint($BaseUrl).UseNagleAlgorithm = $false
+
+    $script:HttpClient = [System.Net.Http.HttpClient]::new($handler)
+    $script:HttpClient.Timeout = [TimeSpan]::FromSeconds(30)
+    # Explicitly ask for the connection to be kept alive
+$script:HttpClient.DefaultRequestHeaders.Connection.Clear()
+    $script:HttpClient.DefaultRequestHeaders.Connection.Add('Keep-Alive')
+}
+
+function Invoke-ApiCall($Uri, $Auth, $Method, $Body, $SkipErrorHandling = $false) {
+    $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+    # Build HttpRequestMessage manually so we can reuse the global HttpClient (persistent connection)
+$seq = ++$script:ApiSeq
+    $ts = (Get-Date).ToString('HH:mm:ss.fff')
+    Info ("[{0:000}] {1} {2} @ {3}" -f $seq, $Method.ToUpper(), $Uri, $ts)
+    $request = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::$Method, $Uri)
+    foreach ($k in $Auth.Keys) { $request.Headers.TryAddWithoutValidation($k, $Auth[$k]) | Out-Null }
+    $request.Headers.Accept.Add([System.Net.Http.Headers.MediaTypeWithQualityHeaderValue]::new('application/json'))
+
+    if ($Body) {
+        $json = ($Body | ConvertTo-Json -Compress)
+        $request.Content = [System.Net.Http.StringContent]::new($json, [System.Text.Encoding]::UTF8, 'application/json')
+    }
+
+    try {
+        $response = $script:HttpClient.SendAsync($request).GetAwaiter().GetResult()
+        $content  = $response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+        if (-not $response.IsSuccessStatusCode) {
+            if ($SkipErrorHandling) { return $null }
+            Err ("`n   HTTP Error: {0} on {1}" -f [int]$response.StatusCode, $Uri)
+            Err ("   Response: {0}" -f $content)
+            return $null
+        }
+        if ([string]::IsNullOrWhiteSpace($content)) { return $null }
+        return ($content | ConvertFrom-Json)
     } catch {
         if ($SkipErrorHandling) { return $null }
-        $ex = $_.Exception
-        if ($ex.Response) {
-            try {
-                $reader = New-Object System.IO.StreamReader($ex.Response.GetResponseStream())
-                $errorBody = $reader.ReadToEnd(); $reader.Close()
-                Err ("`n   HTTP Error: {0} on {1}" -f [int]$ex.Response.StatusCode, $Uri)
-                Err ("   Response: {0}" -f $errorBody)
-            } catch {
-                Err ("`n   HTTP Error on {0}: {1}" -f $Uri, $ex.Message)
-            }
-        } else {
-            Err ("`n   Network/Script Error on {0}: {1}" -f $Uri, $ex.Message)
-        }
+        Err ("`n   Network/Script Error on {0}: {1}" -f $Uri, $_.Exception.Message)
+    } finally {
+        $stopwatch.Stop()
+        $elapsed = $stopwatch.Elapsed.TotalMilliseconds
+        Info ("   -> Client-side call took {0:N2} ms" -f $elapsed)
     }
     return $null
 }
@@ -529,7 +597,7 @@ function Test-RankSystem($auth) {
     } else {
         Err "   ✗ Claim week failed"
     }
-    
+
 
 
     # 8.3 Claim season reward
@@ -578,6 +646,8 @@ function Show-TestSummary {
 }
 
 try {
+    Measure-NetworkLatency -Url $BaseUrl
+
     $webToken = Get-Token -key $AdminKey -uid $UserId -isAdmin $false
     if ($webToken) {
         $adminToken = Get-Token -key $AdminKey -uid $UserId -isAdmin $true

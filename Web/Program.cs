@@ -29,6 +29,37 @@ var bld = WebApplication.CreateBuilder(new WebApplicationOptions
     Args = args,
     WebRootPath = string.Empty
 });
+
+// Kestrel/HTTP keep-alive tuning to improve connection reuse and reduce handshake churn
+bld.WebHost.ConfigureKestrel(o =>
+{
+    // keep idle connections around longer so clients can reuse TCP/TLS sessions
+    o.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
+
+    // allow headers/body to arrive without the server tearing down the connection too aggressively
+    o.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
+
+    // protect against large headers while keeping defaults reasonable
+    // (raise only if you actually need bigger headers)
+    o.Limits.MaxRequestHeadersTotalSize = 64 * 1024;
+
+    // for slow client uploads; adjust if you have large uploads
+    o.Limits.MinRequestBodyDataRate = null;
+    o.Limits.MinResponseDataRate = null;
+
+    // enable both HTTP/1.1 (keep-alive) and HTTP/2 multiplexing
+    o.ConfigureEndpointDefaults(e =>
+    {
+        e.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2;
+    });
+});
+#pragma warning disable CS0618 // suppress obsolete MySqlConnectorLogManager.Provider warning
+// Enable MySqlConnector internal logging if env var MYSQL_DEBUG=1
+if (Environment.GetEnvironmentVariable("MYSQL_DEBUG") == "1")
+{
+    MySqlConnector.Logging.MySqlConnectorLogManager.Provider = new MySqlConnector.Logging.ConsoleLoggerProvider(MySqlConnector.Logging.MySqlConnectorLogLevel.Info);
+    Console.WriteLine("--> MySqlConnector internal logging ENABLED (set MYSQL_DEBUG=0 to disable)");
+}
 // 1. Enable Serilog Self-Logging for troubleshooting the sink
 Serilog.Debugging.SelfLog.Enable(Console.Error);
 
