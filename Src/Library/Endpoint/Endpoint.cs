@@ -173,39 +173,39 @@ public abstract partial class Endpoint<TRequest, TResponse> : BaseEndpoint, IEve
 
     /// <inheritdoc />
     public TService? TryResolve<TService>() where TService : class
-        => Cfg.ServiceResolver.TryResolve<TService>();
+        => ServiceResolver.Instance.TryResolve<TService>();
 
     /// <inheritdoc />
     public object? TryResolve(Type typeOfService)
-        => Cfg.ServiceResolver.TryResolve(typeOfService);
+        => ServiceResolver.Instance.TryResolve(typeOfService);
 
     /// <inheritdoc />
     public TService Resolve<TService>() where TService : class
-        => Cfg.ServiceResolver.Resolve<TService>();
+        => ServiceResolver.Instance.Resolve<TService>();
 
     /// <inheritdoc />
     public object Resolve(Type typeOfService)
-        => Cfg.ServiceResolver.Resolve(typeOfService);
+        => ServiceResolver.Instance.Resolve(typeOfService);
 
     /// <inheritdoc />
     public IServiceScope CreateScope()
-        => Cfg.ServiceResolver.CreateScope();
+        => ServiceResolver.Instance.CreateScope();
 
     /// <inheritdoc />
     public TService? TryResolve<TService>(string keyName) where TService : class
-        => Cfg.ServiceResolver.TryResolve<TService>(keyName);
+        => ServiceResolver.Instance.TryResolve<TService>(keyName);
 
     /// <inheritdoc />
     public object? TryResolve(Type typeOfService, string keyName)
-        => Cfg.ServiceResolver.TryResolve(typeOfService, keyName);
+        => ServiceResolver.Instance.TryResolve(typeOfService, keyName);
 
     /// <inheritdoc />
     public TService Resolve<TService>(string keyName) where TService : class
-        => Cfg.ServiceResolver.Resolve<TService>(keyName);
+        => ServiceResolver.Instance.Resolve<TService>(keyName);
 
     /// <inheritdoc />
     public object Resolve(Type typeOfService, string keyName)
-        => Cfg.ServiceResolver.Resolve(typeOfService, keyName);
+        => ServiceResolver.Instance.Resolve(typeOfService, keyName);
 
     /// <summary>
     /// get the value of a given route parameter by specifying the resulting type and param name.
@@ -302,7 +302,7 @@ public abstract partial class Endpoint<TRequest, TResponse> : BaseEndpoint, IEve
     /// <inheritdoc />
     public Task PublishAsync<TEvent>(TEvent eventModel, Mode waitMode = Mode.WaitForAll, CancellationToken cancellation = default)
         where TEvent : notnull
-        => Cfg.ServiceResolver.Resolve<EventBus<TEvent>>().PublishAsync(eventModel, waitMode, cancellation);
+        => ServiceResolver.Instance.Resolve<EventBus<TEvent>>().PublishAsync(eventModel, waitMode, cancellation);
 
     /// <summary>
     /// create the access/refresh token pair response with a given refresh-token service.
@@ -313,7 +313,7 @@ public abstract partial class Endpoint<TRequest, TResponse> : BaseEndpoint, IEve
     protected Task<TResponse> CreateTokenWith<TService>(string userId, Action<UserPrivileges> userPrivileges, TRequest? request = default)
         where TService : IRefreshTokenService<TResponse>
         => ((IRefreshTokenService<TResponse>)
-               Cfg.ServiceResolver.CreateInstance(typeof(TService), HttpContext.RequestServices)).CreateToken(userId, userPrivileges, false, request);
+               ServiceResolver.Instance.CreateInstance(typeof(TService), HttpContext.RequestServices)).CreateToken(userId, userPrivileges, false, request);
 
     /// <summary>
     /// retrieve the common processor state for this endpoint.

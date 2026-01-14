@@ -1,8 +1,8 @@
 ---
 
-## ❇️ Help Keep FastEndpoints Free & Open-Source ❇️
+## ⚠️ Sponsorship Level Critically Low ⚠️
 
-Due to the current [unfortunate state of FOSS](https://www.youtube.com/watch?v=H96Va36xbvo), please consider [becoming a sponsor](https://opencollective.com/fast-endpoints) and help us beat the odds to keep the project alive and free for everyone.
+Due to low financial backing by the community, FastEndpoints will soon be going into "Bugfix Only" mode until the situation improves. Please [join the discussion here](https://github.com/FastEndpoints/FastEndpoints/issues/1042) and help out if you can.
 
 ---
 
@@ -10,353 +10,173 @@ Due to the current [unfortunate state of FOSS](https://www.youtube.com/watch?v=H
 
 ## New 🎉
 
-<details><summary>Better conditional sending of responses</summary>
+<details><summary>Standalone package for Event/Command Bus functionality</summary>
 
-All **Send.\*Async()** methods now return a T**ask\<Void\>** result. If a response needs to be sent conditionally, you can simply change the return type of the handler from **Task** to **Task\<Void\>**  and return the awaited result as shown below in order to stop further execution of endpoint handler logic:
+The in-process Event Bus and Command Bus features have been liberated from the clutches of the FastEndpoints main library. A new, independent `FastEndpoints.Messaging` package has been created. This package can be used in any .NET 8+ application, even with Blazor WASM. Simply install the nuget package and register it with the IOC container like so:
 
 ```csharp
-public override async Task<Void> HandleAsync(CancellationToken c)
+builder.Services.AddMessaging();
+var host = builder.Build();
+host.Services.UseMessaging();
+```
+
+There's no setup (nor code changes) needed for projects using FastEndpoints main library. The above is only for when you want to use the messaging functionality in projects that don't have FastEndpoints.
+
+</details>
+
+<details><summary>Standalone package for Job Queues functionality</summary>
+
+The job queuing functionality has also been extracted out to a separate package `FastEndpoints.JobQueues` which can be used independently of the main FE library. No code changes are needed for existing FE projects.
+
+</details>
+
+<details><summary>Aspire Testing support for routeless test helpers</summary>
+
+You can now use the routeless test helpers such as `.GETAsync<MyEndpoint>()` with Aspire `DistributedApplication` testing like so:
+
+```csharp
+[Fact]
+public async Task Endpoint_Returns_Ok_Response()
 {
-    if (id == 0)
-        return await Send.NotFoundAsync();
+    // Arrange
+    var ct = TestContext.Current.CancellationToken;
+    var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AspireApp_AppHost>(ct);
+    await using var app = await appHost.BuildAsync(ct).WaitAsync(_defaultTimeout, ct);
+    await app.StartAsync(ct).WaitAsync(_defaultTimeout, ct);
+    await app.ResourceNotifications.WaitForResourceHealthyAsync("apiservice", ct).WaitAsync(_defaultTimeout, ct);
 
-    if (id == 1)
-        return await Send.NoContentAsync();
+    // Act
+    var httpClient = app.CreateHttpClient("apiservice");
+    var (response, _) = await httpClient.GETAsync<HelloEndpoint, EmptyResponse>();
 
-    return await Send.OkAsync();
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 }
 ```
 
-If there's no async work being done in the handler, the **Task\<Void\>** can simply be returned as well:
-
-```csharp
-public override Task<Void> HandleAsync(CancellationToken c)
-{
-    return Send.OkAsync();
-}
-```
-
 </details>
 
-<details><summary>Specify max request body size per endpoint</summary>
+<details><summary>'FastEndpoints.HealthChecks' package</summary>
 
-Instead of globally increasing the max request body size in Kestrel, you can now set a max body size per endpoint where necessary like so:
-
-```csharp
-public override void Configure()
-{
-    Post("/file-upload");
-    AllowFileUploads();
-    MaxRequestBodySize(50 * 1024 * 1024);
-}
-```
-
-</details>
-
-<details><summary>Customize error response builder func when using 'ProblemDetails'</summary>
-
-You can now specify a custom response builder function when doing `.UseProblemDetails()` as shown below in case you have a special requirement to use a certain shape
-for one or more of your endpoints while the rest of the endpoints use the standard response.
+An opt-in library that eliminates boilerplate health check wiring for apps running behind orchestrators such as Kubernetes/.NET Aspire. You can now use the following convenient extension method and it's overloads:
 
 ```csharp
-app.UseFastEndpoints(
-       c => c.Errors.UseProblemDetails(
-           p =>
-           {
-               p.ResponseBuilder = (failures, ctx, statusCode) =>
-                                   {
-                                       if (ctx.Request.Path.StartsWithSegments("/group-name"))
-                                       {
-                                           // return any shape you want to be serialized
-                                           return new
-                                           {
-                                               Errors = failures
-                                           };
-                                       }
+// Defaults: 
+// - /health/live (liveness)
+// - /health/ready (readiness)
+builder.Services.AddServiceHealthChecks();
 
-                                       // anything else will use the standard problem details.
-                                       return new ProblemDetails(failures, ctx.Request.Path, ctx.TraceIdentifier, statusCode);
-                                   };
-           }))
-```
-
-</details>
-
-<details><summary>Use 'ProblemDetails.Detail' property for describing single error instances</summary>
-
-The `FastEndpoints.ProblemDetails.Detail` property has been unused until now. It will now by default be populated according to the following `DetailTransformer` logic, which you can customize if needed. The transformer can also be set to `null` in case you'd like to go back to the previous behavior.
-
-```csharp
-app.UseFastEndpoints(
-       c => c.Errors.UseProblemDetails(
-           p =>
-           {
-               p.DetailTransformer = pd => pd.Errors.Count() == 1
-                                               ? pd.Errors.First().Reason
-                                               : null;
-           }))
-```
-
-The default behavior is to populate the `Detail` property with the reason if there's only 1 error and not populate it at all in case there's more than 1 error.
-
-</details>
-
-<details><summary>Specify a request binder per group</summary>
-
-It is now possible to register a particular open generic request binder such as the following:
-
-```csharp
-class MyBinder<TRequest> : RequestBinder<TRequest> where TRequest : notnull 
-{ 
-    public override async ValueTask<TRequest> BindAsync(BinderContext ctx, CancellationToken ct) 
-    { 
-        var req = await base.BindAsync(ctx, ct); // run the default binding logic
- 
-        if (req is MyRequest r) 
-            r.SomeValue = Guid.NewGuid().ToString(); // do whatever you like
- 
-        return req; 
-    } 
-} 
-```
-
-only for a certain group configuration, so that only endpoints of that group will have the above custom binder associated with them.
-
-```csharp
-sealed class MyGroup : Group 
-{ 
-    public MyGroup() 
-    { 
-        Configure("/my-group", ep => ep.RequestBinder(typeof(MyBinder<>))); 
-    } 
-} 
-```
-
-</details>
-
-<details><summary>Position endpoint version anywhere in the route</summary>
-
-With the built-in versioning, you could only have the endpoint version number either pre-fixed or post-fixed. You can now make the version appear anywhere in the route by using a route template. The template segment will be replaced by the actual version number instead of being prepended or appended.
-
-```csharp
-sealed class MyEndpoint : EndpointWithoutRequest
-{
-    public override void Configure()
+// Custom paths
+builder.Services.AddServiceHealthChecks(
+    configureOptions: opts =>
     {
-        Get("/sales/{_version_}/my-endpoint");
-        Version(1);
-    }
+        opts.LivePath = "/alive";
+        opts.ReadyPath = "/ready";
+    });
 
-    ...
-}
+// Add custom health checks
+builder.Services.AddServiceHealthChecks(
+    configureChecks: hc =>
+    {
+        hc.AddNpgSql(connectionString, name: "postgres");
+        hc.AddRedis("localhost:6379", name: "redis");
+    });
 ```
 
-This version placement strategy must be enabled at startup like so:
-
-```csharp
-app.UseFastEndpoints(
-       c =>
-       {
-           c.Versioning.RouteTemplate = "{_version_}";
-       })
-```
-
-If this setting is enabled, it will take precedence over the default behavior of appending/prepending the version number to the route.
+Liveness returns 200 if process is alive (no dependency checks). Readiness runs all registered health checks and returns aggregate status with optional JSON response.
 
 </details>
 
-<details><summary>Support for Feature Management libraries</summary>
+<details><summary>Test/verify command executions in endpoints without mocks/fakes</summary>
 
-Endpoints can now be setup to execute a `FeatureFlag` for every Http request that comes in, which allows an endpoint to be conditionally available according to some evaluation logic.
+In a similar fashion to the previously released [Test Event Receivers](https://gist.github.com/dj-nitehawk/ae85c63fefb1e8163fdd37ca6dcb7bfd) feature, you can now use [Test Command Receivers](https://gist.github.com/dj-nitehawk/abf3fd08bae544ee3bcafb5c5f487c4a) to verify that a certain command execution was initiated by an endpoint or service without having to register fake command handlers.
 
-To create a feature flag, implement the interface `IFeatureFlag` and simply return `true` from the `IsEnabledAsync()` handler method if the endpoint is to be accessible to that particular request.
-
-```csharp
-sealed class BetaTestersOnly : IFeatureFlag 
-{ 
-    public async Task<bool> IsEnabledAsync(IEndpoint endpoint) 
-    { 
-        //use whatever mechanism/library you like to determine if this endpoint is enabled for the current request. 
-        if (endpoint.HttpContext.Request.Headers.TryGetValue("x-beta-tester", out _)) 
-            return true; // return true to enable 
- 
-        //this is optional. if you don't send anything, a 404 is sent automatically. 
-        await endpoint.HttpContext.Response.SendErrorsAsync([new("featureDisabled", "You are not a beta tester!")]); 
- 
-        return false; // return false to disable 
-    } 
-}
-```
-
-Attach it to the endpoint like so:
-
-```csharp
-sealed class BetaEndpoint : EndpointWithoutRequest<string>
-{
-    public override void Configure()
-    {
-        Get("beta");
-        FeatureFlag<BetaTestersOnly>();
-    }
-
-    public override async Task HandleAsync(CancellationToken c)
-    {
-        await Send.OkAsync("this is the beta!");
-    }
-}
-```
-
-</details>
-
-<details><summary>[FromCookie] attribute for auto binding cookie values</summary>
-
-You can now decorate request DTO properties with `[FromCookie]` and matching cookies will be auto bound from incoming request cookies.
+Typically, you'd unit test the command/handlers in isolation to verify the business logic in those handlers and use the "Test Event/Command Receivers" to validate that certain entrypoints in your application actually do trigger/issue particular commands and events.
 
 </details>
 
 ## Improvements 🚀
 
-<details><summary>Recursive validation of  Data Annotation Attributes</summary>
+<details><summary>Strong-Name-Signed Assemblies</summary>
 
-Until now, only the top level properties of a request DTO was being validated when using Data Annotation Attributes. This release adds support for recursively validating the whole object graph and generating errors for each that fails validation.
-
-</details>
-
-<details><summary>SSE response standard compliance</summary>
-
-The SSE response implementation has been enhanced by making the `Id` property in `StreamItem` optional, adding an optional `Retry` property for client-side reconnection control, as well as introducing an extra `StreamItem` constructor overload for more flexibility. Additionally, the `X-Accel-Buffering: no` response header is now automatically sent to improve compatibility with reverse proxies like NGINX, ensuring streamed data is delivered without buffering. You can now do the following when doing multi-type data responses:
-
-```csharp
-yield return new StreamItem("my-event", myData, 3000);
-```
+All FastEndpoints assemblies are now strong-name-signed. This only matters if your project is utilizing assembly signing. Signed projects will no longer show warnings about FastEndpoints not being signed.
 
 </details>
 
-<details><summary>Respect app shutdown when using SSE</summary>
+<details><summary>Increased frequency of stream flushing in SSE</summary>
 
-The SSE implementation now passes the `ApplicationStopping` cancellation token to your `IAsyncEnumerable` method. This means that streaming is cancelled at least when the application host is shutting down, and also when a user provided `CancellationToken` (if provided) triggers it.
+SSE streams are now flushed after each write as opposed to after every batch. This eliminates random pauses on the client-side due to stream buffering.
+
+</details>
+
+<details><summary>Job storage performance optimization</summary>
+
+Optimized the `JobQueue` startup initialization by reusing the results of the existing scheduled-jobs query to determine whether the queue is in use, allowing the system to skip the additional query for future scheduled jobs when current jobs are already present, thereby reducing database load and improving startup performance without changing observable behavior.
+
+</details>
+
+## Fixes 🪲
+
+<details><summary>Group summary overriding endpoint level summary data</summary>
+
+There was an oversight that resulted in endpoint level summary data being overwritten by group level summary data in situations such as the following:
 
 ```csharp
-public override async Task HandleAsync(CancellationToken ct)
+sealed class MyGroup : Group
 {
-    await Send.EventStreamAsync(GetMultiDataStream(ct), ct);
-
-    async IAsyncEnumerable<StreamItem> GetMultiDataStream([EnumeratorCancellation] CancellationToken ct)
+    public MyGroup()
     {
-        // Here ct is now your user provided CancellationToken combined with the ApplicationStopping CancellationToken.
-        while (!ct.IsCancellationRequested)
-        {
-            await Task.Delay(1000, ct);
+        Configure("group", ep => ep.Summary(s => s.Description = "group level text"));
+    }
+}
 
-            yield return new StreamItem(Guid.NewGuid(), "your-event-type", 42);
-        }
+sealed class MyEndpoint : EndpointWithoutRequest
+{
+    public override void Configure()
+    {
+        Get("/something");
+        Group<MyGroup>();
+        Summary(s => s.Description = "endpoint level text"); //this would get loss due to the bug
     }
 }
 ```
 
 </details>
 
-<details><summary>Async variation of Global Response Modifier</summary>
+<details><summary>Routeless test helpers and optional query params issue</summary>
 
-If you need to do some async work in the [global response modifier](https://fast-endpoints.com/docs/pre-post-processors#intercepting-responses-before-being-sent), you can now use the `GlobalResponseModifierAsync` variant.
-
-</details>
-
-<details><summary>Allow 'ValidationContext' instances to be cached</summary>
-
-Until now, you were meant to obtain an instance of the validation context via `ValidationContext.Instance` in the method itself. Starting this release, you are now able to obtain it either in the constructor or property initializers and cache it for later use.
-
-</details>
-
-## Fixes 🪲
-
-<details><summary>Incorrect enum value for JWT security algorithm was used</summary>
-
-The wrong variant (`SecurityAlgorithms.HmacSha256Signature`) was being used for creating symmetric JWTs by default.
-The default value has been changed to `SecurityAlgorithms.HmacSha256`. It's recommended to invalidate and regenerate new tokens if you've been using the default.
-
-If for some reason, you'd like to keep using `SecurityAlgorithms.HmacSha256Signature`, you can set it yourself like so:
+Given a request DTO class such as:
 
 ```csharp
-var token = JwtBearer.CreateToken(
-    o =>
-    {
-        o.SigningKey = ...;
-        o.SigningAlgorithm = SecurityAlgorithms.HmacSha256Signature;
-    });
-```
-
-</details>
-
-
-<details><summary>Integration testing extensions ignoring custom header names</summary>
-
-The testing httpclient extensions were ignoring user supplied custom header names such as the following:
-
-```csharp
-[FromHeader("x-something")]
-```
-
-during the constructing of the http request message. It was instead using the DTO property name completely dismissing the custom header names.
-
-</details>
-
-<details><summary>Integration test extensions causing 404 if grouped endpoint configured with empty string</summary>
-
-The test helper methods were constructing the url/route of the endpoint being tested incorrectly if that endpoint belonged to a group and was configured with an empty route like so:
-
-```csharp
-sealed class MyGroup : Group 
-{ 
-    public MyGroup() 
-    { 
-        Configure("my-group", ep => ep.AllowAnonymous()); 
-    } 
-} 
- 
-sealed class Request 
-{ 
-    [QueryParam] 
-    public string Id { get; set; } 
-} 
- 
-sealed class RootEndpoint : Endpoint<Request, string> 
-{ 
-    public override void Configure() 
-    { 
-        Get(string.Empty); 
-        Group<MyGroup>(); 
-    } 
- 
-    ...
-}
-```
-
-</details>
-
-<details><summary>Swagger generation failing when DTO inherits a virtual base property</summary>
-
-When a base class has a virtual property that a derived class was overriding as shown below, Swagger generator was throwing an exception due an internal dictionary key duplication.
-
-```csharp
-public abstract class BaseDto
+public class MyRequest 
 {
-    public virtual string Name { get; set; }
+    [RouteParam]
+    public string? Something
 }
+```
 
-sealed class DerivedClass : BaseDto
+When you don't supply a value for `Something` during testing with the routeless test helpers such as `.GETAsync<>()`, and empty query parameter would be appended to the request URL like so:
+
+```csharp
+/my/endpoint?Something=
+```
+
+While this isn't inherently wrong, the common behavior in most REST clients, is to not send in a query parameter at all for when the value is empty. The test helpers will also follow suit from now on.
+
+</details>
+
+<details><summary>Request binder exception when request DTO ctor has a optional struct argument</summary>
+
+The default request binder was throwing an exception when a request DTO has an optional constructor argument that is a struct type like the following.
+
+```csharp
+sealed class MyRequest(SomeStruct someOptionalStruct = default)
 {
-    public override string Name { get; set; }
+  ...
 }
 ```
 
 </details>
 
-<details><summary>Jobs scheduled for the future not executed after app restart</summary>
-
-If a job was scheduled for the future, it would not get picked up for execution in case the app was restarted.
-It would only get executed upon queuing a new job. It has now been fixed by probing the storage provider once at startup to check if there's any jobs scheduled for the future.
-
-</details>
 
 [//]: # (## Breaking Changes ⚠️)

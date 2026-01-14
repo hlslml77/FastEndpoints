@@ -34,39 +34,39 @@ public abstract class Group : IServiceResolverBase
 
     /// <inheritdoc />
     public TService? TryResolve<TService>() where TService : class
-        => Cfg.ServiceResolver.TryResolve<TService>();
+        => ServiceResolver.Instance.TryResolve<TService>();
 
     /// <inheritdoc />
     public object? TryResolve(Type typeOfService)
-        => Cfg.ServiceResolver.TryResolve(typeOfService);
+        => ServiceResolver.Instance.TryResolve(typeOfService);
 
     /// <inheritdoc />
     public TService Resolve<TService>() where TService : class
-        => Cfg.ServiceResolver.Resolve<TService>();
+        => ServiceResolver.Instance.Resolve<TService>();
 
     /// <inheritdoc />
     public object Resolve(Type typeOfService)
-        => Cfg.ServiceResolver.Resolve(typeOfService);
+        => ServiceResolver.Instance.Resolve(typeOfService);
 
     /// <inheritdoc />
     public IServiceScope CreateScope()
-        => Cfg.ServiceResolver.CreateScope();
+        => ServiceResolver.Instance.CreateScope();
 
     /// <inheritdoc />
     public TService? TryResolve<TService>(string keyName) where TService : class
-        => Cfg.ServiceResolver.TryResolve<TService>(keyName);
+        => ServiceResolver.Instance.TryResolve<TService>(keyName);
 
     /// <inheritdoc />
     public object? TryResolve(Type typeOfService, string keyName)
-        => Cfg.ServiceResolver.TryResolve(typeOfService, keyName);
+        => ServiceResolver.Instance.TryResolve(typeOfService, keyName);
 
     /// <inheritdoc />
     public TService Resolve<TService>(string keyName) where TService : class
-        => Cfg.ServiceResolver.Resolve<TService>(keyName);
+        => ServiceResolver.Instance.Resolve<TService>(keyName);
 
     /// <inheritdoc />
     public object Resolve(Type typeOfService, string keyName)
-        => Cfg.ServiceResolver.Resolve(typeOfService, keyName);
+        => ServiceResolver.Instance.Resolve(typeOfService, keyName);
 }
 
 /// <summary>

@@ -31,31 +31,31 @@ public abstract class Mapper<TRequest, TResponse, TEntity> : IRequestMapper<TReq
         => throw new NotImplementedException($"Please override the {nameof(FromEntityAsync)} method!");
 
     public TService? TryResolve<TService>() where TService : class
-        => Cfg.ServiceResolver.TryResolve<TService>();
+        => ServiceResolver.Instance.TryResolve<TService>();
 
     public object? TryResolve(Type typeOfService)
-        => Cfg.ServiceResolver.TryResolve(typeOfService);
+        => ServiceResolver.Instance.TryResolve(typeOfService);
 
     public TService Resolve<TService>() where TService : class
-        => Cfg.ServiceResolver.Resolve<TService>();
+        => ServiceResolver.Instance.Resolve<TService>();
 
     public object Resolve(Type typeOfService)
-        => Cfg.ServiceResolver.Resolve(typeOfService);
+        => ServiceResolver.Instance.Resolve(typeOfService);
 
     public IServiceScope CreateScope()
-        => Cfg.ServiceResolver.CreateScope();
+        => ServiceResolver.Instance.CreateScope();
 
     public TService? TryResolve<TService>(string keyName) where TService : class
-        => Cfg.ServiceResolver.TryResolve<TService>(keyName);
+        => ServiceResolver.Instance.TryResolve<TService>(keyName);
 
     public object? TryResolve(Type typeOfService, string keyName)
-        => Cfg.ServiceResolver.TryResolve(typeOfService, keyName);
+        => ServiceResolver.Instance.TryResolve(typeOfService, keyName);
 
     public TService Resolve<TService>(string keyName) where TService : class
-        => Cfg.ServiceResolver.Resolve<TService>(keyName);
+        => ServiceResolver.Instance.Resolve<TService>(keyName);
 
     public object Resolve(Type typeOfService, string keyName)
-        => Cfg.ServiceResolver.Resolve(typeOfService, keyName);
+        => ServiceResolver.Instance.Resolve(typeOfService, keyName);
 }
 
 /// <summary>
@@ -79,31 +79,31 @@ public abstract class RequestMapper<TRequest, TEntity> : IRequestMapper<TRequest
         => throw new NotImplementedException($"Please override the {nameof(UpdateEntityAsync)} method!");
 
     public TService? TryResolve<TService>() where TService : class
-        => Cfg.ServiceResolver.TryResolve<TService>();
+        => ServiceResolver.Instance.TryResolve<TService>();
 
     public object? TryResolve(Type typeOfService)
-        => Cfg.ServiceResolver.TryResolve(typeOfService);
+        => ServiceResolver.Instance.TryResolve(typeOfService);
 
     public TService Resolve<TService>() where TService : class
-        => Cfg.ServiceResolver.Resolve<TService>();
+        => ServiceResolver.Instance.Resolve<TService>();
 
     public object Resolve(Type typeOfService)
-        => Cfg.ServiceResolver.Resolve(typeOfService);
+        => ServiceResolver.Instance.Resolve(typeOfService);
 
     public IServiceScope CreateScope()
-        => Cfg.ServiceResolver.CreateScope();
+        => ServiceResolver.Instance.CreateScope();
 
     public TService? TryResolve<TService>(string keyName) where TService : class
-        => Cfg.ServiceResolver.TryResolve<TService>(keyName);
+        => ServiceResolver.Instance.TryResolve<TService>(keyName);
 
     public object? TryResolve(Type typeOfService, string keyName)
-        => Cfg.ServiceResolver.TryResolve(typeOfService, keyName);
+        => ServiceResolver.Instance.TryResolve(typeOfService, keyName);
 
     public TService Resolve<TService>(string keyName) where TService : class
-        => Cfg.ServiceResolver.Resolve<TService>(keyName);
+        => ServiceResolver.Instance.Resolve<TService>(keyName);
 
     public object Resolve(Type typeOfService, string keyName)
-        => Cfg.ServiceResolver.Resolve(typeOfService, keyName);
+        => ServiceResolver.Instance.Resolve(typeOfService, keyName);
 }
 
 /// <summary>
@@ -121,29 +121,29 @@ public abstract class ResponseMapper<TResponse, TEntity> : IResponseMapper<TResp
         => throw new NotImplementedException($"Please override the {nameof(FromEntityAsync)} method!");
 
     public TService? TryResolve<TService>() where TService : class
-        => Cfg.ServiceResolver.TryResolve<TService>();
+        => ServiceResolver.Instance.TryResolve<TService>();
 
     public object? TryResolve(Type typeOfService)
-        => Cfg.ServiceResolver.TryResolve(typeOfService);
+        => ServiceResolver.Instance.TryResolve(typeOfService);
 
     public TService Resolve<TService>() where TService : class
-        => Cfg.ServiceResolver.Resolve<TService>();
+        => ServiceResolver.Instance.Resolve<TService>();
 
     public object Resolve(Type typeOfService)
-        => Cfg.ServiceResolver.Resolve(typeOfService);
+        => ServiceResolver.Instance.Resolve(typeOfService);
 
     public IServiceScope CreateScope()
-        => Cfg.ServiceResolver.CreateScope();
+        => ServiceResolver.Instance.CreateScope();
 
     public TService? TryResolve<TService>(string keyName) where TService : class
-        => Cfg.ServiceResolver.TryResolve<TService>(keyName);
+        => ServiceResolver.Instance.TryResolve<TService>(keyName);
 
     public object? TryResolve(Type typeOfService, string keyName)
-        => Cfg.ServiceResolver.TryResolve(typeOfService, keyName);
+        => ServiceResolver.Instance.TryResolve(typeOfService, keyName);
 
     public TService Resolve<TService>(string keyName) where TService : class
-        => Cfg.ServiceResolver.Resolve<TService>(keyName);
+        => ServiceResolver.Instance.Resolve<TService>(keyName);
 
     public object Resolve(Type typeOfService, string keyName)
-        => Cfg.ServiceResolver.Resolve(typeOfService, keyName);
+        => ServiceResolver.Instance.Resolve(typeOfService, keyName);
 }
